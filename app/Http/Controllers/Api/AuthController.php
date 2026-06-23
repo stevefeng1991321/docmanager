@@ -18,9 +18,41 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $maxAttempts    = (int) config('auth.lockout_attempts', 5);
+        $lockoutMinutes = (int) config('auth.lockout_minutes', 15);
+
         $user = User::where('username', $request->username)->first();
 
+        // Check lockout before touching credentials (don't reveal lock status to non-users)
+        if ($user && $user->isLocked()) {
+            $remaining = (int) now()->diffInMinutes($user->locked_until, false);
+            return response()->json([
+                'message' => "Account is temporarily locked. Try again in {$remaining} minute(s).",
+            ], 423);
+        }
+
+        // Validate credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
+            if ($user) {
+                $attempts = $user->failed_login_attempts + 1;
+                $update   = ['failed_login_attempts' => $attempts];
+
+                if ($attempts >= $maxAttempts) {
+                    $update['locked_until'] = now()->addMinutes($lockoutMinutes);
+                }
+
+                $user->update($update);
+
+                ActivityLog::create([
+                    'user_id'    => $user->id,
+                    'event'      => 'api.login.failed',
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'details'    => json_encode(['attempts' => $attempts]),
+                    'created_at' => now(),
+                ]);
+            }
+
             throw ValidationException::withMessages([
                 'username' => ['The provided credentials are incorrect.'],
             ]);
@@ -34,13 +66,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'Account is inactive.'], 403);
         }
 
-        if ($user->isLocked()) {
-            return response()->json(['message' => 'Account is temporarily locked.'], 423);
-        }
+        // Success — reset lockout counters
+        $user->update([
+            'failed_login_attempts' => 0,
+            'locked_until'          => null,
+            'last_login_at'         => now(),
+        ]);
 
         $token = $user->createToken('api-token', ['*'], now()->addDays(30))->plainTextToken;
 
-        ActivityLog::record('api.login', []);
+        ActivityLog::create([
+            'user_id'    => $user->id,
+            'event'      => 'api.login.success',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
 
         return response()->json([
             'token'      => $token,

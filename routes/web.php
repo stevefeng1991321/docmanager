@@ -70,6 +70,12 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::patch('documents/{resource}/approve',[Admin\DocumentController::class, 'approve'])->name('documents.approve');
     Route::patch('documents/{resource}/reject', [Admin\DocumentController::class, 'reject'])->name('documents.reject');
 
+    // Bulk actions
+    Route::post('documents/bulk/approve',          [Admin\DocumentController::class, 'bulkApprove'])->name('documents.bulk-approve');
+    Route::post('documents/bulk/trash',            [Admin\DocumentController::class, 'bulkTrash'])->name('documents.bulk-trash');
+    Route::post('documents/bulk/reject',           [Admin\DocumentController::class, 'bulkReject'])->name('documents.bulk-reject');
+    Route::post('documents/bulk/assign-category',  [Admin\DocumentController::class, 'bulkAssignCategory'])->name('documents.bulk-assign-category');
+
     // Versions
     Route::post('documents/{resource}/versions',              [Admin\VersionController::class, 'store'])->name('versions.store');
     Route::patch('documents/{resource}/versions/{version}/restore', [Admin\VersionController::class, 'restore'])->name('versions.restore');

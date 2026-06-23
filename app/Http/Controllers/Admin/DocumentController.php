@@ -178,6 +178,74 @@ class DocumentController extends Controller
         return back()->with('message', 'Document unlocked.');
     }
 
+    // ---------- bulk actions ----------
+
+    public function bulkApprove(Request $request)
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
+
+        $count = Resource::whereIn('id', $request->ids)
+            ->where('status', 'pending_review')
+            ->update(['status' => 'published']);
+
+        AuditLog::record('document.bulk_approved', null, ['count' => $count, 'ids' => $request->ids]);
+        self::clearDocumentCaches();
+
+        return back()->with('message', "{$count} document(s) approved and published.");
+    }
+
+    public function bulkTrash(Request $request)
+    {
+        $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
+
+        $count = Resource::whereIn('id', $request->ids)->whereNull('deleted_at')->count();
+        Resource::whereIn('id', $request->ids)->delete();
+
+        AuditLog::record('document.bulk_trashed', null, ['count' => $count, 'ids' => $request->ids]);
+        self::clearDocumentCaches();
+
+        return back()->with('message', "{$count} document(s) moved to Trash.");
+    }
+
+    public function bulkReject(Request $request)
+    {
+        $request->validate([
+            'ids'    => ['required', 'array'],
+            'ids.*'  => ['integer'],
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $count = Resource::whereIn('id', $request->ids)->update(['status' => 'rejected']);
+
+        AuditLog::record('document.bulk_rejected', null, [
+            'count'  => $count,
+            'ids'    => $request->ids,
+            'reason' => $request->reason,
+        ]);
+        self::clearDocumentCaches();
+
+        return back()->with('message', "{$count} document(s) rejected.");
+    }
+
+    public function bulkAssignCategory(Request $request)
+    {
+        $request->validate([
+            'ids'         => ['required', 'array'],
+            'ids.*'       => ['integer'],
+            'category_id' => ['required', 'exists:categories,id'],
+        ]);
+
+        $count = Resource::whereIn('id', $request->ids)->update(['category_id' => $request->category_id]);
+
+        AuditLog::record('document.bulk_category_assigned', null, [
+            'count'       => $count,
+            'category_id' => $request->category_id,
+        ]);
+        self::clearDocumentCaches();
+
+        return back()->with('message', "{$count} document(s) assigned to category.");
+    }
+
     private static function clearDocumentCaches(): void
     {
         Cache::forget('dashboard.stats');

@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin — {{ config('app.name') }} — @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>[x-cloak]{display:none!important}</style>
 </head>
 <body class="h-full flex" x-data="{ sidebarOpen: false }">
 
@@ -114,5 +115,6 @@
         </main>
     </div>
 
+    @stack('scripts')
 </body>
 </html>
