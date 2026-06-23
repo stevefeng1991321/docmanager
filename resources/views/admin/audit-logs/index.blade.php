@@ -2,6 +2,12 @@
 @section('title', 'Audit Logs')
 
 @section('content')
+<div class="flex justify-end mb-3">
+    <a href="{{ route('admin.audit-logs.export', request()->query()) }}"
+       class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm rounded-lg transition">
+        ↓ Export CSV
+    </a>
+</div>
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <table class="min-w-full divide-y divide-gray-100 text-sm">
         <thead class="bg-gray-50">

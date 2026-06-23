@@ -54,6 +54,81 @@
     </div>
 @endif
 
+{{-- Charts row --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+
+    {{-- Upload trend (7 days) --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 col-span-1">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Uploads — Last 7 Days</h3>
+        @php
+            $maxCount = $uploadTrend->max('count') ?: 1;
+        @endphp
+        <div class="flex items-end gap-1.5 h-24">
+            @forelse($uploadTrend as $day)
+            @php $pct = round(($day->count / $maxCount) * 100); @endphp
+            <div class="flex-1 flex flex-col items-center gap-1" title="{{ $day->date }}: {{ $day->count }}">
+                <span class="text-xs text-gray-400">{{ $day->count }}</span>
+                <div class="w-full bg-blue-500 rounded-t" style="height: {{ max(4, $pct) }}%"></div>
+                <span class="text-xs text-gray-400 rotate-45 origin-left" style="font-size:9px">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
+            </div>
+            @empty
+            <p class="text-xs text-gray-400 w-full text-center">No uploads this week.</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Download trend (7 days) --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 col-span-1">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Downloads — Last 7 Days</h3>
+        @php $maxDl = $downloadTrend->max('count') ?: 1; @endphp
+        <div class="flex items-end gap-1.5 h-24">
+            @forelse($downloadTrend as $day)
+            @php $pct = round(($day->count / $maxDl) * 100); @endphp
+            <div class="flex-1 flex flex-col items-center gap-1" title="{{ $day->date }}: {{ $day->count }}">
+                <span class="text-xs text-gray-400">{{ $day->count }}</span>
+                <div class="w-full bg-purple-500 rounded-t" style="height: {{ max(4, $pct) }}%"></div>
+                <span class="text-xs text-gray-400" style="font-size:9px">{{ \Carbon\Carbon::parse($day->date)->format('d/m') }}</span>
+            </div>
+            @empty
+            <p class="text-xs text-gray-400 w-full text-center">No downloads this week.</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Top search terms --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 col-span-1">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Top Searches (30 days)</h3>
+        @forelse($topSearches as $s)
+        <div class="flex items-center justify-between py-1 border-b border-gray-50 last:border-0">
+            <span class="text-xs text-gray-700 truncate max-w-[70%]">{{ $s->query }}</span>
+            <span class="text-xs font-semibold text-gray-500">{{ $s->count }}×</span>
+        </div>
+        @empty
+        <p class="text-xs text-gray-400">No searches yet.</p>
+        @endforelse
+    </div>
+
+</div>
+
+{{-- Top downloaded --}}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <h3 class="text-sm font-semibold text-gray-700 mb-3">Top Downloaded Documents</h3>
+    @forelse($topDownloaded as $doc)
+    @php $maxDlDoc = $topDownloaded->max('download_count') ?: 1; @endphp
+    <div class="flex items-center gap-3 py-1.5 border-b border-gray-50 last:border-0">
+        <div class="flex-1 min-w-0">
+            <a href="{{ route('admin.documents.edit', $doc) }}" class="text-sm text-blue-600 hover:underline truncate block">{{ $doc->title }}</a>
+        </div>
+        <div class="w-32 bg-gray-100 rounded-full h-2">
+            <div class="bg-blue-500 h-2 rounded-full" style="width: {{ round($doc->download_count / $maxDlDoc * 100) }}%"></div>
+        </div>
+        <span class="text-xs text-gray-500 w-10 text-right">{{ number_format($doc->download_count) }}</span>
+    </div>
+    @empty
+    <p class="text-xs text-gray-400">No downloads yet.</p>
+    @endforelse
+</div>
+
 {{-- Recent documents --}}
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">

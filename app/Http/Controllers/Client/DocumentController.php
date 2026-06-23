@@ -25,12 +25,20 @@ class DocumentController extends Controller
         );
 
         $resource->load(['category', 'tags', 'versions', 'ratings']);
-        $userRating = $resource->ratings()->where('user_id', auth()->id())->first();
+        $userRating  = $resource->ratings()->where('user_id', auth()->id())->first();
         $isFavorited = auth()->user()->favorites()->where('resource_id', $resource->id)->exists();
+
+        $related = Resource::published()
+            ->where('category_id', $resource->category_id)
+            ->where('id', '!=', $resource->id)
+            ->withAvg('ratings', 'rating')
+            ->orderByDesc('download_count')
+            ->take(5)
+            ->get();
 
         AuditLog::record('document.viewed', $resource->id, []);
 
-        return view('documents.show', compact('resource', 'userRating', 'isFavorited'));
+        return view('documents.show', compact('resource', 'userRating', 'isFavorited', 'related'));
     }
 
     public function preview(Resource $resource)

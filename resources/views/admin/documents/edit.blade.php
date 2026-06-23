@@ -153,7 +153,7 @@
                     <div class="flex items-start justify-between gap-2 text-sm py-2 border-b border-gray-50 last:border-0">
                         <div>
                             <span class="font-medium text-gray-800">v{{ $version->version_number }}</span>
-                            <span class="text-gray-400 ml-2 text-xs">{{ $version->created_at->format('d M Y H:i') }}</span>
+                            <span class="text-gray-400 ml-2 text-xs">{{ $version->created_at?->format('d M Y H:i') ?? '—' }}</span>
                             @if($version->change_note)
                                 <p class="text-xs text-gray-500 mt-0.5">{{ $version->change_note }}</p>
                             @endif

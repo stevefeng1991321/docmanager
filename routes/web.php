@@ -77,6 +77,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     // Categories & Tags
     Route::resource('categories', Admin\CategoryController::class);
     Route::resource('tags', Admin\TagController::class);
+    Route::post('tags/merge',  [Admin\TagController::class, 'merge'])->name('tags.merge');
+
+    // Roles (read-only permission matrix)
+    Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');
 
     // Users (admin only) — static routes before resource() to avoid wildcard conflict
     Route::middleware('role:admin')->group(function () {
@@ -90,8 +94,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     });
 
     // Logs & Analytics
-    Route::get('audit-logs',    [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
-    Route::get('activity-logs', [Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('audit-logs',        [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('audit-logs/export', [Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
+    Route::get('activity-logs',        [Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('activity-logs/export', [Admin\ActivityLogController::class, 'export'])->name('activity-logs.export');
     Route::get('jobs',          [Admin\JobMonitorController::class, 'index'])->name('jobs.index');
     Route::get('storage',       [Admin\StorageController::class, 'index'])->name('storage.index');
     Route::get('search',        [Admin\SearchIndexController::class, 'index'])->name('search.index');

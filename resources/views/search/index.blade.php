@@ -2,92 +2,182 @@
 @section('title', $query ? "Search: {$query}" : 'Search')
 
 @section('content')
-<div class="space-y-5">
+<div class="flex gap-6">
 
-    {{-- Search form --}}
-    <form method="GET" action="{{ route('search') }}" class="flex gap-2">
-        <input type="text" name="q" value="{{ $query }}" placeholder="Search documents…" autofocus
-               class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none">
-        <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">
-            Search
-        </button>
-        @if($query)
-        <button type="button" onclick="document.querySelector('[name=q]').value='';this.closest('form').submit()"
-                class="px-4 py-2.5 border border-gray-300 text-gray-500 hover:bg-gray-50 text-sm rounded-xl transition">
-            Clear
-        </button>
-        @endif
-    </form>
+    {{-- Filter sidebar --}}
+    <aside class="hidden lg:block w-52 flex-shrink-0">
+        <form method="GET" action="{{ route('search') }}" id="filter-form" class="space-y-5">
+            <input type="hidden" name="q" value="{{ $query }}">
 
-    {{-- Save search --}}
-    @if($query && $total > 0)
-    <form method="POST" action="{{ route('saved-searches.store') }}" class="inline">
-        @csrf
-        <input type="hidden" name="query" value="{{ $query }}">
-        <button class="text-xs text-blue-600 hover:underline">Save this search</button>
-    </form>
-    @endif
-
-    {{-- Results --}}
-    @if($query)
-    <div class="flex items-center justify-between">
-        <p class="text-sm text-gray-500">
-            @if($total)
-            {{ number_format($total) }} result{{ $total !== 1 ? 's' : '' }} for "<strong>{{ $query }}</strong>"
-            @else
-            No results for "<strong>{{ $query }}</strong>"
-            @endif
-        </p>
-    </div>
-
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
-        @forelse ($results as $doc)
-        <a href="{{ route('documents.show', $doc) }}"
-           class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-gray-800 text-sm">{{ $doc->title }}</p>
-                @if($doc->description)
-                <p class="text-xs text-gray-400 mt-0.5 truncate">{{ $doc->description }}</p>
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">File Type</h3>
+                @foreach (['pdf','docx','xlsx','pptx','txt','png','jpg'] as $ft)
+                <label class="flex items-center gap-2 py-0.5 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
+                    <input type="radio" name="type" value="{{ $ft }}" {{ $type === $ft ? 'checked' : '' }}
+                           onchange="document.getElementById('filter-form').submit()"
+                           class="text-blue-600">
+                    {{ strtoupper($ft) }}
+                </label>
+                @endforeach
+                @if($type)
+                <a href="{{ route('search', array_merge(request()->query(), ['type' => null])) }}"
+                   class="text-xs text-blue-500 hover:underline mt-1 block">Clear type</a>
                 @endif
-                <p class="text-xs text-gray-400 mt-1">
-                    {{ $doc->category?->name ?? 'Uncategorised' }}
-                    &middot; {{ number_format($doc->download_count) }} downloads
-                    &middot; {{ $doc->created_at->format('Y-m-d') }}
-                </p>
             </div>
-            <span class="flex-shrink-0 text-xs text-gray-400 uppercase font-mono bg-gray-100 px-2 py-0.5 rounded">
-                {{ $doc->file_type }}
-            </span>
-        </a>
-        @empty
-        <div class="px-5 py-10 text-center text-gray-400 text-sm">
-            <p class="text-3xl mb-2">&#128269;</p>
-            <p>No documents match your search.</p>
-            <p class="mt-1">Try different keywords or browse by category.</p>
-        </div>
-        @endforelse
-    </div>
 
-    @if($results instanceof \Illuminate\Pagination\LengthAwarePaginator)
-    <div>{{ $results->links() }}</div>
-    @endif
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Category</h3>
+                <select name="category_id" onchange="document.getElementById('filter-form').submit()"
+                        class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">All categories</option>
+                    @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ $categoryId == $cat->id ? 'selected' : '' }}>
+                        {{ $cat->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
 
-    @else
-    {{-- Suggestions / saved searches --}}
-    @if($savedSearches->count())
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <h3 class="text-xs font-semibold uppercase text-gray-500 mb-2">Saved Searches</h3>
-        <div class="flex flex-wrap gap-2">
-            @foreach($savedSearches as $saved)
-            <a href="{{ route('search', ['q' => $saved->query]) }}"
-               class="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-full text-sm transition">
-                {{ $saved->query }}
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Upload Date</h3>
+                <div class="space-y-1.5">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}"
+                           onchange="document.getElementById('filter-form').submit()"
+                           class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                           placeholder="From">
+                    <input type="date" name="date_to" value="{{ $dateTo }}"
+                           onchange="document.getElementById('filter-form').submit()"
+                           class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                           placeholder="To">
+                </div>
+            </div>
+
+            @if($type || $categoryId || $dateFrom || $dateTo)
+            <a href="{{ route('search', ['q' => $query]) }}"
+               class="block text-center text-xs text-red-500 hover:underline border border-red-200 rounded-lg py-1.5">
+                Clear all filters
             </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-    @endif
+            @endif
+        </form>
+    </aside>
 
+    {{-- Main content --}}
+    <div class="flex-1 min-w-0 space-y-4">
+
+        {{-- Search form --}}
+        <form method="GET" action="{{ route('search') }}" class="flex gap-2">
+            <input type="hidden" name="type" value="{{ $type }}">
+            <input type="hidden" name="category_id" value="{{ $categoryId }}">
+            <input type="hidden" name="date_from" value="{{ $dateFrom }}">
+            <input type="hidden" name="date_to" value="{{ $dateTo }}">
+            <input type="text" name="q" value="{{ $query }}" placeholder="Search documents…" autofocus
+                   class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none">
+            <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">
+                Search
+            </button>
+            @if($query)
+            <a href="{{ route('search') }}" class="px-4 py-2.5 border border-gray-300 text-gray-500 hover:bg-gray-50 text-sm rounded-xl transition">
+                Clear
+            </a>
+            @endif
+        </form>
+
+        @if($query)
+        {{-- Results header --}}
+        <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+                <p class="text-sm text-gray-500">
+                    @if($total)
+                        <strong>{{ number_format($total) }}</strong> result{{ $total !== 1 ? 's' : '' }} for "<strong>{{ $query }}</strong>"
+                    @else
+                        No results for "<strong>{{ $query }}</strong>"
+                    @endif
+                </p>
+                @if($total > 0)
+                <form method="POST" action="{{ route('saved-searches.store') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="query" value="{{ $query }}">
+                    <button class="text-xs text-blue-600 hover:underline border border-blue-200 px-2 py-0.5 rounded">Save search</button>
+                </form>
+                @endif
+            </div>
+            {{-- Sort --}}
+            <form method="GET" action="{{ route('search') }}">
+                <input type="hidden" name="q" value="{{ $query }}">
+                <input type="hidden" name="type" value="{{ $type }}">
+                <input type="hidden" name="category_id" value="{{ $categoryId }}">
+                <input type="hidden" name="date_from" value="{{ $dateFrom }}">
+                <input type="hidden" name="date_to" value="{{ $dateTo }}">
+                <select name="sort" onchange="this.form.submit()"
+                        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700">
+                    <option value="relevance" {{ $sort === 'relevance' ? 'selected' : '' }}>Most relevant</option>
+                    <option value="date_desc" {{ $sort === 'date_desc' ? 'selected' : '' }}>Newest first</option>
+                    <option value="date_asc"  {{ $sort === 'date_asc'  ? 'selected' : '' }}>Oldest first</option>
+                    <option value="name_asc"  {{ $sort === 'name_asc'  ? 'selected' : '' }}>A → Z</option>
+                    <option value="downloads" {{ $sort === 'downloads' ? 'selected' : '' }}>Most downloaded</option>
+                    <option value="size_desc" {{ $sort === 'size_desc' ? 'selected' : '' }}>Largest first</option>
+                </select>
+            </form>
+        </div>
+
+        {{-- Results list --}}
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+            @forelse ($results as $doc)
+            @php
+                $hl = fn($text) => $query
+                    ? preg_replace('/(' . preg_quote(e($query), '/') . ')/iu', '<mark class="bg-yellow-100 text-yellow-800 rounded px-0.5">$1</mark>', e($text))
+                    : e($text);
+            @endphp
+            <a href="{{ route('documents.show', $doc) }}"
+               class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-800 text-sm">{!! $hl($doc->title) !!}</p>
+                    @if($doc->description)
+                    <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{!! $hl($doc->description) !!}</p>
+                    @endif
+                    <div class="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
+                        <span>{{ $doc->category?->name ?? 'Uncategorised' }}</span>
+                        <span>{{ number_format($doc->download_count) }} downloads</span>
+                        <span>{{ $doc->created_at->format('Y-m-d') }}</span>
+                        @if($doc->ratings_avg_rating)
+                        <span class="text-yellow-500">&#9733; {{ number_format($doc->ratings_avg_rating, 1) }}</span>
+                        @endif
+                    </div>
+                </div>
+                <span class="flex-shrink-0 text-xs text-gray-400 uppercase font-mono bg-gray-100 px-2 py-0.5 rounded">
+                    {{ $doc->file_type }}
+                </span>
+            </a>
+            @empty
+            <div class="px-5 py-10 text-center text-gray-400 text-sm">
+                <p class="text-3xl mb-2">&#128269;</p>
+                <p>No documents match your search.</p>
+                <p class="mt-1">Try different keywords or <a href="{{ route('home') }}" class="text-blue-500 hover:underline">browse by category</a>.</p>
+            </div>
+            @endforelse
+        </div>
+
+        @if($results instanceof \Illuminate\Pagination\LengthAwarePaginator)
+        <div>{{ $results->links() }}</div>
+        @endif
+
+        @else
+        {{-- Empty state: saved searches --}}
+        @if($savedSearches->count())
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <h3 class="text-xs font-semibold uppercase text-gray-500 mb-2">Saved Searches</h3>
+            <div class="flex flex-wrap gap-2">
+                @foreach($savedSearches as $saved)
+                <a href="{{ route('search', ['q' => $saved->query]) }}"
+                   class="px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-full text-sm transition">
+                    {{ $saved->query }}
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+        @endif
+
+    </div>
 </div>
 @endsection

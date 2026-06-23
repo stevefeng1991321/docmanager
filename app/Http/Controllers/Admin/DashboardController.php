@@ -42,8 +42,23 @@ class DashboardController extends Controller
             ->orderBy('date')
             ->get();
 
+        $topSearches = DB::table('search_logs')
+            ->selectRaw('query, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('query')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        $downloadTrend = DB::table('download_logs')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
         return view('admin.dashboard.index', compact(
-            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend'
+            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend'
         ));
     }
 }

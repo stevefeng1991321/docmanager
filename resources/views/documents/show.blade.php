@@ -186,7 +186,29 @@
                 @foreach($resource->versions->sortByDesc('version_number') as $ver)
                 <li class="flex justify-between text-xs text-gray-500">
                     <span>v{{ $ver->version_number }}</span>
-                    <span>{{ $ver->created_at->format('Y-m-d') }}</span>
+                    <span>{{ $ver->created_at?->format('Y-m-d') ?? '—' }}</span>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        {{-- Related documents --}}
+        @if($related->count())
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3">Related Documents</h3>
+            <ul class="space-y-2">
+                @foreach($related as $rel)
+                <li>
+                    <a href="{{ route('documents.show', $rel) }}" class="block hover:text-blue-600 transition">
+                        <p class="text-xs font-medium text-gray-700 leading-snug">{{ Str::limit($rel->title, 50) }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            {{ number_format($rel->download_count) }} dl
+                            @if($rel->ratings_avg_rating)
+                            &middot; <span class="text-yellow-500">&#9733; {{ number_format($rel->ratings_avg_rating, 1) }}</span>
+                            @endif
+                        </p>
+                    </a>
                 </li>
                 @endforeach
             </ul>

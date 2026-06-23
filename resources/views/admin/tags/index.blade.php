@@ -2,12 +2,46 @@
 @section('title', 'Tags')
 
 @section('content')
-<div x-data="{ showForm: false }" class="space-y-5">
+<div x-data="{ showForm: false, showMerge: false }" class="space-y-5">
 
-    <button @click="showForm = !showForm"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-        + Add Tag
-    </button>
+    <div class="flex gap-2">
+        <button @click="showForm = !showForm"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
+            + Add Tag
+        </button>
+        <button @click="showMerge = !showMerge"
+                class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium rounded-lg transition">
+            Merge Tags
+        </button>
+    </div>
+
+    <div x-show="showMerge" x-cloak class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <form method="POST" action="{{ route('admin.tags.merge') }}" class="flex flex-wrap gap-3 items-end">
+            @csrf
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Merge this tag…</label>
+                <select name="source_id" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-44">
+                    <option value="">Select source</option>
+                    @foreach($tags as $tag)
+                    <option value="{{ $tag->id }}">{{ $tag->name }} ({{ $tag->resources_count }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">…into this tag</label>
+                <select name="target_id" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-44">
+                    <option value="">Select target</option>
+                    @foreach($tags as $tag)
+                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" onclick="return confirm('Merge tags? The source tag will be deleted.')"
+                    class="px-5 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition">
+                Merge
+            </button>
+        </form>
+    </div>
 
     <div x-show="showForm" x-cloak class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <form method="POST" action="{{ route('admin.tags.store') }}" class="flex gap-3 items-end">

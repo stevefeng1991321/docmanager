@@ -5,28 +5,43 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Resource;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $sort = $request->input('sort', 'date_desc');
+        $view = $request->input('view', session('doc_view', 'grid'));
+        session(['doc_view' => $view]);
+
         $categories = Category::withCount('resources')
             ->whereNull('parent_id')
             ->orderBy('sort_order')
             ->get();
 
         $featured = Resource::published()
-            ->with(['category', 'tags'])
+            ->withAvg('ratings', 'rating')
+            ->with(['category'])
             ->orderByDesc('download_count')
             ->take(6)
             ->get();
 
-        $recent = Resource::published()
-            ->with(['category'])
-            ->latest()
-            ->take(10)
-            ->get();
+        $allDocs = Resource::published()
+            ->withAvg('ratings', 'rating')
+            ->with(['category']);
 
-        return view('home.index', compact('categories', 'featured', 'recent'));
+        $allDocs = match($sort) {
+            'name_asc'   => $allDocs->orderBy('title'),
+            'name_desc'  => $allDocs->orderByDesc('title'),
+            'size_desc'  => $allDocs->orderByDesc('file_size'),
+            'downloads'  => $allDocs->orderByDesc('download_count'),
+            'date_asc'   => $allDocs->orderBy('created_at'),
+            default      => $allDocs->orderByDesc('created_at'),
+        };
+
+        $allDocs = $allDocs->paginate(18)->withQueryString();
+
+        return view('home.index', compact('categories', 'featured', 'allDocs', 'sort', 'view'));
     }
 }
