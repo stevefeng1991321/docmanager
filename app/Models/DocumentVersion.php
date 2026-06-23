@@ -10,7 +10,7 @@ class DocumentVersion extends Model
 
     protected $fillable = [
         'resource_id', 'version_number', 'file_path',
-        'stored_filename', 'file_size', 'file_hash', 'change_note', 'uploaded_by',
+        'stored_filename', 'file_size', 'file_hash', 'change_note', 'uploaded_by', 'created_at',
     ];
 
     protected function casts(): array

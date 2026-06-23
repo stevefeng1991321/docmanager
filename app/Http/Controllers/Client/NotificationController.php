@@ -11,7 +11,7 @@ class NotificationController extends Controller
     {
         $notifications = auth()->user()
             ->notifications()
-            ->latest()
+            ->latest('created_at')
             ->paginate(20);
 
         return view('notifications.index', compact('notifications'));
@@ -20,7 +20,7 @@ class NotificationController extends Controller
     public function markRead(Notification $notification)
     {
         abort_if($notification->user_id !== auth()->id(), 403);
-        $notification->update(['read_at' => now()]);
+        $notification->update(['is_read' => true]);
         return back();
     }
 

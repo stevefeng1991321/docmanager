@@ -6,14 +6,14 @@
     <h1 class="text-xl font-bold text-gray-800">Notifications</h1>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
         @forelse($notifications as $notif)
-        <div class="flex items-start gap-4 px-5 py-4 {{ $notif->read_at ? '' : 'bg-blue-50/40' }}">
+        <div class="flex items-start gap-4 px-5 py-4 {{ $notif->is_read ? '' : 'bg-blue-50/40' }}">
             <div class="flex-1 min-w-0">
                 <p class="font-medium text-gray-800 text-sm">{{ $notif->title }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">{{ $notif->message }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
             </div>
             <div class="flex gap-2 flex-shrink-0 text-xs">
-                @if(!$notif->read_at)
+                @if(!$notif->is_read)
                 <form method="POST" action="{{ route('notifications.read', $notif) }}">
                     @csrf @method('PATCH')
                     <button class="text-blue-500 hover:text-blue-700">Mark read</button>

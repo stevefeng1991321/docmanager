@@ -65,7 +65,7 @@ class ReadingListController extends Controller
 
         ReadingListItem::firstOrCreate(
             ['reading_list_id' => $readingList->id, 'resource_id' => $resource->id],
-            ['sort_order' => $maxOrder + 1]
+            ['sort_order' => $maxOrder + 1, 'added_at' => now()]
         );
 
         return back()->with('message', 'Document added to list.');

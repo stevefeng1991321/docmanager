@@ -41,10 +41,9 @@ class SearchController extends Controller
             $total = $results->total();
 
             SearchLog::create([
-                'user_id'        => auth()->id(),
-                'query'          => $query,
-                'results_count'  => $total,
-                'ip_address'     => $request->ip(),
+                'user_id'       => auth()->id(),
+                'query'         => $query,
+                'results_count' => $total,
             ]);
         }
 

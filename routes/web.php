@@ -62,7 +62,7 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     // Documents — custom routes before resource() to avoid wildcard conflict
     Route::get('documents/trash',              [Admin\DocumentController::class, 'trash'])->name('documents.trash');
-    Route::resource('documents', Admin\DocumentController::class);
+    Route::resource('documents', Admin\DocumentController::class)->except(['show']);
     Route::patch('documents/{resource}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore');
     Route::delete('documents/{resource}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete');
     Route::patch('documents/{resource}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
@@ -101,14 +101,14 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::post('jobs/{id}/retry',  [Admin\JobMonitorController::class, 'retry'])->name('jobs.retry');
     Route::post('jobs/retry-all',   [Admin\JobMonitorController::class, 'retryAll'])->name('jobs.retry-all');
 
-    // Notifications broadcast
+    // Notifications (index accessible by editors too)
+    Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/broadcast', [Admin\NotificationController::class, 'broadcast'])->name('notifications.broadcast');
 
     // Settings (admin only)
     Route::middleware('role:admin')->group(function () {
         Route::get('settings',  [Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('settings',  [Admin\SettingController::class, 'update'])->name('settings.update');
-        Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
     });
 });
 

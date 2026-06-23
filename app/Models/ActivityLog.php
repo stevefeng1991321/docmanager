@@ -24,6 +24,7 @@ class ActivityLog extends Model
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'details'    => $details,
+            'created_at' => now(),
         ]);
     }
 }
