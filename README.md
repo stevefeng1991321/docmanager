@@ -45,7 +45,7 @@ npm install && npm run build
 cp .env.example .env
 php artisan key:generate
 
-# 5. Edit .env — set DB credentials, queue driver, cache driver, mail settings
+# 5. Edit .env — set DB credentials, queue driver, cache driver
 
 # 6. Run database migrations
 php artisan migrate --seed
@@ -96,7 +96,6 @@ Key `.env` settings:
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | MySQL connection |
 | `QUEUE_CONNECTION` | `database` or `redis` |
 | `CACHE_DRIVER` | `redis` or `file` |
-| `MAIL_MAILER`, `MAIL_HOST`, etc. | Email notification settings |
 | `OPENAI_API_KEY` | For OpenAI embedding model (optional) |
 | `VECTOR_DB_URL` | Qdrant / Chroma / Weaviate endpoint |
 | `SESSION_LIFETIME` | Session timeout in minutes (default: `120`) |
@@ -131,9 +130,9 @@ A full back-office interface for Admins and Editors.
 | Activity Logs | `/admin/activity-logs` | Session events — login, logout, failed access, account lockouts |
 | Jobs | `/admin/jobs` | Monitor queue — pending, processing, and failed jobs |
 | Storage | `/admin/storage` | Storage usage per user, global quota management |
-| Notifications | `/admin/notifications` | Manage and broadcast system notifications, manage email templates |
+| Notifications | `/admin/notifications` | Manage and broadcast system notifications |
 | Search Index | `/admin/search` | Re-index search engine, view search analytics |
-| Settings | `/admin/settings` | Upload limits, session timeout, share link expiry, email config, 2FA enforcement |
+| Settings | `/admin/settings` | Upload limits, session timeout, share link expiry |
 
 ---
 
@@ -255,8 +254,8 @@ A clean document portal for all authenticated users.
 * Re-index search engine (metadata, fulltext, embeddings)
 * Manage categories (hierarchical tree CRUD)
 * Manage tags (create, rename, merge, delete)
-* Broadcast system notifications; manage email notification templates
-* System settings: upload size limit, session timeout, share link expiry, 2FA enforcement
+* Broadcast system notifications
+* System settings: upload size limit, session timeout, share link expiry
 
 ---
 
@@ -391,7 +390,7 @@ The full MySQL schema (all `CREATE TABLE` statements with indexes, foreign keys,
 | `download_logs` | Per-file download records |
 | `resource_embeddings` | AI vector chunks per document for semantic search |
 | `notifications` | Per-user notifications with read/unread state |
-| `user_preferences` | Per-user settings (notification opt-ins, view mode, optional email, etc.) |
+| `user_preferences` | Per-user settings (notification opt-ins, view mode, etc.) |
 | `reading_lists` | User-created named document collections |
 | `reading_list_items` | Many-to-many pivot: reading lists ↔ documents, with sort order |
 | `bookmarks` | Per-user in-document page bookmarks (page number + optional label per PDF) |
@@ -663,7 +662,6 @@ Used for:
 * File content extraction
 * Embedding generation
 * Search indexing
-* Email notifications
 * Bulk ZIP download generation
 
 ```
@@ -730,21 +728,20 @@ Monitor failed jobs at `/admin/jobs`.
 
 # 🔔 Notification System
 
-| Event | In-App | Email (if configured) |
-|---|---|---|
-| File uploaded | ✔ | ✔ (optional) |
-| Version updated | ✔ | ✔ (optional) |
-| Access denied | ✔ (admin) | ✔ (optional) |
-| Account locked | ✔ | ✗ |
-| New pending registration | ✔ (admin) | ✗ |
-| Account activated / rejected | ✔ (user) | ✗ |
-| Document approved / rejected | ✔ (editor) | ✔ (optional) |
-| Username / deletion request received | ✔ (admin) | ✗ |
+| Event | In-App |
+|---|---|
+| File uploaded | ✔ |
+| Version updated | ✔ |
+| Access denied | ✔ (admin) |
+| Account locked | ✔ |
+| New pending registration | ✔ (admin) |
+| Account activated / rejected | ✔ (user) |
+| Document approved / rejected | ✔ (editor) |
+| Username / deletion request received | ✔ (admin) |
 
 **Delivery:**
 
-* In-app notifications always active (stored in `notifications` table with `is_read` flag)
-* Email notifications optional — only sent if SMTP is configured and the user account has an email address
+* In-app notifications stored in `notifications` table with `is_read` flag
 
 **User preferences:**
 
@@ -840,7 +837,7 @@ For large-scale deployments:
                     Laravel Backend
                             ↓
           ─────────────────────────────────────────
-          │ Auth (Breeze+2FA) │ RBAC │ API (Sanctum)│
+          │ Auth (Breeze)     │ RBAC │ API (Sanctum)│
           │ File Manager      │ Search Engine        │
           │ AI Module         │ Queue (Redis)         │
           │ Cache (Redis)     │ Notifications         │
@@ -890,7 +887,7 @@ This system is a **complete enterprise-grade document management platform** feat
 ✔ Document ratings (1–5 stars) — community quality signal, used in search ranking
 ✔ Background job processing (queues) with queue monitor
 ✔ Advanced analytics dashboard (stat cards + charts)
-✔ In-app + email notification system with per-user preferences
+✔ In-app notification system with per-user preferences
 ✔ REST API layer (Laravel Sanctum)
 ✔ Redis caching layer
 ✔ Storage quota management per user
