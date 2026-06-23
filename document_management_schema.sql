@@ -314,6 +314,71 @@ CREATE TABLE IF NOT EXISTS notifications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------
+-- reading_lists
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS reading_lists (
+    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT UNSIGNED NOT NULL,
+    name        VARCHAR(100)    NOT NULL,
+    description TEXT            NULL,
+    is_private  BOOLEAN         NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP       NULL,
+    updated_at  TIMESTAMP       NULL,
+    CONSTRAINT fk_rl_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- reading_list_items  (many-to-many pivot: reading_lists ↔ resources)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS reading_list_items (
+    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    reading_list_id BIGINT UNSIGNED NOT NULL,
+    resource_id     BIGINT UNSIGNED NOT NULL,
+    sort_order      INT UNSIGNED    NOT NULL DEFAULT 0,
+    added_at        TIMESTAMP       NULL,
+    UNIQUE KEY uq_rli (reading_list_id, resource_id),
+    CONSTRAINT fk_rli_list FOREIGN KEY (reading_list_id)
+        REFERENCES reading_lists (id) ON DELETE CASCADE,
+    CONSTRAINT fk_rli_resource FOREIGN KEY (resource_id)
+        REFERENCES resources (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- bookmarks  (in-document page bookmarks for PDFs)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS bookmarks (
+    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT UNSIGNED NOT NULL,
+    resource_id BIGINT UNSIGNED NOT NULL,
+    page_number INT UNSIGNED    NOT NULL DEFAULT 1,
+    label       VARCHAR(100)    NULL,
+    created_at  TIMESTAMP       NULL,
+    updated_at  TIMESTAMP       NULL,
+    CONSTRAINT fk_bm_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_bm_resource FOREIGN KEY (resource_id)
+        REFERENCES resources (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- document_ratings  (1–5 star per-user rating per document)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS document_ratings (
+    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id     BIGINT UNSIGNED NOT NULL,
+    resource_id BIGINT UNSIGNED NOT NULL,
+    rating      TINYINT UNSIGNED NOT NULL COMMENT '1 to 5',
+    created_at  TIMESTAMP       NULL,
+    updated_at  TIMESTAMP       NULL,
+    UNIQUE KEY uq_rating (user_id, resource_id),
+    CONSTRAINT fk_rating_user FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_rating_resource FOREIGN KEY (resource_id)
+        REFERENCES resources (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
 -- user_preferences  (per-user settings and optional profile fields)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS user_preferences (

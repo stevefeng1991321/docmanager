@@ -157,6 +157,7 @@ A clean document portal for all authenticated users.
 | Recently Viewed | `/history` | Documents the user has opened, most recent first |
 | Download History | `/downloads` | User's own file download log |
 | Saved Searches | `/saved-searches` | Manage saved search queries |
+| Reading Lists | `/reading-lists` | Create and manage named document collections (e.g. "Linux study pack") |
 | Notifications | `/notifications` | Inbox — mark as read, dismiss, manage notification preferences |
 | Profile | `/profile` | Edit name, email, password, avatar, notification preferences |
 
@@ -282,11 +283,16 @@ A clean document portal for all authenticated users.
 * Secure download (controller-gated, permission-checked)
 * View version history (read-only)
 * Generate and copy signed share link
+* Rate document (1–5 stars) — average rating shown on document detail and search results
+* Save in-document page bookmark — remember a specific page number inside a PDF for later resumption
 
 ### Personal Features
 * Favorites / Bookmarks — save documents for quick access
 * Recently Viewed — auto-tracked list of opened documents
 * Download History — user's own download log
+* Reading Lists — create named collections of documents (e.g. "Linux study pack", "Project X references"); add/remove documents, reorder, make private or share with other users
+* In-document Page Bookmarks — save a specific page number within a PDF; resume reading from where you left off; multiple bookmarks per document with optional label
+* Document Ratings — rate any document 1–5 stars; average rating visible on document cards and detail pages; used as a search ranking signal
 * Notification inbox — mark as read, dismiss, manage notification preferences per event type
 * Profile page — edit display name, optional email, avatar, change password, toggle 2FA, set notification preferences
 * Username change request — submit a request to Admin (username cannot be changed directly by the user)
@@ -387,6 +393,10 @@ The full MySQL schema (all `CREATE TABLE` statements with indexes, foreign keys,
 | `resource_embeddings` | AI vector chunks per document for semantic search |
 | `notifications` | Per-user notifications with read/unread state |
 | `user_preferences` | Per-user settings (notification opt-ins, view mode, optional email, etc.) |
+| `reading_lists` | User-created named document collections |
+| `reading_list_items` | Many-to-many pivot: reading lists ↔ documents, with sort order |
+| `bookmarks` | Per-user in-document page bookmarks (page number + optional label per PDF) |
+| `document_ratings` | Per-user 1–5 star rating per document; average rating computed for display and search ranking |
 
 ---
 
@@ -472,6 +482,7 @@ Scoring model:
 * Content match → +2
 * Vector similarity → 0–1 score
 * Recent files boost → +1
+* Average rating boost → 0–1 (normalised from 1–5 star average)
 
 ---
 
@@ -875,6 +886,9 @@ This system is a **complete enterprise-grade document management platform** feat
 ✔ Soft delete with restorable Trash and auto-purge
 ✔ Document sharing with signed time-limited links + revocation
 ✔ Favorites, recently viewed, download history, saved searches
+✔ Reading lists — user-created named document collections
+✔ In-document page bookmarks — resume reading from a saved page in any PDF
+✔ Document ratings (1–5 stars) — community quality signal, used in search ranking
 ✔ Background job processing (queues) with queue monitor
 ✔ Advanced analytics dashboard (stat cards + charts)
 ✔ In-app + email notification system with per-user preferences
