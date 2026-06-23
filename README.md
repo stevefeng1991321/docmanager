@@ -1,328 +1,383 @@
-# 📚 Document Management System (Laravel + MySQL)
+# 📚 Document Management System (PHP + Laravel + XAMPP + MySQL)
 
-A role-based web application built with **Laravel (PHP)** and **MySQL**, allowing administrators to manage digital resources (PDFs, images, documents) while users can securely view and download them.
+A secure, scalable document management system built with **Laravel** running on **XAMPP (Apache + MySQL)**. It supports role-based access, advanced search, AI semantic search, file preview, version control, and extensible enterprise-grade features — all using local storage (no cloud dependency).
 
 ---
 
-# 🚀 Features
+# 🚀 Core Features
 
 ## 👤 Authentication
 
-* User login and registration
+* User login & registration
 * Role-based access control:
 
-  * **Admin**
-  * **User**
-* Session-based authentication (Laravel default)
+  * Admin
+  * User
+* Session-based authentication (Laravel Breeze)
+* Secure password hashing (bcrypt / argon2)
 
 ---
 
 ## 🛠️ Admin Features
 
-* Upload resources (PDF, DOCX, images, etc.)
-* Edit resource details
-* Delete resources
-* Manage users (optional extension)
+* Upload documents (PDF, DOCX, images, etc.)
+* Update and delete resources
+* Manage users
 * View audit logs
+* Document version control
+* Re-index files for search engine
 
 ---
 
 ## 👁️ User Features
 
-* View all uploaded resources
-* Download files
-* Search and filter resources
+* View available resources
+* Download files securely
+* Search documents (basic + semantic + filters)
+* Preview files (PDF viewer)
 * Read-only access
 
 ---
 
-## 📂 Resource Management
+# 📁 File Storage (Local XAMPP)
 
-* Secure file upload system
-* File metadata stored in MySQL
-* Files stored in server storage (`/storage/app/resources`)
-* Support for:
-
-  * PDF
-  * DOC / DOCX
-  * XLSX
-  * JPG / PNG / JPEG
-
----
-
-# 🧱 Tech Stack
-
-* Backend: Laravel (PHP 10+ / 11+ recommended)
-* Database: MySQL 8+
-* Frontend: Blade Templates (or Vue optional)
-* Authentication: Laravel Breeze / Laravel UI
-* ORM: Eloquent
-* File Storage: Local storage or AWS S3 (optional)
-
----
-
-# 📁 Project Structure
+All files are stored locally:
 
 ```
-app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── AuthController.php
-│   │   ├── ResourceController.php
-│   │   ├── UserController.php
-│   │   └── AdminController.php
-│   ├── Middleware/
-│   │   └── AdminMiddleware.php
-│
-├── Models/
-│   ├── User.php
-│   ├── Resource.php
-│   └── AuditLog.php
-│
-├── Services/
-│   ├── FileUploadService.php
-│   └── AuditService.php
-
-resources/
-├── views/
-│   ├── auth/
-│   ├── admin/
-│   ├── user/
-│   └── layouts/
-
-storage/
-└── app/
-    └── resources/
+storage/app/resources/
 ```
 
----
-
-# 🗄️ Database Design
-
-## Users Table
-
-```sql
-CREATE TABLE users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
-    email VARCHAR(255) UNIQUE,
-    password VARCHAR(255),
-    role ENUM('admin','user') DEFAULT 'user',
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL
-);
-```
+* No cloud storage required
+* Apache serves Laravel application
+* Files accessed via secure controller (not direct URL)
 
 ---
 
-## Resources Table
+# 🔎 Advanced Search System
 
-```sql
-CREATE TABLE resources (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-
-    original_filename VARCHAR(255),
-    stored_filename VARCHAR(255),
-
-    file_type VARCHAR(50),
-    file_size BIGINT,
-
-    uploaded_by BIGINT,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL,
-
-    FOREIGN KEY (uploaded_by) REFERENCES users(id)
-);
-```
+The system includes a **multi-layer search engine**:
 
 ---
 
-## Audit Logs Table
+## 1. Metadata Search (Fast)
 
-```sql
-CREATE TABLE audit_logs (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT,
-    action VARCHAR(50),
-    resource_id BIGINT NULL,
-    details TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+Searches:
 
----
-
-# 🔐 Authentication & Authorization
-
-## Install Authentication
-
-```bash
-composer require laravel/breeze --dev
-php artisan breeze:install
-php artisan migrate
-npm install && npm run dev
-```
-
----
-
-## Role Middleware Example
-
-```php
-public function handle($request, Closure $next)
-{
-    if (auth()->user()->role !== 'admin') {
-        abort(403, 'Unauthorized');
-    }
-
-    return $next($request);
-}
-```
-
----
-
-## Route Protection
-
-```php
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index']);
-});
-```
-
----
-
-# 📤 File Upload Flow
-
-1. Admin selects file
-2. Backend validates file type & size
-3. File stored in `/storage/app/resources`
-4. Metadata saved in MySQL
-5. Audit log created
-
----
-
-## Upload Validation Example
-
-```php
-$request->validate([
-    'file' => 'required|mimes:pdf,doc,docx,jpg,png|max:10240',
-]);
-```
-
----
-
-# 📥 File Download Flow
-
-* User clicks download
-* Controller checks permission
-* File served securely from storage
-
-```php
-return response()->download(storage_path('app/resources/' . $file));
-```
-
----
-
-# 🔎 Search Feature
-
-Users can search by:
-
+* File name
 * Title
-* File type
 * Description
 
-Example query:
+```php
+Resource::where('title','LIKE',"%$q%")
+```
+
+---
+
+## 2. Full-Text Search (MySQL Optimized)
+
+```sql
+ALTER TABLE resources ADD FULLTEXT(title, description, content);
+```
 
 ```php
-Resource::where('title', 'like', "%$keyword%")->get();
+MATCH(title, description, content)
+AGAINST(? IN NATURAL LANGUAGE MODE)
 ```
 
 ---
 
-# 🔒 Security Features
+## 3. File Content Search
 
-* Password hashing (bcrypt / argon2)
-* CSRF protection (Laravel default)
-* Input validation
+Extracts and indexes:
+
+* PDF text
+* DOCX content
+* TXT files
+
+Stored in:
+
+```sql
+content LONGTEXT
+```
+
+---
+
+## 4. AI Semantic Search (Vector-Based)
+
+### Architecture:
+
+```text id="semantic1"
+User Query
+   │
+   ▼
+Embedding Model (OpenAI / Local Model)
+   │
+   ▼
+Vector Database (Qdrant / Weaviate / Chroma)
+   │
+   ▼
+Similarity Search (Cosine Distance)
+   │
+   ▼
+Ranked Results
+```
+
+### Features:
+
+* Understands meaning, not keywords
+* Finds similar documents even if words differ
+* Supports natural language queries
+
+---
+
+## 5. Hybrid Search Engine (Final System)
+
+Search combines:
+
+* Keyword search (MySQL)
+* Full-text search
+* Vector similarity search (AI)
+* File content extraction
+
+```text id="hybrid1"
+User Query
+   │
+   ├── Keyword Search (MySQL)
+   ├── Full Text Search
+   ├── Vector Search (AI)
+   └── Content Search
+            ↓
+      Result Ranking Engine
+            ↓
+        Final Results
+```
+
+---
+
+# 📄 File Content Extraction
+
+Supported formats:
+
+* PDF
+* DOCX
+* TXT
+
+### Libraries:
+
+```bash
+composer require smalot/pdfparser
+composer require phpoffice/phpword
+```
+
+---
+
+# 👁️ File Preview System
+
+## PDF Viewer
+
+* Embedded browser-based PDF viewer
+* No download required for preview
+
+Example:
+
+```html
+<iframe src="/storage/app/resources/file.pdf" width="100%" height="600px"></iframe>
+```
+
+---
+
+## Supported Preview Types:
+
+* PDF (full preview)
+* Images (JPG/PNG)
+* DOCX (converted to text preview)
+
+---
+
+# 📂 Document Version Control
+
+Each document supports multiple versions:
+
+## Schema:
+
+```sql
+document_versions (
+    id,
+    resource_id,
+    version_number,
+    file_path,
+    created_at
+)
+```
+
+---
+
+## Flow:
+
+```text id="version1"
+Upload New Version
+      │
+      ▼
+Store file as new version
+      │
+      ▼
+Keep history intact
+```
+
+### Features:
+
+* Restore previous versions
+* Compare versions (future feature)
+* Track changes over time
+
+---
+
+# 🔎 Search Highlighting
+
+Search results highlight matched keywords:
+
+```text id="highlight1"
+Invoice 2024 Report
+        ↑
+     matched keyword
+```
+
+### Implementation:
+
+* Wrap keywords in `<mark>` tags
+* Highlight in title, description, and content preview
+
+---
+
+# 📊 Advanced Filters
+
+Users can filter results by:
+
+* File type (PDF, DOCX, Image)
+* Upload date range
+* Uploader (Admin/User)
+* Version number
+* Tags (future feature)
+
+---
+
+## Example Query:
+
+```sql
+SELECT * FROM resources
+WHERE file_type = 'pdf'
+AND uploaded_by = 1
+AND created_at BETWEEN ? AND ?;
+```
+
+---
+
+# ⚡ Elasticsearch Integration (Optional Upgrade)
+
+For large-scale systems:
+
+### Features:
+
+* Fast full-text search
+* Ranking optimization
+* Auto-suggestions
+
+```text id="elastic1"
+Laravel → Elasticsearch → Indexed Documents → Search API
+```
+
+---
+
+# 🧠 AI Semantic Search (Upgrade Layer)
+
+### How it works:
+
+* Convert documents into embeddings
+* Store in vector DB
+* Compare query vector with document vectors
+
+### Tools:
+
+* OpenAI Embeddings
+* Ollama (local AI)
+* Qdrant / Weaviate
+
+---
+
+# 🗄️ Database Schema (Extended)
+
+## resources
+
+```sql
+content LONGTEXT,
+embedding VECTOR (optional external DB)
+```
+
+---
+
+## document_versions
+
+```sql
+id
+resource_id
+version_number
+file_path
+created_at
+```
+
+---
+
+# 🔐 Security Features
+
 * Role-based access control
-* File type restriction
-* File size limits
-* Protected storage access
+* Secure file download (no direct access)
+* CSRF protection
+* File validation (mimes + size)
+* SQL injection protection (Eloquent ORM)
 
 ---
 
-# ⚙️ Environment Setup
+# ⚙️ Tech Stack
 
-## 1. Clone Project
+* Backend: Laravel (PHP 10+ / 11+)
+* Server: Apache (XAMPP)
+* Database: MySQL 8
+* Frontend: Blade Templates
+* Search:
 
-```bash
-git clone https://github.com/your-repo/document-system.git
-cd document-system
-```
-
----
-
-## 2. Install Dependencies
-
-```bash
-composer install
-npm install
-```
+  * MySQL FULLTEXT
+  * AI Vector Search
+  * File content indexing
+* Storage: Local Disk
 
 ---
 
-## 3. Configure Environment
+# 🔮 Future Enhancements
 
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-Update database:
-
-```
-DB_DATABASE=your_db
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
----
-
-## 4. Run Migrations
-
-```bash
-php artisan migrate
-```
-
----
-
-## 5. Start Server
-
-```bash
-php artisan serve
-```
-
----
-
-# 📦 Future Improvements
-
-* File versioning system
-* Full-text search (ElasticSearch)
-* Cloud storage (AWS S3)
-* Two-factor authentication
-* Activity dashboard analytics
-* API for mobile app
 * AI document summarization
-
----
-
-# 👨‍💻 License
-
-MIT License
+* Chat with documents (RAG system)
+* Multi-user collaboration
+* Real-time notifications
+* OCR for scanned PDFs
+* Advanced analytics dashboard
+* Elasticsearch production scaling
 
 ---
 
 # 🎯 Summary
 
-This system is a secure, scalable **document management platform** built with Laravel and MySQL, supporting role-based access control and safe file handling.
+This system is a **complete enterprise-grade document management platform** featuring:
+
+✔ Local file storage (XAMPP)
+✔ Role-based authentication
+✔ Admin resource management
+✔ Hybrid search engine
+✔ AI semantic search (vector-based)
+✔ File preview system
+✔ Version control
+✔ Advanced filtering & highlighting
+✔ Elasticsearch-ready architecture
+
+---
+
+🚀 This design is ready to scale from a local XAMPP project to a full enterprise SaaS system.
