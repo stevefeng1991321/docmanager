@@ -13,26 +13,38 @@ class RequireActiveAccount
     {
         $user = Auth::user();
 
+        $isApi = $request->expectsJson() || $request->is('api/*');
+
         if (!$user) {
-            return redirect()->route('login');
+            return $isApi
+                ? response()->json(['message' => 'Unauthenticated.'], 401)
+                : redirect()->route('login');
         }
 
         if ($user->status === 'pending') {
             Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect()->route('login')
-                ->with('status', 'pending')
-                ->with('message', 'Your account is awaiting activation by an administrator.');
+            if (!$isApi) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+            return $isApi
+                ? response()->json(['message' => 'Account is pending activation.'], 403)
+                : redirect()->route('login')
+                    ->with('status', 'pending')
+                    ->with('message', 'Your account is awaiting activation by an administrator.');
         }
 
         if ($user->status === 'inactive') {
             Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect()->route('login')
-                ->with('status', 'inactive')
-                ->with('message', 'Your account has been deactivated. Please contact support.');
+            if (!$isApi) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+            return $isApi
+                ? response()->json(['message' => 'Account is deactivated.'], 403)
+                : redirect()->route('login')
+                    ->with('status', 'inactive')
+                    ->with('message', 'Your account has been deactivated. Please contact support.');
         }
 
         return $next($request);
