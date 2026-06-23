@@ -64,13 +64,14 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'username' => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:users,username,' . $user->id],
-            'name'     => ['required', 'string', 'max:255'],
-            'role'     => ['required', 'in:admin,editor,viewer'],
-            'status'   => ['required', 'in:active,inactive'],
+            'username'         => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:users,username,' . $user->id],
+            'name'             => ['required', 'string', 'max:255'],
+            'role'             => ['required', 'in:admin,editor,viewer'],
+            'status'           => ['required', 'in:active,inactive'],
+            'storage_quota_mb' => ['nullable', 'integer', 'min:0', 'max:102400'],
         ]);
 
-        $user->update($request->only('username', 'name', 'role', 'status'));
+        $user->update($request->only('username', 'name', 'role', 'status', 'storage_quota_mb'));
         AuditLog::record('user.updated', null, ['user_id' => $user->id]);
 
         return redirect()->route('admin.users.index')->with('message', 'User updated.');

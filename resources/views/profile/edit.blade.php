@@ -73,6 +73,31 @@
         </form>
     </div>
 
+    {{-- Storage usage --}}
+    @php
+        $usedBytes  = $user->storageUsedBytes();
+        $quotaBytes = $user->storageQuotaBytes();
+        $usedMb     = round($usedBytes / 1048576, 1);
+        $quotaMb    = $quotaBytes ? round($quotaBytes / 1048576) : null;
+        $pct        = $quotaBytes ? min(100, round($usedBytes / $quotaBytes * 100)) : 0;
+        $barColor   = $pct >= 90 ? 'bg-red-500' : ($pct >= 70 ? 'bg-yellow-400' : 'bg-blue-500');
+    @endphp
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
+        <h3 class="font-semibold text-gray-800">Storage Usage</h3>
+        @if($quotaBytes)
+            <div class="flex justify-between text-xs text-gray-500">
+                <span>{{ $usedMb }} MB used</span>
+                <span>{{ $quotaMb }} MB quota</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                <div class="{{ $barColor }} h-2.5 rounded-full transition-all" style="width: {{ $pct }}%"></div>
+            </div>
+            <p class="text-xs text-gray-400">{{ $pct }}% of your quota used</p>
+        @else
+            <p class="text-sm text-gray-500">{{ $usedMb }} MB used &mdash; <span class="text-green-600 font-medium">Unlimited quota</span></p>
+        @endif
+    </div>
+
     <div class="bg-white rounded-xl border border-red-100 shadow-sm p-6">
         <h3 class="font-semibold text-red-700 mb-2">Delete Account</h3>
         <p class="text-sm text-gray-500 mb-4">Permanent — cannot be undone.</p>

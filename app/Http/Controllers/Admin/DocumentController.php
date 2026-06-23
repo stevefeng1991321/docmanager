@@ -11,6 +11,7 @@ use App\Models\Notification;
 use App\Models\Resource;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -52,6 +53,11 @@ class DocumentController extends Controller
         ]);
 
         $file            = $request->file('file');
+
+        if (auth()->user()->wouldExceedQuota($file->getSize())) {
+            return back()->withErrors(['file' => 'This upload would exceed your storage quota.'])->withInput();
+        }
+
         $originalName    = $file->getClientOriginalName();
         $storedName      = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path            = $file->storeAs('resources', $storedName, 'local');
@@ -91,6 +97,7 @@ class DocumentController extends Controller
         AuditLog::record('document.uploaded', $resource->id, ['title' => $resource->title]);
 
         ExtractDocumentContent::dispatch($resource);
+        self::clearDocumentCaches();
 
         return redirect()->route('admin.documents.index')
             ->with('message', "Document \"{$resource->title}\" uploaded. Content indexing queued.");
@@ -118,6 +125,7 @@ class DocumentController extends Controller
         $document->tags()->sync($request->tags ?? []);
 
         AuditLog::record('document.updated', $document->id, ['title' => $document->title]);
+        self::clearDocumentCaches();
 
         return redirect()->route('admin.documents.edit', $document)
             ->with('message', 'Document updated.');
@@ -127,6 +135,7 @@ class DocumentController extends Controller
     {
         $document->delete(); // soft delete
         AuditLog::record('document.deleted', $document->id, ['title' => $document->title]);
+        self::clearDocumentCaches();
 
         return redirect()->route('admin.documents.index')
             ->with('message', "Document moved to Trash.");
@@ -142,6 +151,7 @@ class DocumentController extends Controller
     {
         $document->restore();
         AuditLog::record('document.restored', $document->id);
+        self::clearDocumentCaches();
         return back()->with('message', 'Document restored.');
     }
 
@@ -150,6 +160,7 @@ class DocumentController extends Controller
         Storage::disk('local')->delete($document->file_path);
         $document->forceDelete();
         AuditLog::record('document.permanently_deleted', null, ['title' => $document->title]);
+        self::clearDocumentCaches();
         return back()->with('message', 'Document permanently deleted.');
     }
 
@@ -167,12 +178,21 @@ class DocumentController extends Controller
         return back()->with('message', 'Document unlocked.');
     }
 
+    private static function clearDocumentCaches(): void
+    {
+        Cache::forget('dashboard.stats');
+        Cache::forget('dashboard.upload_trend');
+        Cache::forget('dashboard.download_trend');
+        Cache::forget('home.categories');
+        Cache::forget('home.featured');
+    }
+
     public function approve(Request $request, Resource $document)
     {
         $document->update(['status' => 'published']);
         AuditLog::record('document.approved', $document->id);
+        self::clearDocumentCaches();
 
-        // Notify uploader
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_approved',
                 'Document Published', "\"{$document->title}\" has been approved and published.", $document->id);
@@ -186,6 +206,7 @@ class DocumentController extends Controller
         $request->validate(['reason' => ['nullable', 'string', 'max:500']]);
         $document->update(['status' => 'rejected']);
         AuditLog::record('document.rejected', $document->id, ['reason' => $request->reason]);
+        self::clearDocumentCaches();
 
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_rejected',

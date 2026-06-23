@@ -16,7 +16,7 @@ class User extends Authenticatable
         'role', 'status',
         'failed_login_attempts', 'locked_until',
         'two_factor_secret', 'two_factor_recovery_codes',
-        'last_login_at',
+        'last_login_at', 'storage_quota_mb',
     ];
 
     protected $hidden = [
@@ -42,6 +42,25 @@ class User extends Authenticatable
     public function isActive(): bool   { return $this->status === 'active'; }
     public function isPending(): bool  { return $this->status === 'pending'; }
     public function isLocked(): bool   { return $this->locked_until && $this->locked_until->isFuture(); }
+
+    // ---------- storage quota ----------
+
+    public function storageUsedBytes(): int
+    {
+        return (int) $this->resources()->whereNull('deleted_at')->sum('file_size');
+    }
+
+    public function storageQuotaBytes(): ?int
+    {
+        return $this->storage_quota_mb ? $this->storage_quota_mb * 1024 * 1024 : null;
+    }
+
+    public function wouldExceedQuota(int $incomingBytes): bool
+    {
+        $quota = $this->storageQuotaBytes();
+        if ($quota === null) return false;
+        return ($this->storageUsedBytes() + $incomingBytes) > $quota;
+    }
 
     // ---------- relationships ----------
 

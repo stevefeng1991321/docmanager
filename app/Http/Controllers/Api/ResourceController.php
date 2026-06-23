@@ -13,6 +13,7 @@ use App\Models\Resource;
 use App\Models\Share;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -82,6 +83,11 @@ class ResourceController extends Controller
         ]);
 
         $file        = $request->file('file');
+
+        if ($request->user()->wouldExceedQuota($file->getSize())) {
+            return response()->json(['message' => 'Upload would exceed your storage quota.'], 422);
+        }
+
         $storedName  = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path        = $file->storeAs('resources', $storedName, 'local');
         $hash        = hash_file('sha256', $file->getRealPath());
@@ -118,6 +124,7 @@ class ResourceController extends Controller
 
         AuditLog::record('document.uploaded', $resource->id, ['source' => 'api']);
         ExtractDocumentContent::dispatch($resource);
+        $this->clearDocumentCaches();
 
         return (new DocumentResource($resource->load('category', 'tags')))
             ->response()->setStatusCode(201);
@@ -143,6 +150,7 @@ class ResourceController extends Controller
         }
 
         AuditLog::record('document.updated', $resource->id, ['source' => 'api']);
+        $this->clearDocumentCaches();
 
         return new DocumentResource($resource->fresh(['category', 'tags']));
     }
@@ -153,6 +161,7 @@ class ResourceController extends Controller
 
         $resource->delete();
         AuditLog::record('document.deleted', $resource->id, ['source' => 'api']);
+        $this->clearDocumentCaches();
 
         return response()->json(['message' => 'Document deleted.']);
     }
@@ -190,6 +199,15 @@ class ResourceController extends Controller
     }
 
     // ---------- helpers ----------
+
+    private function clearDocumentCaches(): void
+    {
+        Cache::forget('dashboard.stats');
+        Cache::forget('dashboard.upload_trend');
+        Cache::forget('dashboard.download_trend');
+        Cache::forget('home.categories');
+        Cache::forget('home.featured');
+    }
 
     private function userCanManage(): bool
     {
