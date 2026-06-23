@@ -20,15 +20,52 @@
     @else
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100">
         @foreach($searches as $search)
-        <div class="flex items-center justify-between px-5 py-3">
-            <a href="{{ route('search', ['q' => $search->query]) }}"
-               class="text-blue-600 hover:underline text-sm font-medium">
-                {{ $search->query }}
-            </a>
-            <form method="POST" action="{{ route('saved-searches.destroy', $search) }}">
-                @csrf @method('DELETE')
-                <button class="text-xs text-red-400 hover:text-red-600">Remove</button>
-            </form>
+        <div class="px-5 py-3" x-data="{ editing: false, name: '{{ addslashes($search->name) }}' }">
+            <div class="flex items-center justify-between gap-3">
+
+                {{-- View mode --}}
+                <div x-show="!editing" class="flex-1 min-w-0">
+                    <a href="{{ route('search', ['q' => $search->query]) }}"
+                       class="text-blue-600 hover:underline text-sm font-medium block truncate"
+                       title="{{ $search->query }}">
+                        {{ $search->name }}
+                    </a>
+                    @if($search->name !== $search->query)
+                        <p class="text-xs text-gray-400 truncate mt-0.5">{{ $search->query }}</p>
+                    @endif
+                </div>
+
+                {{-- Edit mode --}}
+                <form x-show="editing" method="POST"
+                      action="{{ route('saved-searches.update', $search) }}"
+                      class="flex-1 flex gap-2" @submit.prevent="$el.submit()">
+                    @csrf @method('PUT')
+                    <input type="text" name="name" x-model="name" maxlength="100" required
+                           class="flex-1 border border-blue-300 rounded-lg px-3 py-1.5 text-sm focus:ring-blue-500 focus:border-blue-500"
+                           @keydown.escape="editing = false">
+                    <button type="submit"
+                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">
+                        Save
+                    </button>
+                    <button type="button" @click="editing = false"
+                            class="px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-500 text-xs rounded-lg">
+                        Cancel
+                    </button>
+                </form>
+
+                {{-- Actions --}}
+                <div x-show="!editing" class="flex items-center gap-3 flex-shrink-0">
+                    <button @click="editing = true; $nextTick(() => $el.closest('.px-5').querySelector('input[name=name]').focus())"
+                            class="text-xs text-gray-400 hover:text-gray-600">
+                        Rename
+                    </button>
+                    <form method="POST" action="{{ route('saved-searches.destroy', $search) }}">
+                        @csrf @method('DELETE')
+                        <button class="text-xs text-red-400 hover:text-red-600">Remove</button>
+                    </form>
+                </div>
+
+            </div>
         </div>
         @endforeach
     </div>

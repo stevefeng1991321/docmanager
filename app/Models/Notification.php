@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['user_id', 'type', 'title', 'message', 'resource_id', 'is_read'];
+    protected $fillable = ['user_id', 'type', 'title', 'message', 'resource_id', 'is_read', 'created_at'];
 
     protected function casts(): array
     {
@@ -25,6 +25,7 @@ class Notification extends Model
             'title'       => $title,
             'message'     => $message,
             'resource_id' => $resourceId,
+            'created_at'  => now(),
         ]);
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityLog extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['user_id', 'event', 'ip_address', 'user_agent', 'details'];
+    protected $fillable = ['user_id', 'event', 'ip_address', 'user_agent', 'details', 'created_at'];
 
     protected function casts(): array
     {

@@ -14,7 +14,7 @@ class BookmarkController extends Controller
         $request->validate([
             'resource_id' => ['required', 'exists:resources,id'],
             'page_number' => ['required', 'integer', 'min:1'],
-            'label'        => ['nullable', 'string', 'max:500'],
+            'label'        => ['nullable', 'string', 'max:100'],
         ]);
 
         $resource = Resource::findOrFail($request->resource_id);
@@ -33,7 +33,7 @@ class BookmarkController extends Controller
     public function update(Request $request, Bookmark $bookmark)
     {
         abort_if($bookmark->user_id !== auth()->id(), 403);
-        $request->validate(['label' => ['nullable', 'string', 'max:500']]);
+        $request->validate(['label' => ['nullable', 'string', 'max:100']]);
         $bookmark->update(['label' => $request->label]);
         return response()->json(['message' => 'Bookmark updated.']);
     }

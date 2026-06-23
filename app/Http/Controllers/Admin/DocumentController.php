@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ExtractDocumentContent;
 use App\Models\AuditLog;
 use App\Models\Category;
+use App\Models\DocumentAccessLog;
 use App\Models\DocumentVersion;
 use App\Models\Notification;
 use App\Models\Resource;
@@ -150,6 +151,16 @@ class DocumentController extends Controller
     {
         $documents = Resource::onlyTrashed()->with('uploader')->latest('deleted_at')->paginate(20);
         return view('admin.documents.trash', compact('documents'));
+    }
+
+    public function accessLog(Resource $document)
+    {
+        $logs = DocumentAccessLog::where('resource_id', $document->id)
+            ->with('user', 'version')
+            ->latest('created_at')
+            ->paginate(50);
+
+        return view('admin.documents.access-log', compact('document', 'logs'));
     }
 
     public function restore(Resource $document)

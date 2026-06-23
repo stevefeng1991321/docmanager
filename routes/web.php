@@ -65,12 +65,13 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     // Documents — custom routes before resource() to avoid wildcard conflict
     Route::get('documents/trash',              [Admin\DocumentController::class, 'trash'])->name('documents.trash');
     Route::resource('documents', Admin\DocumentController::class)->except(['show']);
-    Route::patch('documents/{resource}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore');
-    Route::delete('documents/{resource}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete');
-    Route::patch('documents/{resource}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
-    Route::patch('documents/{resource}/unlock', [Admin\DocumentController::class, 'unlock'])->name('documents.unlock');
-    Route::patch('documents/{resource}/approve',[Admin\DocumentController::class, 'approve'])->name('documents.approve');
-    Route::patch('documents/{resource}/reject', [Admin\DocumentController::class, 'reject'])->name('documents.reject');
+    Route::get('documents/{document}/access-log', [Admin\DocumentController::class, 'accessLog'])->name('documents.access-log');
+    Route::patch('documents/{document}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore');
+    Route::delete('documents/{document}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete');
+    Route::patch('documents/{document}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
+    Route::patch('documents/{document}/unlock', [Admin\DocumentController::class, 'unlock'])->name('documents.unlock');
+    Route::patch('documents/{document}/approve',[Admin\DocumentController::class, 'approve'])->name('documents.approve');
+    Route::patch('documents/{document}/reject', [Admin\DocumentController::class, 'reject'])->name('documents.reject');
 
     // Bulk actions
     Route::post('documents/bulk/approve',          [Admin\DocumentController::class, 'bulkApprove'])->name('documents.bulk-approve');

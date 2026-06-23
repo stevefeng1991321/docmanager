@@ -20,7 +20,7 @@ class Share extends Model
 
     public function isValid(): bool
     {
-        return $this->revoked_at === null && $this->expires_at->isFuture();
+        return $this->revoked_at === null && $this->expires_at !== null && $this->expires_at->isFuture();
     }
 
     public function resource() { return $this->belongsTo(Resource::class); }

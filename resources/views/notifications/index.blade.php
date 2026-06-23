@@ -10,7 +10,7 @@
             <div class="flex-1 min-w-0">
                 <p class="font-medium text-gray-800 text-sm">{{ $notif->title }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">{{ $notif->message }}</p>
-                <p class="text-xs text-gray-400 mt-1">{{ $notif->created_at->diffForHumans() }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ $notif->created_at?->diffForHumans() ?? '—' }}</p>
             </div>
             <div class="flex gap-2 flex-shrink-0 text-xs">
                 @if(!$notif->is_read)

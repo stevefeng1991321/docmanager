@@ -46,7 +46,7 @@ class DocumentController extends Controller
         abort_if(!$resource->isPublished(), 404);
 
         // Only PDF and image files can be previewed
-        $previewable = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'];
+        $previewable = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp'];
         abort_if(!in_array(strtolower($resource->file_type), $previewable), 404);
 
         return view('documents.preview', compact('resource'));

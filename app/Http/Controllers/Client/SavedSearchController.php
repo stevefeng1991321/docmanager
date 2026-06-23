@@ -28,6 +28,17 @@ class SavedSearchController extends Controller
         return back()->with('message', 'Search saved.');
     }
 
+    public function update(Request $request, SavedSearch $savedSearch)
+    {
+        abort_if($savedSearch->user_id !== auth()->id(), 403);
+
+        $request->validate(['name' => ['required', 'string', 'max:100']]);
+
+        $savedSearch->update(['name' => $request->name]);
+
+        return back()->with('message', 'Saved search renamed.');
+    }
+
     public function destroy(SavedSearch $savedSearch)
     {
         abort_if($savedSearch->user_id !== auth()->id(), 403);

@@ -172,6 +172,16 @@
             </div>
         </div>
 
+        {{-- Access log --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-800 mb-3">Access Log</h3>
+            <p class="text-xs text-gray-400 mb-3">Who viewed, previewed, or downloaded this document.</p>
+            <a href="{{ route('admin.documents.access-log', $document) }}"
+               class="block w-full text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg transition">
+                View Access Log
+            </a>
+        </div>
+
         {{-- Danger zone --}}
         <div class="bg-white rounded-xl shadow-sm border border-red-100 p-5">
             <h3 class="font-semibold text-red-700 mb-3">Danger Zone</h3>

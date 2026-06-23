@@ -159,6 +159,9 @@ class ChunkedUploadController extends Controller
 
         ExtractDocumentContent::dispatch($resource);
         Cache::forget('dashboard.stats');
+        Cache::forget('dashboard.upload_trend');
+        Cache::forget('dashboard.download_trend');
+        Cache::forget('home.categories');
         Cache::forget('home.featured');
 
         return response()->json([
