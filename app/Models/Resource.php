@@ -64,7 +64,7 @@ class Resource extends Model
 
     public function averageRating(): ?float
     {
-        $avg = $this->ratings()->avg('score');
+        $avg = $this->ratings()->avg('rating');
         return $avg !== null ? (float) $avg : null;
     }
 }

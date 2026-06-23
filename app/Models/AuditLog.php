@@ -25,6 +25,7 @@ class AuditLog extends Model
             'resource_id' => $resourceId,
             'details'     => $details,
             'ip_address'  => request()->ip(),
+            'created_at'  => now(),
         ]);
     }
 }

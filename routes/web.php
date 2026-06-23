@@ -60,9 +60,9 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
-    // Documents
-    Route::resource('documents', Admin\DocumentController::class);
+    // Documents — custom routes before resource() to avoid wildcard conflict
     Route::get('documents/trash',              [Admin\DocumentController::class, 'trash'])->name('documents.trash');
+    Route::resource('documents', Admin\DocumentController::class);
     Route::patch('documents/{resource}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore');
     Route::delete('documents/{resource}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete');
     Route::patch('documents/{resource}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
@@ -78,15 +78,15 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::resource('categories', Admin\CategoryController::class);
     Route::resource('tags', Admin\TagController::class);
 
-    // Users (admin only)
+    // Users (admin only) — static routes before resource() to avoid wildcard conflict
     Route::middleware('role:admin')->group(function () {
+        Route::get('users/pending',          [Admin\UserController::class, 'pending'])->name('users.pending');
+        Route::post('users/bulk-activate',   [Admin\UserController::class, 'bulkActivate'])->name('users.bulk-activate');
+        Route::post('users/bulk-reject',     [Admin\UserController::class, 'bulkReject'])->name('users.bulk-reject');
         Route::resource('users', Admin\UserController::class);
-        Route::get('users/pending',                    [Admin\UserController::class, 'pending'])->name('users.pending');
-        Route::patch('users/{user}/activate',          [Admin\UserController::class, 'activate'])->name('users.activate');
-        Route::patch('users/{user}/deactivate',        [Admin\UserController::class, 'deactivate'])->name('users.deactivate');
-        Route::patch('users/{user}/reset-password',    [Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
-        Route::post('users/bulk-activate',             [Admin\UserController::class, 'bulkActivate'])->name('users.bulk-activate');
-        Route::post('users/bulk-reject',               [Admin\UserController::class, 'bulkReject'])->name('users.bulk-reject');
+        Route::patch('users/{user}/activate',       [Admin\UserController::class, 'activate'])->name('users.activate');
+        Route::patch('users/{user}/deactivate',     [Admin\UserController::class, 'deactivate'])->name('users.deactivate');
+        Route::patch('users/{user}/reset-password', [Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
     });
 
     // Logs & Analytics

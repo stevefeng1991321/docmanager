@@ -18,10 +18,12 @@ class SavedSearchController extends Controller
     {
         $request->validate(['query' => ['required', 'string', 'max:255']]);
 
-        SavedSearch::firstOrCreate([
-            'user_id' => auth()->id(),
-            'query'   => $request->query,
-        ]);
+        $q = $request->input('query');
+
+        SavedSearch::firstOrCreate(
+            ['user_id' => auth()->id(), 'query' => $q],
+            ['name' => $q]
+        );
 
         return back()->with('message', 'Search saved.');
     }
