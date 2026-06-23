@@ -35,6 +35,16 @@ class Resource extends Model
         return $this->status === 'published';
     }
 
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
+    }
+
+    public function getCurrentVersionAttribute(): int
+    {
+        return $this->versions()->max('version_number') ?? 1;
+    }
+
     // ---------- relationships ----------
 
     public function uploader()       { return $this->belongsTo(User::class, 'uploaded_by'); }
@@ -52,8 +62,9 @@ class Resource extends Model
     public function embeddings()     { return $this->hasMany(ResourceEmbedding::class); }
     public function downloadLogs()   { return $this->hasMany(DownloadLog::class); }
 
-    public function averageRating(): float
+    public function averageRating(): ?float
     {
-        return (float) $this->ratings()->avg('rating');
+        $avg = $this->ratings()->avg('score');
+        return $avg !== null ? (float) $avg : null;
     }
 }

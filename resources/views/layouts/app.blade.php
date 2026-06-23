@@ -104,5 +104,6 @@
         &copy; {{ date('Y') }} {{ config('app.name') }}
     </footer>
 
+    @stack('scripts')
 </body>
 </html>

@@ -97,10 +97,17 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::get('search',        [Admin\SearchIndexController::class, 'index'])->name('search.index');
     Route::post('search/reindex',[Admin\SearchIndexController::class, 'reindex'])->name('search.reindex');
 
+    // Job retry
+    Route::post('jobs/{id}/retry',  [Admin\JobMonitorController::class, 'retry'])->name('jobs.retry');
+    Route::post('jobs/retry-all',   [Admin\JobMonitorController::class, 'retryAll'])->name('jobs.retry-all');
+
+    // Notifications broadcast
+    Route::post('notifications/broadcast', [Admin\NotificationController::class, 'broadcast'])->name('notifications.broadcast');
+
     // Settings (admin only)
     Route::middleware('role:admin')->group(function () {
-        Route::get('settings',   [Admin\SettingController::class, 'index'])->name('settings.index');
-        Route::patch('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::get('settings',  [Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings',  [Admin\SettingController::class, 'update'])->name('settings.update');
         Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
     });
 });

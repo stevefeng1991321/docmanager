@@ -14,5 +14,6 @@ class ReadingList extends Model
     }
 
     public function user()      { return $this->belongsTo(User::class); }
+    public function items()     { return $this->hasMany(ReadingListItem::class); }
     public function resources() { return $this->belongsToMany(Resource::class, 'reading_list_items')->withPivot('sort_order', 'added_at')->orderByPivot('sort_order'); }
 }

@@ -2,24 +2,46 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // First admin account
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'name'     => 'Administrator',
+                'email'    => null,
+                'password' => Hash::make('Admin@1234'),
+                'role'     => 'admin',
+                'status'   => 'active',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Starter categories
+        $categories = [
+            ['name' => 'Engineering',       'slug' => 'engineering'],
+            ['name' => 'Science',           'slug' => 'science'],
+            ['name' => 'Mathematics',       'slug' => 'mathematics'],
+            ['name' => 'Computer Science',  'slug' => 'computer-science'],
+            ['name' => 'Standards & Codes', 'slug' => 'standards-codes'],
+            ['name' => 'Manuals',           'slug' => 'manuals'],
+            ['name' => 'Reports',           'slug' => 'reports'],
+        ];
+
+        foreach ($categories as $i => $data) {
+            Category::firstOrCreate(
+                ['slug' => $data['slug']],
+                ['name' => $data['name'], 'sort_order' => $i + 1]
+            );
+        }
+
+        $this->command->info('Admin account: username=admin  password=Admin@1234');
+        $this->command->warn('Change the admin password after first login!');
     }
 }

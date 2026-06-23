@@ -1,0 +1,32 @@
+@extends('layouts.admin')
+@section('title', 'Activity Logs')
+
+@section('content')
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-100 text-sm">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Time</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Event</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Details</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">IP</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            @forelse ($logs as $log)
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">{{ $log->event }}</span>
+                </td>
+                <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{{ json_encode($log->details) }}</td>
+                <td class="px-4 py-3 text-gray-400 text-xs">{{ $log->ip_address ?? '—' }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No activity logs yet.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+<div class="mt-4">{{ $logs->links() }}</div>
+@endsection
