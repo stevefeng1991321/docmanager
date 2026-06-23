@@ -1,40 +1,50 @@
 # 📚 Document Management System (PHP + Laravel + XAMPP + MySQL)
 
-A secure, scalable document management system built with **Laravel** running on **XAMPP (Apache + MySQL)**. It supports role-based access, advanced search, AI semantic search, file preview, version control, and extensible enterprise-grade features — all using local storage (no cloud dependency).
+A **secure, scalable, enterprise-ready document management system** built with **Laravel** running on **XAMPP (Apache + MySQL)**. It supports advanced search (keyword + AI semantic search), version control, secure file handling, preview system, analytics, and extensible AI-powered document intelligence.
+
+All files are stored locally on the server machine (no cloud dependency).
 
 ---
 
 # 🚀 Core Features
 
-## 👤 Authentication
+## 👤 Authentication & Authorization
 
 * User login & registration
-* Role-based access control:
+* Session-based authentication (Laravel Breeze)
+* Role-based + Permission-based access control (RBAC)
 
   * Admin
-  * User
-* Session-based authentication (Laravel Breeze)
-* Secure password hashing (bcrypt / argon2)
+  * Editor (optional)
+  * Viewer (optional)
+
+### Permissions include:
+
+* Upload / edit / delete resources
+* View / download resources
+* Manage users
+* View analytics
 
 ---
 
-## 🛠️ Admin Features
+# 🛠️ Admin Features
 
 * Upload documents (PDF, DOCX, images, etc.)
-* Update and delete resources
-* Manage users
-* View audit logs
-* Document version control
-* Re-index files for search engine
+* Update / delete resources
+* Manage users and roles
+* View audit logs & activity tracking
+* Re-index search engine
+* Manage document versions
 
 ---
 
-## 👁️ User Features
+# 👁️ User Features
 
-* View available resources
-* Download files securely
-* Search documents (basic + semantic + filters)
+* View resources
+* Download securely
+* Search documents (keyword + semantic + filters)
 * Preview files (PDF viewer)
+* Highlight search results
 * Read-only access
 
 ---
@@ -47,57 +57,239 @@ All files are stored locally:
 storage/app/resources/
 ```
 
-* No cloud storage required
-* Apache serves Laravel application
-* Files accessed via secure controller (not direct URL)
+* No cloud dependency
+* Secure controller-based access
+* No direct public file exposure
+
+---
+
+# 🔐 Security Architecture
+
+## File Access Protection
+
+* No direct `/storage` access
+* Download via controller with permission check
+* Signed / validated download requests
+
+## Password Security
+
+* bcrypt / argon2 hashing
+
+## System Security
+
+* CSRF protection (Laravel default)
+* Input validation
+* SQL injection protection (Eloquent ORM)
+* File type + size validation
+
+---
+
+## File Integrity
+
+* SHA256 file hashing
+* Duplicate detection
+* Optional virus scan hook
+
+---
+
+# 🗄️ Database Schema (Core)
+
+## users
+
+```sql
+id, name, email, password, role, is_active, remember_token, timestamps
+```
+
+---
+
+## resources
+
+```sql
+id,
+title,
+description,
+original_filename,
+stored_filename,
+file_path,
+file_type,
+file_size,
+file_hash VARCHAR(64),   -- SHA256
+content LONGTEXT,
+uploaded_by,
+created_at,
+updated_at
+FULLTEXT KEY (title, description, content)
+```
+
+---
+
+## document_versions
+
+```sql
+id,
+resource_id,
+version_number,
+file_path,
+stored_filename,
+file_size,
+file_hash,
+uploaded_by,
+created_at
+```
+
+---
+
+## tags
+
+```sql
+id, name, slug, timestamps
+```
+
+---
+
+## resource_tags
+
+Junction table linking resources to tags (many-to-many).
+
+```sql
+resource_id,
+tag_id,
+PRIMARY KEY (resource_id, tag_id)
+```
+
+---
+
+## audit_logs
+
+Records admin/system-level actions (upload, delete, permission changes).
+
+```sql
+id,
+user_id,
+action,
+resource_id,
+details JSON,
+ip_address,
+created_at
+```
+
+---
+
+## activity_logs
+
+Tracks user session events (login, logout, failed access).
+
+```sql
+id,
+user_id,
+event,
+ip_address,
+user_agent,
+details JSON,
+created_at
+```
+
+---
+
+## search_logs
+
+Dedicated log of every search query executed.
+
+```sql
+id,
+user_id,
+query,
+search_type ENUM('keyword','fulltext','semantic','hybrid'),
+results_count,
+created_at
+```
+
+---
+
+## download_logs
+
+Dedicated log of every file download.
+
+```sql
+id,
+user_id,
+resource_id,
+ip_address,
+created_at
+```
+
+---
+
+## resource_embeddings
+
+Stores AI-generated vector embeddings per document chunk.
+
+```sql
+id,
+resource_id,
+chunk_index,
+chunk_text TEXT,
+embedding JSON,
+model VARCHAR(100),
+timestamps
+UNIQUE KEY (resource_id, chunk_index)
+```
+
+---
+
+## notifications
+
+Per-user notification records.
+
+```sql
+id,
+user_id,
+type,           -- file_uploaded, version_updated, access_denied
+title,
+message,
+resource_id,
+is_read BOOLEAN,
+created_at
+```
 
 ---
 
 # 🔎 Advanced Search System
 
-The system includes a **multi-layer search engine**:
+The system uses a **multi-layer hybrid search engine**.
 
 ---
 
 ## 1. Metadata Search (Fast)
 
-Searches:
+Search:
 
-* File name
-* Title
-* Description
-
-```php
-Resource::where('title','LIKE',"%$q%")
-```
+* file name
+* title
+* description
 
 ---
 
-## 2. Full-Text Search (MySQL Optimized)
+## 2. Full-Text Search (MySQL)
 
 ```sql
 ALTER TABLE resources ADD FULLTEXT(title, description, content);
-```
-
-```php
-MATCH(title, description, content)
-AGAINST(? IN NATURAL LANGUAGE MODE)
 ```
 
 ---
 
 ## 3. File Content Search
 
-Extracts and indexes:
+Extracted from:
 
-* PDF text
-* DOCX content
-* TXT files
+* PDF
+* DOCX
+* TXT
 
 Stored in:
 
-```sql
-content LONGTEXT
+```
+content (LONGTEXT)
 ```
 
 ---
@@ -106,51 +298,58 @@ content LONGTEXT
 
 ### Architecture:
 
-```text id="semantic1"
+```
 User Query
-   │
-   ▼
-Embedding Model (OpenAI / Local Model)
-   │
-   ▼
-Vector Database (Qdrant / Weaviate / Chroma)
-   │
-   ▼
-Similarity Search (Cosine Distance)
-   │
-   ▼
+   ↓
+Embedding Model (OpenAI / Local LLM)
+   ↓
+Vector Database (Qdrant / Chroma / Weaviate)
+   ↓
+Similarity Matching
+   ↓
 Ranked Results
 ```
 
 ### Features:
 
-* Understands meaning, not keywords
-* Finds similar documents even if words differ
-* Supports natural language queries
+* Meaning-based search (not keyword-based)
+* Finds similar documents
+* Natural language queries
 
 ---
 
-## 5. Hybrid Search Engine (Final System)
+## 5. Hybrid Search Engine
 
-Search combines:
-
-* Keyword search (MySQL)
-* Full-text search
-* Vector similarity search (AI)
-* File content extraction
-
-```text id="hybrid1"
-User Query
-   │
-   ├── Keyword Search (MySQL)
-   ├── Full Text Search
-   ├── Vector Search (AI)
-   └── Content Search
-            ↓
-      Result Ranking Engine
-            ↓
-        Final Results
 ```
+Keyword Search (MySQL)
++ Full-text Search
++ Vector Search (AI)
++ Content Search
+→ Ranking Engine
+→ Final Results
+```
+
+---
+
+## 🔍 Search Ranking System
+
+Scoring model:
+
+* Title match → +5
+* Filename match → +4
+* Content match → +2
+* Vector similarity → 0–1 score
+* Recent files boost → +1
+
+---
+
+## 🔎 Search Highlighting
+
+* Highlights matched keywords in:
+
+  * title
+  * description
+  * preview text
 
 ---
 
@@ -175,169 +374,150 @@ composer require phpoffice/phpword
 
 ## PDF Viewer
 
-* Embedded browser-based PDF viewer
-* No download required for preview
+* PDF.js integration (recommended)
+* Browser-based preview
 
-Example:
-
-```html
-<iframe src="/storage/app/resources/file.pdf" width="100%" height="600px"></iframe>
+```
+<iframe src="/file-preview/{id}"></iframe>
 ```
 
----
-
-## Supported Preview Types:
+### Supported:
 
 * PDF (full preview)
-* Images (JPG/PNG)
-* DOCX (converted to text preview)
+* Images
+* DOCX (converted text preview)
 
 ---
 
-# 📂 Document Version Control
+# 🔄 Document Version Control
 
-Each document supports multiple versions:
+## Features:
 
-## Schema:
-
-```sql
-document_versions (
-    id,
-    resource_id,
-    version_number,
-    file_path,
-    created_at
-)
-```
-
----
+* Maintain multiple file versions
+* Restore previous versions
+* Track history
 
 ## Flow:
 
-```text id="version1"
-Upload New Version
-      │
-      ▼
-Store file as new version
-      │
-      ▼
-Keep history intact
 ```
-
-### Features:
-
-* Restore previous versions
-* Compare versions (future feature)
-* Track changes over time
-
----
-
-# 🔎 Search Highlighting
-
-Search results highlight matched keywords:
-
-```text id="highlight1"
-Invoice 2024 Report
-        ↑
-     matched keyword
-```
-
-### Implementation:
-
-* Wrap keywords in `<mark>` tags
-* Highlight in title, description, and content preview
-
----
-
-# 📊 Advanced Filters
-
-Users can filter results by:
-
-* File type (PDF, DOCX, Image)
-* Upload date range
-* Uploader (Admin/User)
-* Version number
-* Tags (future feature)
-
----
-
-## Example Query:
-
-```sql
-SELECT * FROM resources
-WHERE file_type = 'pdf'
-AND uploaded_by = 1
-AND created_at BETWEEN ? AND ?;
+Upload new version
+   ↓
+Store file
+   ↓
+Create version entry
+   ↓
+Keep previous versions
 ```
 
 ---
 
-# ⚡ Elasticsearch Integration (Optional Upgrade)
+# ⚙️ Background Processing (Queues)
 
-For large-scale systems:
+Used for:
 
-### Features:
+* File content extraction
+* Embedding generation
+* Search indexing
 
-* Fast full-text search
-* Ranking optimization
+```
+Upload → Queue Job → Process → Store index
+```
+
+Laravel Queues:
+
+* database / Redis
+
+---
+
+# 🧠 AI Semantic Search (RAG-Ready)
+
+### Pipeline:
+
+* Extract text
+* Chunk documents
+* Generate embeddings
+* Store in vector DB
+* Query using similarity search
+
+### Enables:
+
+* Chat with documents
+* Semantic retrieval
+* Smart search results
+
+---
+
+# 📊 Admin Analytics Dashboard
+
+Tracks:
+
+* Most downloaded files
+* Popular search terms
+* Active users
+* Storage usage
+* Upload trends
+
+---
+
+# 🏷️ Tags System
+
+Improves search accuracy:
+
+* finance
+* legal
+* invoice
+* report
+
+---
+
+# 🔔 Notification System
+
+* File uploaded
+* Version updated
+* Access denied alerts
+
+---
+
+# 📱 API Layer (Future-ready)
+
+```
+/api/resources
+/api/search
+/api/auth
+```
+
+Enables mobile apps and integrations.
+
+---
+
+# 🧊 Caching Layer
+
+* Cache search results
+* Cache embeddings
+* Reduce DB load
+
+---
+
+# 🧬 OCR (Optional Upgrade)
+
+For scanned PDFs:
+
+* Extract text from images inside PDFs
+* Enables full search support
+
+---
+
+# ⚡ Elasticsearch Integration (Optional)
+
+For large-scale deployments:
+
+* Fast indexing
+* Advanced ranking
 * Auto-suggestions
 
-```text id="elastic1"
-Laravel → Elasticsearch → Indexed Documents → Search API
-```
-
 ---
 
-# 🧠 AI Semantic Search (Upgrade Layer)
-
-### How it works:
-
-* Convert documents into embeddings
-* Store in vector DB
-* Compare query vector with document vectors
-
-### Tools:
-
-* OpenAI Embeddings
-* Ollama (local AI)
-* Qdrant / Weaviate
-
----
-
-# 🗄️ Database Schema (Extended)
-
-## resources
-
-```sql
-content LONGTEXT,
-embedding VECTOR (optional external DB)
-```
-
----
-
-## document_versions
-
-```sql
-id
-resource_id
-version_number
-file_path
-created_at
-```
-
----
-
-# 🔐 Security Features
-
-* Role-based access control
-* Secure file download (no direct access)
-* CSRF protection
-* File validation (mimes + size)
-* SQL injection protection (Eloquent ORM)
-
----
-
-# ⚙️ Tech Stack
+# 🧱 Tech Stack
 
 * Backend: Laravel (PHP 10+ / 11+)
 * Server: Apache (XAMPP)
@@ -347,8 +527,26 @@ created_at
 
   * MySQL FULLTEXT
   * AI Vector Search
-  * File content indexing
+  * Hybrid Ranking Engine
 * Storage: Local Disk
+
+---
+
+# ⚙️ System Architecture
+
+```
+Frontend (Blade)
+      ↓
+Laravel Backend
+      ↓
+-------------------------
+| Auth | RBAC | API     |
+| Files | Search Engine |
+| AI Module | Queue     |
+-------------------------
+      ↓
+MySQL + Local Storage + Vector DB
+```
 
 ---
 
@@ -356,11 +554,11 @@ created_at
 
 * AI document summarization
 * Chat with documents (RAG system)
-* Multi-user collaboration
-* Real-time notifications
-* OCR for scanned PDFs
-* Advanced analytics dashboard
+* OCR scanning for all PDFs
+* Real-time collaboration
 * Elasticsearch production scaling
+* Multi-tenant SaaS version
+* Advanced analytics dashboard
 
 ---
 
@@ -369,15 +567,15 @@ created_at
 This system is a **complete enterprise-grade document management platform** featuring:
 
 ✔ Local file storage (XAMPP)
-✔ Role-based authentication
-✔ Admin resource management
-✔ Hybrid search engine
-✔ AI semantic search (vector-based)
-✔ File preview system
-✔ Version control
-✔ Advanced filtering & highlighting
-✔ Elasticsearch-ready architecture
+✔ Secure role-based authentication (RBAC)
+✔ Hybrid search engine (keyword + full-text + AI vector search)
+✔ File preview system (PDF.js)
+✔ Document version control
+✔ Background job processing (queues)
+✔ Advanced analytics & tagging
+✔ AI-ready architecture (RAG + embeddings)
+✔ Extensible API layer
 
 ---
 
-🚀 This design is ready to scale from a local XAMPP project to a full enterprise SaaS system.
+🚀 This project is now architected as a **full SaaS-level document intelligence platform**, not just a file manager.
