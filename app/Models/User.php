@@ -2,48 +2,58 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'username', 'name', 'email', 'password',
+        'role', 'status',
+        'failed_login_attempts', 'locked_until',
+        'two_factor_secret', 'two_factor_recovery_codes',
+        'last_login_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
+        'two_factor_secret', 'two_factor_recovery_codes',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'                  => 'hashed',
+            'locked_until'              => 'datetime',
+            'last_login_at'             => 'datetime',
+            'two_factor_recovery_codes' => 'array',
         ];
     }
+
+    // ---------- helpers ----------
+
+    public function isAdmin(): bool    { return $this->role === 'admin'; }
+    public function isEditor(): bool   { return $this->role === 'editor'; }
+    public function isViewer(): bool   { return $this->role === 'viewer'; }
+    public function isActive(): bool   { return $this->status === 'active'; }
+    public function isPending(): bool  { return $this->status === 'pending'; }
+    public function isLocked(): bool   { return $this->locked_until && $this->locked_until->isFuture(); }
+
+    // ---------- relationships ----------
+
+    public function resources()        { return $this->hasMany(Resource::class, 'uploaded_by'); }
+    public function favorites()        { return $this->hasMany(Favorite::class); }
+    public function recentlyViewed()   { return $this->hasMany(RecentlyViewed::class); }
+    public function savedSearches()    { return $this->hasMany(SavedSearch::class); }
+    public function readingLists()     { return $this->hasMany(ReadingList::class); }
+    public function bookmarks()        { return $this->hasMany(Bookmark::class); }
+    public function ratings()          { return $this->hasMany(DocumentRating::class); }
+    public function notifications()    { return $this->hasMany(Notification::class); }
+    public function preferences()      { return $this->hasOne(UserPreference::class); }
+    public function auditLogs()        { return $this->hasMany(AuditLog::class); }
+    public function activityLogs()     { return $this->hasMany(ActivityLog::class); }
 }

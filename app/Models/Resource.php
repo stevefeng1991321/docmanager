@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Resource extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'title', 'description', 'original_filename', 'stored_filename',
+        'file_path', 'file_type', 'file_size', 'file_hash', 'content',
+        'category_id', 'uploaded_by', 'status',
+        'locked_by', 'locked_at', 'download_count', 'expires_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'locked_at'  => 'datetime',
+            'expires_at' => 'datetime',
+        ];
+    }
+
+    public function isLocked(): bool
+    {
+        return $this->locked_by !== null;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === 'published';
+    }
+
+    // ---------- relationships ----------
+
+    public function uploader()       { return $this->belongsTo(User::class, 'uploaded_by'); }
+    public function locker()         { return $this->belongsTo(User::class, 'locked_by'); }
+    public function category()       { return $this->belongsTo(Category::class); }
+    public function versions()       { return $this->hasMany(DocumentVersion::class)->orderByDesc('version_number'); }
+    public function tags()           { return $this->belongsToMany(Tag::class, 'resource_tags'); }
+    public function accessLogs()     { return $this->hasMany(DocumentAccessLog::class); }
+    public function favorites()      { return $this->hasMany(Favorite::class); }
+    public function recentlyViewed() { return $this->hasMany(RecentlyViewed::class); }
+    public function readingLists()   { return $this->belongsToMany(ReadingList::class, 'reading_list_items')->withPivot('sort_order', 'added_at'); }
+    public function bookmarks()      { return $this->hasMany(Bookmark::class); }
+    public function ratings()        { return $this->hasMany(DocumentRating::class); }
+    public function shares()         { return $this->hasMany(Share::class); }
+    public function embeddings()     { return $this->hasMany(ResourceEmbedding::class); }
+    public function downloadLogs()   { return $this->hasMany(DownloadLog::class); }
+
+    public function averageRating(): float
+    {
+        return (float) $this->ratings()->avg('rating');
+    }
+}
