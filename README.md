@@ -92,165 +92,27 @@ storage/app/resources/
 
 ---
 
-# 🗄️ Database Schema (Core)
+# 🗄️ Database Schema
 
-## users
+The full MySQL schema (all `CREATE TABLE` statements with indexes, foreign keys, and constraints) is in:
 
-```sql
-id, name, email, password, role, is_active, remember_token, timestamps
-```
+📄 **[document_management_schema.sql](document_management_schema.sql)**
 
----
+### Tables
 
-## resources
-
-```sql
-id,
-title,
-description,
-original_filename,
-stored_filename,
-file_path,
-file_type,
-file_size,
-file_hash VARCHAR(64),   -- SHA256
-content LONGTEXT,
-uploaded_by,
-created_at,
-updated_at
-FULLTEXT KEY (title, description, content)
-```
-
----
-
-## document_versions
-
-```sql
-id,
-resource_id,
-version_number,
-file_path,
-stored_filename,
-file_size,
-file_hash,
-uploaded_by,
-created_at
-```
-
----
-
-## tags
-
-```sql
-id, name, slug, timestamps
-```
-
----
-
-## resource_tags
-
-Junction table linking resources to tags (many-to-many).
-
-```sql
-resource_id,
-tag_id,
-PRIMARY KEY (resource_id, tag_id)
-```
-
----
-
-## audit_logs
-
-Records admin/system-level actions (upload, delete, permission changes).
-
-```sql
-id,
-user_id,
-action,
-resource_id,
-details JSON,
-ip_address,
-created_at
-```
-
----
-
-## activity_logs
-
-Tracks user session events (login, logout, failed access).
-
-```sql
-id,
-user_id,
-event,
-ip_address,
-user_agent,
-details JSON,
-created_at
-```
-
----
-
-## search_logs
-
-Dedicated log of every search query executed.
-
-```sql
-id,
-user_id,
-query,
-search_type ENUM('keyword','fulltext','semantic','hybrid'),
-results_count,
-created_at
-```
-
----
-
-## download_logs
-
-Dedicated log of every file download.
-
-```sql
-id,
-user_id,
-resource_id,
-ip_address,
-created_at
-```
-
----
-
-## resource_embeddings
-
-Stores AI-generated vector embeddings per document chunk.
-
-```sql
-id,
-resource_id,
-chunk_index,
-chunk_text TEXT,
-embedding JSON,
-model VARCHAR(100),
-timestamps
-UNIQUE KEY (resource_id, chunk_index)
-```
-
----
-
-## notifications
-
-Per-user notification records.
-
-```sql
-id,
-user_id,
-type,           -- file_uploaded, version_updated, access_denied
-title,
-message,
-resource_id,
-is_read BOOLEAN,
-created_at
-```
+| Table | Purpose |
+|---|---|
+| `users` | Accounts, roles, and session tokens |
+| `resources` | Document metadata, file paths, extracted content |
+| `document_versions` | Version history per document |
+| `tags` | Tag definitions |
+| `resource_tags` | Many-to-many pivot: resources ↔ tags |
+| `audit_logs` | Admin/system-level actions (upload, delete, permission changes) |
+| `activity_logs` | User session events (login, logout, failed access) |
+| `search_logs` | Every search query with type and result count |
+| `download_logs` | Per-file download records |
+| `resource_embeddings` | AI vector chunks per document for semantic search |
+| `notifications` | Per-user notifications (upload, version update, access denied) |
 
 ---
 
