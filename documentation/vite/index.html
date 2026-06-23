@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vite v7 — Offline Docs</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #cbd5e1; line-height: 1.6; }
+  a { color: #818cf8; text-decoration: none; } a:hover { text-decoration: underline; }
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: #0d1525; border-right: 1px solid #1e293b; padding: 1.5rem 1rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav .logo span { font-size: 1.1rem; font-weight: 700; color: #f1f5f9; }
+  nav .back { font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem; display: block; margin-top: 0.5rem; }
+  nav h2 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin: 1.25rem 0 0.5rem; }
+  nav ul { list-style: none; }
+  nav ul li a { display: block; padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.875rem; color: #94a3b8; }
+  nav ul li a:hover { background: #1e293b; color: #f1f5f9; text-decoration: none; }
+  main { flex: 1; padding: 2.5rem 3rem; max-width: 860px; }
+  .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #1e293b; }
+  .page-header .badge { display: inline-block; background: #a855f7; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; margin-bottom: 0.75rem; }
+  .page-header h1 { font-size: 2rem; font-weight: 800; color: #f8fafc; }
+  .page-header p { margin-top: 0.5rem; color: #94a3b8; font-size: 1rem; }
+  h2 { font-size: 1.35rem; font-weight: 700; color: #f1f5f9; margin: 2.5rem 0 0.75rem; padding-top: 1rem; border-top: 1px solid #1e293b; }
+  h2:first-of-type { border-top: none; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: #e2e8f0; margin: 1.5rem 0 0.5rem; }
+  p { margin-bottom: 1rem; font-size: 0.95rem; }
+  ul, ol { margin: 0.75rem 0 1rem 1.5rem; }
+  li { margin-bottom: 0.35rem; font-size: 0.95rem; }
+  code { background: #1e293b; color: #7dd3fc; padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.85em; }
+  pre { background: #0d1525; border: 1px solid #1e293b; border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0 1.5rem; }
+  pre code { background: none; color: #e2e8f0; padding: 0; font-size: 0.875rem; line-height: 1.7; }
+  .tip { background: #0c1a2e; border-left: 3px solid #a855f7; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.875rem; }
+  th { background: #0d1525; color: #94a3b8; font-weight: 600; text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; }
+  td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+  tr:hover td { background: #0d1525; }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="logo"><span>⚡ Vite</span></div>
+  <a class="back" href="../index.html">← Back to index</a>
+  <h2>Getting Started</h2>
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#install">Installation</a></li>
+    <li><a href="#commands">CLI Commands</a></li>
+  </ul>
+  <h2>Configuration</h2>
+  <ul>
+    <li><a href="#config-file">Config File</a></li>
+    <li><a href="#config-env">Environment Modes</a></li>
+    <li><a href="#config-server">Server Options</a></li>
+    <li><a href="#config-build">Build Options</a></li>
+    <li><a href="#config-resolve">Resolve Options</a></li>
+    <li><a href="#config-css">CSS Options</a></li>
+    <li><a href="#config-plugins">Plugins</a></li>
+  </ul>
+  <h2>Features</h2>
+  <ul>
+    <li><a href="#env-vars">Env Variables</a></li>
+    <li><a href="#static-assets">Static Assets</a></li>
+    <li><a href="#hmr">HMR</a></li>
+    <li><a href="#glob-import">Glob Import</a></li>
+    <li><a href="#ssr">SSR</a></li>
+  </ul>
+  <h2>Laravel (Inertia)</h2>
+  <ul>
+    <li><a href="#laravel">Laravel Vite Plugin</a></li>
+  </ul>
+</nav>
+<main>
+  <div class="page-header">
+    <span class="badge">v7.x</span>
+    <h1>Vite</h1>
+    <p>Next-generation frontend tooling. It's fast.</p>
+  </div>
+
+  <h2 id="overview">Overview</h2>
+  <p>Vite consists of two main components:</p>
+  <ul>
+    <li><strong>Dev server</strong> — serves files over native ES modules with instant HMR (Hot Module Replacement)</li>
+    <li><strong>Build command</strong> — bundles code via Rolldown for optimized production assets</li>
+  </ul>
+  <p>Browser requirements: Node.js 20.19+ or 22.12+. Modern browsers supporting ES modules for dev; Baseline Widely Available for production.</p>
+
+  <h2 id="install">Installation</h2>
+  <pre><code># Create a new project (interactive)
+npm create vite@latest
+
+# With template flags
+npm create vite@latest my-app -- --template vanilla
+npm create vite@latest my-app -- --template react
+npm create vite@latest my-app -- --template vue
+
+# Add to existing project
+npm install -D vite</code></pre>
+
+  <p>Available templates: <code>vanilla</code>, <code>vanilla-ts</code>, <code>vue</code>, <code>vue-ts</code>, <code>react</code>, <code>react-ts</code>, <code>react-swc</code>, <code>react-swc-ts</code>, <code>preact</code>, <code>preact-ts</code>, <code>lit</code>, <code>lit-ts</code>, <code>svelte</code>, <code>svelte-ts</code>, <code>solid</code>, <code>solid-ts</code>, <code>qwik</code>, <code>qwik-ts</code></p>
+
+  <h2 id="commands">CLI Commands</h2>
+  <table>
+    <tr><th>Command</th><th>Description</th></tr>
+    <tr><td><code>vite</code> / <code>vite dev</code></td><td>Start dev server (default port 5173)</td></tr>
+    <tr><td><code>vite build</code></td><td>Build for production (outputs to <code>dist/</code>)</td></tr>
+    <tr><td><code>vite preview</code></td><td>Preview production build locally</td></tr>
+    <tr><td><code>vite --port 3000</code></td><td>Start dev on port 3000</td></tr>
+    <tr><td><code>vite --host</code></td><td>Expose to network (LAN access)</td></tr>
+    <tr><td><code>vite --mode staging</code></td><td>Override env mode</td></tr>
+    <tr><td><code>vite build --watch</code></td><td>Watch mode for build</td></tr>
+  </table>
+
+  <h2 id="config-file">Config File</h2>
+  <p>Vite looks for <code>vite.config.js</code> / <code>vite.config.ts</code> in the project root.</p>
+  <pre><code>// vite.config.js
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  // options here
+})</code></pre>
+
+  <pre><code>// TypeScript
+import { defineConfig } from 'vite'
+import type { UserConfig } from 'vite'
+
+export default defineConfig({} satisfies UserConfig)</code></pre>
+
+  <pre><code>// With intellisense via JSDoc (JS projects)
+/** @type {import('vite').UserConfig} */
+export default {
+  // ...
+}</code></pre>
+
+  <h2 id="config-env">Environment Modes</h2>
+  <pre><code>// Conditional config based on command/mode
+export default defineConfig(({ command, mode }) => {
+  if (command === 'serve') {
+    return {
+      // dev-specific config
+    }
+  } else {
+    // command === 'build'
+    return {
+      // build-specific config
+    }
+  }
+})
+
+// Async config
+export default defineConfig(async ({ command, mode }) => {
+  const data = await asyncFunction()
+  return {
+    // ...
+  }
+})</code></pre>
+
+  <h2 id="config-server">Server Options</h2>
+  <pre><code>export default defineConfig({
+  server: {
+    host: true,          // expose to network
+    port: 3000,
+    strictPort: true,    // fail if port taken
+    open: true,          // open browser on start
+    https: true,
+    cors: true,
+
+    // Proxy API calls
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      // Regex proxy
+      '^/fallback/.*': {
+        target: 'http://jsonplaceholder.typicode.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/fallback/, ''),
+      },
+    },
+
+    // File watching options
+    watch: {
+      usePolling: true,  // needed in some Docker/WSL envs
+    },
+
+    hmr: {
+      port: 24678,       // custom HMR port
+    },
+  },
+})</code></pre>
+
+  <h2 id="config-build">Build Options</h2>
+  <pre><code>export default defineConfig({
+  build: {
+    outDir: 'dist',         // output directory
+    assetsDir: 'assets',    // nested dir for assets
+    assetsInlineLimit: 4096, // 4kb — smaller files become base64
+    sourcemap: false,        // true | 'inline' | 'hidden'
+    minify: 'esbuild',      // 'terser' | 'esbuild' | false
+    target: 'modules',      // browser target(s)
+    cssMinify: true,
+    emptyOutDir: true,      // clear outDir on build
+    chunkSizeWarningLimit: 500, // kB
+
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        nested: 'nested/index.html',
+      },
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+        },
+      },
+    },
+
+    lib: {                  // library mode
+      entry: 'src/index.ts',
+      name: 'MyLib',
+      formats: ['es', 'cjs', 'umd'],
+    },
+  },
+})</code></pre>
+
+  <h2 id="config-resolve">Resolve Options</h2>
+  <pre><code>export default defineConfig({
+  resolve: {
+    alias: {
+      '@': '/src',
+      '~': '/src',
+      // Using path module (more robust)
+      // '@': path.resolve(__dirname, './src'),
+    },
+
+    // Extension resolution order
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
+  },
+})</code></pre>
+
+  <h2 id="config-css">CSS Options</h2>
+  <pre><code>export default defineConfig({
+  css: {
+    modules: {
+      // CSS Modules naming
+      localsConvention: 'camelCase',
+    },
+
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "@/styles/variables.scss";`,
+      },
+    },
+
+    devSourcemap: true,
+  },
+})</code></pre>
+
+  <h2 id="config-plugins">Plugins</h2>
+  <pre><code>import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import legacy from '@vitejs/plugin-legacy'
+
+export default defineConfig({
+  plugins: [
+    vue(),          // Vue 3 SFCs
+    // react(),     // React JSX
+    tailwindcss(),  // Tailwind CSS v4+
+    legacy({        // Legacy browser support
+      targets: ['defaults', 'not IE 11'],
+    }),
+  ],
+})</code></pre>
+
+  <h2 id="env-vars">Environment Variables</h2>
+  <p>Create <code>.env</code> files in the project root:</p>
+  <pre><code># .env             — loaded always
+# .env.local        — loaded always, gitignored
+# .env.[mode]       — loaded for specific mode
+# .env.[mode].local — loaded for specific mode, gitignored
+
+# Variables must be prefixed with VITE_ to be exposed to client code
+VITE_API_URL=http://localhost:8000
+VITE_APP_TITLE=My App
+
+# Non-prefixed variables are server-only (not exposed)
+DATABASE_URL=postgres://...</code></pre>
+  <p>Access in client code:</p>
+  <pre><code>console.log(import.meta.env.VITE_API_URL)
+console.log(import.meta.env.MODE)      // 'development' | 'production'
+console.log(import.meta.env.DEV)       // boolean
+console.log(import.meta.env.PROD)      // boolean
+console.log(import.meta.env.SSR)       // boolean</code></pre>
+  <p>TypeScript IntelliSense — create <code>src/vite-env.d.ts</code>:</p>
+  <pre><code>/// &lt;reference types="vite/client" /&gt;
+
+interface ImportMetaEnv {
+  readonly VITE_API_URL: string
+  readonly VITE_APP_TITLE: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}</code></pre>
+  <p>Load env in config file:</p>
+  <pre><code>import { defineConfig, loadEnv } from 'vite'
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  return {
+    server: {
+      port: Number(env.PORT) || 5173,
+    },
+    define: {
+      __APP_VERSION__: JSON.stringify(env.npm_package_version),
+    },
+  }
+})</code></pre>
+
+  <h2 id="static-assets">Static Assets</h2>
+  <pre><code>// Import asset in JS/TS — returns resolved URL string
+import logoUrl from './assets/logo.png'
+// logoUrl = '/assets/logo.2d8efhg.png' in production
+
+// Import as string (raw text)
+import shaderSource from './shader.glsl?raw'
+
+// Import as URL
+import workerUrl from './worker.js?url'
+
+// Import as Worker
+import MyWorker from './worker.js?worker'
+const worker = new MyWorker()</code></pre>
+  <p>Files in the <code>public/</code> folder are served at root without hashing — reference as <code>/logo.png</code>, not as imports.</p>
+
+  <h2 id="hmr">Hot Module Replacement (HMR)</h2>
+  <pre><code>// Accept updates for this module
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    // react to the updated module
+  })
+
+  // Accept updates from a dependency
+  import.meta.hot.accept('./dep.js', (newDep) => {
+    // ...
+  })
+
+  // Dispose side effects before module is replaced
+  import.meta.hot.dispose((data) => {
+    // cleanup (e.g. clear intervals)
+  })
+
+  // Mark as not HMR-able; full reload instead
+  import.meta.hot.decline()
+}
+
+// Invalidate this module and trigger full reload
+import.meta.hot.invalidate()</code></pre>
+
+  <h2 id="glob-import">Glob Import</h2>
+  <pre><code>// Import all matching files as a map
+const modules = import.meta.glob('./dir/*.js')
+// { './dir/foo.js': () => import('./dir/foo.js'), ... }
+
+// Eager loading (included in bundle immediately)
+const modules = import.meta.glob('./dir/*.js', { eager: true })
+
+// Named exports only
+const modules = import.meta.glob('./dir/*.js', { import: 'setup' })
+
+// As raw strings
+const modules = import.meta.glob('./dir/*.txt', { query: '?raw', import: 'default' })
+
+// Dynamic usage
+for (const path in modules) {
+  modules[path]().then((mod) => {
+    console.log(path, mod)
+  })
+}</code></pre>
+
+  <h2 id="ssr">SSR Build</h2>
+  <pre><code>// vite.config.js — separate SSR entry
+export default defineConfig({
+  build: {
+    ssr: true,
+    rollupOptions: {
+      input: 'src/entry-server.js',
+    },
+  },
+})
+
+// package.json scripts
+{
+  "scripts": {
+    "build": "vite build && vite build --ssr src/entry-server.js"
+  }
+}</code></pre>
+
+  <h2 id="laravel">Laravel Vite Plugin</h2>
+  <pre><code>// vite.config.js for Laravel
+import { defineConfig } from 'vite'
+import laravel from 'laravel-vite-plugin'
+
+export default defineConfig({
+  plugins: [
+    laravel({
+      input: ['resources/css/app.css', 'resources/js/app.js'],
+      refresh: true,
+    }),
+  ],
+})</code></pre>
+  <pre><code>&lt;!-- resources/views/app.blade.php --&gt;
+@vite(['resources/css/app.css', 'resources/js/app.js'])</code></pre>
+  <pre><code>// resources/js/app.js
+import './bootstrap'
+import Alpine from 'alpinejs'
+import 'flowbite'
+
+window.Alpine = Alpine
+Alpine.start()</code></pre>
+  <p>SSR with Laravel:</p>
+  <pre><code>// vite.config.js
+laravel({
+  input: 'resources/js/app.js',
+  ssr: 'resources/js/ssr.js',
+})</code></pre>
+  <p>Running dev server with Laravel:</p>
+  <pre><code>npm run dev   # starts Vite dev server; Laravel Blade @vite() auto-connects
+php artisan serve</code></pre>
+
+</main>
+</div>
+</body>
+</html>

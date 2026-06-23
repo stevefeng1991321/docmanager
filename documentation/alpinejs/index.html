@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpine.js v3 — Offline Docs</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #cbd5e1; line-height: 1.6; }
+  a { color: #818cf8; text-decoration: none; } a:hover { text-decoration: underline; }
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 260px; min-width: 260px; background: #0d1525; border-right: 1px solid #1e293b; padding: 1.5rem 1rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav .logo { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+  nav .logo span { font-size: 1.1rem; font-weight: 700; color: #f1f5f9; }
+  nav .back { font-size: 0.8rem; color: #64748b; margin-bottom: 1.5rem; display: block; }
+  nav h2 { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin: 1.25rem 0 0.5rem; }
+  nav ul { list-style: none; }
+  nav ul li a { display: block; padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.875rem; color: #94a3b8; }
+  nav ul li a:hover, nav ul li a.active { background: #1e293b; color: #f1f5f9; text-decoration: none; }
+  main { flex: 1; padding: 2.5rem 3rem; max-width: 860px; }
+  .page-header { margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #1e293b; }
+  .page-header .badge { display: inline-block; background: #6366f1; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; margin-bottom: 0.75rem; }
+  .page-header h1 { font-size: 2rem; font-weight: 800; color: #f8fafc; }
+  .page-header p { margin-top: 0.5rem; color: #94a3b8; font-size: 1rem; }
+  h2 { font-size: 1.35rem; font-weight: 700; color: #f1f5f9; margin: 2.5rem 0 0.75rem; padding-top: 1rem; border-top: 1px solid #1e293b; }
+  h2:first-of-type { border-top: none; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: #e2e8f0; margin: 1.5rem 0 0.5rem; }
+  p { margin-bottom: 1rem; font-size: 0.95rem; }
+  ul, ol { margin: 0.75rem 0 1rem 1.5rem; }
+  li { margin-bottom: 0.35rem; font-size: 0.95rem; }
+  code { background: #1e293b; color: #7dd3fc; padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.85em; }
+  pre { background: #0d1525; border: 1px solid #1e293b; border-radius: 8px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0 1.5rem; }
+  pre code { background: none; color: #e2e8f0; padding: 0; font-size: 0.875rem; line-height: 1.7; }
+  .tip { background: #0c1a2e; border-left: 3px solid #6366f1; padding: 0.75rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.875rem; }
+  th { background: #0d1525; color: #94a3b8; font-weight: 600; text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; }
+  td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+  tr:hover td { background: #0d1525; }
+  .dir-tag { display: inline-block; background: #312e81; color: #a5b4fc; font-family: monospace; font-size: 0.8rem; padding: 0.1rem 0.5rem; border-radius: 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="logo"><span>🏔️ Alpine.js</span></div>
+  <a class="back" href="../index.html">← Back to index</a>
+  <h2>Getting Started</h2>
+  <ul>
+    <li><a href="#install">Installation</a></li>
+    <li><a href="#quickstart">Quick Start</a></li>
+  </ul>
+  <h2>Directives</h2>
+  <ul>
+    <li><a href="#x-data">x-data</a></li>
+    <li><a href="#x-show">x-show</a></li>
+    <li><a href="#x-if">x-if</a></li>
+    <li><a href="#x-for">x-for</a></li>
+    <li><a href="#x-model">x-model</a></li>
+    <li><a href="#x-text">x-text</a></li>
+    <li><a href="#x-html">x-html</a></li>
+    <li><a href="#x-bind">x-bind (:)</a></li>
+    <li><a href="#x-on">x-on (@)</a></li>
+    <li><a href="#x-transition">x-transition</a></li>
+    <li><a href="#x-init">x-init</a></li>
+    <li><a href="#x-cloak">x-cloak</a></li>
+    <li><a href="#x-ref">x-ref</a></li>
+    <li><a href="#x-ignore">x-ignore</a></li>
+  </ul>
+  <h2>Magics</h2>
+  <ul>
+    <li><a href="#el">$el</a></li>
+    <li><a href="#refs">$refs</a></li>
+    <li><a href="#store">$store</a></li>
+    <li><a href="#watch">$watch</a></li>
+    <li><a href="#dispatch">$dispatch</a></li>
+    <li><a href="#nextTick">$nextTick</a></li>
+    <li><a href="#root">$root</a></li>
+  </ul>
+  <h2>Globals</h2>
+  <ul>
+    <li><a href="#alpine-data">Alpine.data()</a></li>
+    <li><a href="#alpine-store">Alpine.store()</a></li>
+  </ul>
+</nav>
+<main>
+  <div class="page-header">
+    <span class="badge">v3.x</span>
+    <h1>Alpine.js</h1>
+    <p>A rugged, minimal framework for composing behaviour directly in your markup.</p>
+  </div>
+
+  <h2 id="install">Installation</h2>
+  <h3>Via CDN (simplest)</h3>
+  <pre><code>&lt;script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"&gt;&lt;/script&gt;</code></pre>
+  <h3>Via npm</h3>
+  <pre><code>npm install alpinejs</code></pre>
+  <pre><code>import Alpine from 'alpinejs'
+window.Alpine = Alpine
+Alpine.start()</code></pre>
+
+  <h2 id="quickstart">Quick Start Examples</h2>
+  <h3>Counter</h3>
+  <pre><code>&lt;div x-data="{ count: 0 }"&gt;
+    &lt;button @click="count++"&gt;Increment&lt;/button&gt;
+    &lt;span x-text="count"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+
+  <h3>Dropdown</h3>
+  <pre><code>&lt;div x-data="{ open: false }"&gt;
+    &lt;button @click="open = !open"&gt;Toggle&lt;/button&gt;
+    &lt;div x-show="open" @click.outside="open = false"&gt;
+        Dropdown content...
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+  <h3>Search Filter</h3>
+  <pre><code>&lt;div x-data="{
+    query: '',
+    items: ['Apple', 'Banana', 'Cherry', 'Date'],
+    get filtered() {
+        return this.items.filter(i => i.toLowerCase().includes(this.query.toLowerCase()))
+    }
+}"&gt;
+    &lt;input x-model="query" placeholder="Search..."&gt;
+    &lt;ul&gt;
+        &lt;template x-for="item in filtered" :key="item"&gt;
+            &lt;li x-text="item"&gt;&lt;/li&gt;
+        &lt;/template&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+
+  <!-- DIRECTIVES -->
+  <h2 id="x-data"><span class="dir-tag">x-data</span></h2>
+  <p>Everything in Alpine starts with <code>x-data</code>. It declares a reactive data object for that HTML region and all its children.</p>
+  <pre><code>&lt;!-- Object --&gt;
+&lt;div x-data="{ open: false, count: 0 }"&gt;...&lt;/div&gt;
+
+&lt;!-- With methods --&gt;
+&lt;div x-data="{ open: false, toggle() { this.open = !this.open } }"&gt;...&lt;/div&gt;
+
+&lt;!-- With getter (computed) --&gt;
+&lt;div x-data="{
+    items: [1,2,3],
+    get total() { return this.items.reduce((a,b) => a+b, 0) }
+}"&gt;...&lt;/div&gt;
+
+&lt;!-- Empty component (no data needed) --&gt;
+&lt;div x-data&gt;...&lt;/div&gt;
+
+&lt;!-- Named component (see Alpine.data) --&gt;
+&lt;div x-data="myComponent"&gt;...&lt;/div&gt;</code></pre>
+  <p>Child components can access parent data. Child declarations with the same property name shadow the parent.</p>
+
+  <h2 id="x-show"><span class="dir-tag">x-show</span></h2>
+  <p>Toggles <code>display: none</code> based on a boolean expression. The element stays in the DOM.</p>
+  <pre><code>&lt;div x-show="open"&gt;Content&lt;/div&gt;
+
+&lt;!-- With transition --&gt;
+&lt;div x-show="open" x-transition&gt;Content&lt;/div&gt;
+
+&lt;!-- Override !important display rules --&gt;
+&lt;div x-show.important="open"&gt;Content&lt;/div&gt;</code></pre>
+  <div class="tip">Use <code>x-cloak</code> alongside to prevent flash-of-content before Alpine loads.</div>
+
+  <h2 id="x-if"><span class="dir-tag">x-if</span></h2>
+  <p>Conditionally adds/removes an element from the DOM entirely. Must be used on a <code>&lt;template&gt;</code> tag.</p>
+  <pre><code>&lt;template x-if="loggedIn"&gt;
+    &lt;div&gt;Welcome back!&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+  <p>Unlike <code>x-show</code>, the element is destroyed and recreated — lifecycle hooks run each time.</p>
+
+  <h2 id="x-for"><span class="dir-tag">x-for</span></h2>
+  <p>Loop over an array. Must be used on a <code>&lt;template&gt;</code> tag. Always provide a <code>:key</code>.</p>
+  <pre><code>&lt;template x-for="item in items" :key="item.id"&gt;
+    &lt;li x-text="item.name"&gt;&lt;/li&gt;
+&lt;/template&gt;
+
+&lt;!-- With index --&gt;
+&lt;template x-for="(item, index) in items" :key="index"&gt;
+    &lt;li&gt;&lt;span x-text="index + 1"&gt;&lt;/span&gt;. &lt;span x-text="item"&gt;&lt;/span&gt;&lt;/li&gt;
+&lt;/template&gt;
+
+&lt;!-- Range --&gt;
+&lt;template x-for="i in 5"&gt;
+    &lt;span x-text="i"&gt;&lt;/span&gt;
+&lt;/template&gt;</code></pre>
+
+  <h2 id="x-model"><span class="dir-tag">x-model</span></h2>
+  <p>Two-way data binding between an input and a reactive property.</p>
+  <pre><code>&lt;input x-model="username" type="text"&gt;
+&lt;textarea x-model="message"&gt;&lt;/textarea&gt;
+&lt;input x-model="accepted" type="checkbox"&gt;
+&lt;select x-model="country"&gt;...&lt;/select&gt;
+
+&lt;!-- Modifiers --&gt;
+&lt;input x-model.lazy="search"&gt;   &lt;!-- sync on change, not input --&gt;
+&lt;input x-model.number="age"&gt;    &lt;!-- cast to Number --&gt;
+&lt;input x-model.trim="name"&gt;     &lt;!-- trim whitespace --&gt;
+&lt;input x-model.debounce="q"&gt;    &lt;!-- debounce sync --&gt;</code></pre>
+
+  <h2 id="x-text"><span class="dir-tag">x-text</span></h2>
+  <p>Sets the text content of an element to the result of a JavaScript expression.</p>
+  <pre><code>&lt;span x-text="name"&gt;&lt;/span&gt;
+&lt;span x-text="'Hello ' + name"&gt;&lt;/span&gt;
+&lt;span x-text="price.toFixed(2)"&gt;&lt;/span&gt;</code></pre>
+
+  <h2 id="x-html"><span class="dir-tag">x-html</span></h2>
+  <p>Sets the inner HTML of an element. Only use with trusted content — XSS risk with user input.</p>
+  <pre><code>&lt;div x-html="rawHtml"&gt;&lt;/div&gt;</code></pre>
+
+  <h2 id="x-bind"><span class="dir-tag">x-bind</span> <code>:</code></h2>
+  <p>Dynamically bind HTML attributes or CSS classes to JavaScript expressions.</p>
+  <pre><code>&lt;!-- Attribute binding --&gt;
+&lt;img :src="imageUrl" :alt="imageAlt"&gt;
+&lt;input :disabled="isLoading"&gt;
+&lt;a :href="'/users/' + userId"&gt;Profile&lt;/a&gt;
+
+&lt;!-- Class binding --&gt;
+&lt;div :class="{ 'bg-red-500': hasError, 'text-white': hasError }"&gt;&lt;/div&gt;
+&lt;div :class="isActive ? 'font-bold' : 'font-normal'"&gt;&lt;/div&gt;
+&lt;!-- Merge with static classes --&gt;
+&lt;div class="p-4" :class="{ 'bg-red-500': hasError }"&gt;&lt;/div&gt;
+
+&lt;!-- Style binding --&gt;
+&lt;div :style="{ color: textColor, fontSize: size + 'px' }"&gt;&lt;/div&gt;</code></pre>
+
+  <h2 id="x-on"><span class="dir-tag">x-on</span> <code>@</code></h2>
+  <p>Listen for DOM events and execute expressions when they fire.</p>
+  <pre><code>&lt;button @click="count++"&gt;Click&lt;/button&gt;
+&lt;input @input="search = $event.target.value"&gt;
+&lt;form @submit.prevent="submitForm"&gt;
+
+&lt;!-- Keyboard --&gt;
+&lt;input @keyup.enter="submit"&gt;
+&lt;input @keyup.shift.enter="newLine"&gt;
+
+&lt;!-- Custom events --&gt;
+&lt;div @foo="handleFoo"&gt;
+    &lt;button @click="$dispatch('foo', { data: 123 })"&gt;Fire&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+  <h3>Event Modifiers</h3>
+  <table>
+    <tr><th>Modifier</th><th>Effect</th></tr>
+    <tr><td><code>.prevent</code></td><td>calls preventDefault()</td></tr>
+    <tr><td><code>.stop</code></td><td>calls stopPropagation()</td></tr>
+    <tr><td><code>.outside</code></td><td>fires only for clicks outside the element</td></tr>
+    <tr><td><code>.window</code></td><td>listens on the window object</td></tr>
+    <tr><td><code>.document</code></td><td>listens on the document</td></tr>
+    <tr><td><code>.once</code></td><td>handler fires only once</td></tr>
+    <tr><td><code>.debounce[.Nms]</code></td><td>debounce (default 250ms)</td></tr>
+    <tr><td><code>.throttle[.Nms]</code></td><td>throttle (default 250ms)</td></tr>
+    <tr><td><code>.self</code></td><td>only fires for events from the element itself</td></tr>
+    <tr><td><code>.passive</code></td><td>improves scroll performance</td></tr>
+    <tr><td><code>.capture</code></td><td>fires in the capturing phase</td></tr>
+  </table>
+  <pre><code>&lt;input @input.debounce.500ms="fetchResults"&gt;
+&lt;div @scroll.window.throttle.750ms="handleScroll"&gt;&lt;/div&gt;
+&lt;div @click.outside="close"&gt;&lt;/div&gt;</code></pre>
+
+  <h2 id="x-transition"><span class="dir-tag">x-transition</span></h2>
+  <p>Apply CSS transitions when elements are shown/hidden with <code>x-show</code> or <code>x-if</code>.</p>
+  <pre><code>&lt;!-- Default transition --&gt;
+&lt;div x-show="open" x-transition&gt;...&lt;/div&gt;
+
+&lt;!-- Custom classes --&gt;
+&lt;div x-show="open"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 scale-90"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-90"
+&gt;...&lt;/div&gt;
+
+&lt;!-- Duration / delay modifiers --&gt;
+&lt;div x-show="open" x-transition.duration.500ms&gt;...&lt;/div&gt;</code></pre>
+
+  <h2 id="x-init"><span class="dir-tag">x-init</span></h2>
+  <p>Run code when Alpine initializes the element. Use <code>$nextTick</code> if you need the DOM to be ready.</p>
+  <pre><code>&lt;div x-data x-init="console.log('initialized')"&gt;&lt;/div&gt;
+
+&lt;!-- Async initialization --&gt;
+&lt;div x-data="{ users: [] }" x-init="users = await fetchUsers()"&gt;&lt;/div&gt;</code></pre>
+
+  <h2 id="x-cloak"><span class="dir-tag">x-cloak</span></h2>
+  <p>Hides elements until Alpine has finished initializing — prevents flash of unprocessed markup.</p>
+  <pre><code>&lt;!-- In your CSS: --&gt;
+[x-cloak] { display: none !important; }
+
+&lt;!-- In your HTML: --&gt;
+&lt;div x-data="{ open: false }" x-cloak&gt;...&lt;/div&gt;</code></pre>
+
+  <h2 id="x-ref"><span class="dir-tag">x-ref</span></h2>
+  <p>Mark elements for direct DOM access via <code>$refs</code>.</p>
+  <pre><code>&lt;input x-ref="searchInput" type="text"&gt;
+&lt;button @click="$refs.searchInput.focus()"&gt;Focus&lt;/button&gt;</code></pre>
+
+  <h2 id="x-ignore"><span class="dir-tag">x-ignore</span></h2>
+  <p>Prevent Alpine from processing this element and all its children (useful for third-party widgets).</p>
+  <pre><code>&lt;div x-ignore&gt;
+    &lt;!-- Alpine will not process anything here --&gt;
+&lt;/div&gt;</code></pre>
+
+  <!-- MAGICS -->
+  <h2 id="el"><span class="dir-tag">$el</span></h2>
+  <p>Reference to the root DOM element of the current component.</p>
+  <pre><code>&lt;div x-data @click="$el.classList.toggle('active')"&gt;...&lt;/div&gt;</code></pre>
+
+  <h2 id="refs"><span class="dir-tag">$refs</span></h2>
+  <p>Access DOM elements marked with <code>x-ref</code>.</p>
+  <pre><code>&lt;input x-ref="myInput"&gt;
+&lt;button @click="$refs.myInput.focus()"&gt;Focus Input&lt;/button&gt;</code></pre>
+
+  <h2 id="store"><span class="dir-tag">$store</span></h2>
+  <p>Access global stores registered with <code>Alpine.store()</code> from any component.</p>
+  <pre><code>&lt;!-- Reading from store --&gt;
+&lt;div :class="$store.darkMode.on ? 'bg-black' : 'bg-white'"&gt;...&lt;/div&gt;
+
+&lt;!-- Writing to store --&gt;
+&lt;button @click="$store.darkMode.toggle()"&gt;Toggle Dark Mode&lt;/button&gt;</code></pre>
+
+  <h2 id="watch"><span class="dir-tag">$watch</span></h2>
+  <p>Watch a data property and run a callback when it changes.</p>
+  <pre><code>&lt;div x-data="{ count: 0 }" x-init="$watch('count', val => console.log(val))"&gt;
+    &lt;button @click="count++"&gt;Increment&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+  <h2 id="dispatch"><span class="dir-tag">$dispatch</span></h2>
+  <p>Dispatch a custom DOM event from this element (bubbles up the tree).</p>
+  <pre><code>&lt;button @click="$dispatch('notify', { message: 'Saved!' })"&gt;Save&lt;/button&gt;
+
+&lt;!-- Parent listens --&gt;
+&lt;div @notify.window="showToast($event.detail.message)"&gt;...&lt;/div&gt;</code></pre>
+
+  <h2 id="nextTick"><span class="dir-tag">$nextTick</span></h2>
+  <p>Execute code after Alpine has finished updating the DOM.</p>
+  <pre><code>&lt;div x-data="{ open: false }"&gt;
+    &lt;button @click="open = true; $nextTick(() => $refs.dialog.focus())"&gt;Open&lt;/button&gt;
+    &lt;dialog x-ref="dialog" x-show="open"&gt;...&lt;/dialog&gt;
+&lt;/div&gt;</code></pre>
+
+  <h2 id="root"><span class="dir-tag">$root</span></h2>
+  <p>Reference to the nearest ancestor element with <code>x-data</code>.</p>
+  <pre><code>&lt;div x-data="{ message: 'Hello' }"&gt;
+    &lt;div&gt;
+        &lt;button @click="$root.remove()"&gt;Remove component&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+  <!-- GLOBALS -->
+  <h2 id="alpine-data"><span class="dir-tag">Alpine.data()</span></h2>
+  <p>Register reusable component data to avoid repetition across multiple elements.</p>
+  <pre><code>document.addEventListener('alpine:init', () => {
+    Alpine.data('dropdown', () => ({
+        open: false,
+        toggle() { this.open = !this.open },
+        close() { this.open = false },
+    }))
+})
+
+&lt;!-- Usage --&gt;
+&lt;div x-data="dropdown"&gt;
+    &lt;button @click="toggle"&gt;Toggle&lt;/button&gt;
+    &lt;div x-show="open"&gt;Content&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+  <h2 id="alpine-store"><span class="dir-tag">Alpine.store()</span></h2>
+  <p>Register global reactive state accessible from any component via <code>$store</code>.</p>
+  <pre><code>document.addEventListener('alpine:init', () => {
+    // Object store
+    Alpine.store('darkMode', {
+        on: false,
+        toggle() { this.on = !this.on }
+    })
+
+    // Primitive store
+    Alpine.store('count', 0)
+})
+
+&lt;!-- Access anywhere --&gt;
+&lt;button @click="$store.darkMode.toggle()"&gt;Toggle Dark Mode&lt;/button&gt;
+&lt;span x-text="$store.count"&gt;&lt;/span&gt;
+&lt;button @click="$store.count++"&gt;Increment&lt;/button&gt;</code></pre>
+
+</main>
+</div>
+</body>
+</html>
