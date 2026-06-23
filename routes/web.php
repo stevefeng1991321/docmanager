@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'active'])->group(function () {
 
     Route::get('/', [Client\HomeController::class, 'index'])->name('home');
+    Route::get('/home/browse', [Client\HomeController::class, 'browse'])->name('home.browse');
 
     // Documents
     Route::get('/documents/{resource}',         [Client\DocumentController::class, 'show'])->name('documents.show');
