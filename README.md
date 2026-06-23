@@ -17,44 +17,110 @@ All files are stored locally on the server machine (no cloud dependency).
 
 | Requirement | Version |
 |---|---|
-| PHP | 10+ / 11+ |
+| PHP | 8.2+ |
 | MySQL | 8.0+ |
-| XAMPP | 8.x (Apache + MySQL) |
 | Composer | 2.x |
-| Node.js / npm | 18+ (for Tailwind CSS build) |
-| Redis | 7+ (for queues and caching) |
-| PHP Extensions | `zip`, `pdo_mysql`, `fileinfo`, `mbstring`, `openssl`, `gd` or `imagick` |
+| Node.js / npm | 18+ |
+| PHP Extensions | `pdo_mysql`, `fileinfo`, `mbstring`, `openssl`, `zip` |
 | LibreOffice | Optional — required only for DOCX → PDF full-fidelity preview |
+
+### Enable required PHP extensions
+
+Open your `php.ini` (run `php --ini` to find the path) and uncomment these lines:
+
+```ini
+extension=fileinfo
+extension=pdo_mysql
+```
+
+Then verify they loaded:
+
+```bash
+php -r "echo extension_loaded('fileinfo') && extension_loaded('pdo_mysql') ? 'OK' : 'Missing';"
+```
 
 ---
 
-# 🚀 Installation
+# 🚀 Local Development Setup
+
+### Step 1 — Clone the repository
 
 ```bash
-# 1. Clone the repository
 git clone <repo-url>
 cd docmanager
+```
 
-# 2. Install PHP dependencies
+### Step 2 — Install PHP dependencies
+
+```bash
 composer install
+```
 
-# 3. Install frontend dependencies
-npm install && npm run build
+### Step 3 — Install JS dependencies
 
-# 4. Configure environment
+```bash
+npm install
+```
+
+### Step 4 — Configure environment
+
+```bash
 cp .env.example .env
 php artisan key:generate
+```
 
-# 5. Edit .env — set DB credentials, queue driver, cache driver
+Edit `.env` and set your MySQL credentials:
 
-# 6. Run database migrations
-php artisan migrate --seed
+```env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=docmanager
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-# 7. Start the queue worker
+### Step 5 — Run database migrations
+
+```bash
+php artisan migrate
+```
+
+### Step 6 — Fix Vite IPv6/IPv4 mismatch (Windows)
+
+On Windows, Vite defaults to IPv6 (`[::1]`) which breaks CSS loading. Add `host` to `vite.config.js`:
+
+```js
+export default defineConfig({
+    server: {
+        host: '127.0.0.1',
+    },
+    plugins: [
+        laravel({
+            input: ['resources/css/app.css', 'resources/js/app.js'],
+            refresh: true,
+        }),
+    ],
+});
+```
+
+### Step 7 — Start both dev servers (two terminals)
+
+```bash
+# Terminal 1 — Laravel backend
+php artisan serve --host=127.0.0.1 --port=8000
+
+# Terminal 2 — Vite (CSS + JS + HMR)
+npm run dev
+```
+
+The app will be available at **http://127.0.0.1:8000**
+
+### Step 8 — (Optional) Start the queue worker
+
+Required for file content extraction, embedding generation, and bulk downloads:
+
+```bash
 php artisan queue:work --queue=default
-
-# 8. Serve via XAMPP or built-in server
-php artisan serve
 ```
 
 ---
