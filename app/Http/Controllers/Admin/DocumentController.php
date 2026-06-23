@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExtractDocumentContent;
 use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\DocumentVersion;
@@ -89,8 +90,10 @@ class DocumentController extends Controller
 
         AuditLog::record('document.uploaded', $resource->id, ['title' => $resource->title]);
 
+        ExtractDocumentContent::dispatch($resource);
+
         return redirect()->route('admin.documents.index')
-            ->with('message', "Document \"{$resource->title}\" uploaded.");
+            ->with('message', "Document \"{$resource->title}\" uploaded. Content indexing queued.");
     }
 
     public function edit(Resource $document)

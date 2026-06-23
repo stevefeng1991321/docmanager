@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExtractDocumentContent;
+use App\Models\Resource;
 use App\Models\SearchLog;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +23,17 @@ class SearchIndexController extends Controller
 
     public function reindex()
     {
-        // Dispatch re-index job (implemented in Phase 2)
-        return back()->with('message', 'Re-index queued.');
+        $count = 0;
+
+        Resource::whereNull('deleted_at')
+            ->select(['id', 'file_path', 'original_filename'])
+            ->chunk(50, function ($resources) use (&$count) {
+                foreach ($resources as $resource) {
+                    ExtractDocumentContent::dispatch($resource);
+                    $count++;
+                }
+            });
+
+        return back()->with('message', "Re-index queued for {$count} document(s). Run the queue worker to process.");
     }
 }

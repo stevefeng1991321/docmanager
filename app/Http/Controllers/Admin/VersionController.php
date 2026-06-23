@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ExtractDocumentContent;
 use App\Models\AuditLog;
 use App\Models\DocumentVersion;
 use App\Models\Resource;
@@ -49,7 +50,9 @@ class VersionController extends Controller
 
         AuditLog::record('document.version_uploaded', $resource->id, ['version' => $nextVersion]);
 
-        return back()->with('message', "Version {$nextVersion} uploaded.");
+        ExtractDocumentContent::dispatch($resource);
+
+        return back()->with('message', "Version {$nextVersion} uploaded. Content indexing queued.");
     }
 
     public function restore(Resource $resource, DocumentVersion $version)
