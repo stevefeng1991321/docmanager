@@ -125,6 +125,60 @@ php artisan queue:work --queue=default
 
 ---
 
+# 🔌 Offline Mode
+
+Run the project with **no internet connection and no Vite dev server** — assets are served directly from pre-built files.
+
+### Step 1 — Build frontend assets (do this once, while online)
+
+```bash
+npm run build
+```
+
+This compiles all CSS/JS into `public/build/`. You won't need to run this again unless the frontend code changes.
+
+### Step 2 — Remove the `public/hot` file
+
+```powershell
+Remove-Item public\hot -ErrorAction SilentlyContinue
+```
+
+If this file exists, Laravel tries to load assets from the Vite dev server (`http://127.0.0.1:5173`), which won't be running offline. Deleting it tells Laravel to use `public/build/` instead.
+
+### Step 3 — Start Laravel only (no npm)
+
+```bash
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+Open **http://127.0.0.1:8000** — fully offline, no Vite, no internet.
+
+---
+
+### Dev mode vs Offline mode
+
+| | Dev mode | Offline mode |
+|---|---|---|
+| Assets served from | Vite dev server (`http://127.0.0.1:5173`) | `public/build/` (local files) |
+| Servers required | Laravel + Vite (`npm run dev`) | Laravel only |
+| `public/hot` file | present | deleted |
+| Reflects code changes | instantly (HMR) | only after `npm run build` |
+
+---
+
+### Make the repo permanently offline-ready
+
+Remove these two lines from `.gitignore` and commit both folders:
+
+```
+/vendor
+/public/build
+```
+
+With `vendor/` and `public/build/` committed, no internet connection, Composer, or npm is required to run the project on any machine.
+
+---
+
 # 🎨 Frontend Stack
 
 Both the **Admin Panel** and **Client Web App** are built with **Tailwind CSS + Alpine.js + Flowbite**, compiled and bundled locally — no CDN required, fully offline-capable.
