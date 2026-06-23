@@ -58,9 +58,15 @@
                     {{-- User menu --}}
                     <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 font-medium">
-                            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold uppercase">
-                                {{ substr(auth()->user()->name, 0, 1) }}
-                            </div>
+                            @php $navAvatar = auth()->user()->preferences?->avatar; @endphp
+                            @if($navAvatar)
+                                <img src="{{ asset('storage/' . $navAvatar) }}" alt="Avatar"
+                                     class="w-8 h-8 rounded-full object-cover border border-gray-200">
+                            @else
+                                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold uppercase">
+                                    {{ substr(auth()->user()->name, 0, 1) }}
+                                </div>
+                            @endif
                             <span class="hidden md:block">{{ auth()->user()->name }}</span>
                         </button>
                         <div x-show="open" @click.outside="open = false" x-cloak

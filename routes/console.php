@@ -17,5 +17,8 @@ Schedule::command('dms:prune-shares')->daily()->at('02:15');
 // Delete expired Sanctum API tokens
 Schedule::command('dms:prune-tokens')->daily()->at('02:30');
 
+// Auto-archive documents whose expires_at has passed
+Schedule::command('dms:archive-expired')->hourly();
+
 // Prune old job batches
 Schedule::command('queue:prune-batches --hours=48')->weekly();

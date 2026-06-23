@@ -6,14 +6,51 @@
 
     <h1 class="text-xl font-bold text-gray-800">My Profile</h1>
 
-    <form method="POST" action="{{ route('profile.update') }}" class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+    {{-- Avatar + main details --}}
+    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data"
+          class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
         @csrf @method('PATCH')
+
+        {{-- Avatar --}}
+        <div class="flex items-center gap-4">
+            @php $avatar = $prefs->avatar ?? null; @endphp
+            <div id="avatar-preview-wrap">
+                @if($avatar)
+                    <img id="avatar-preview" src="{{ asset('storage/' . $avatar) }}" alt="Avatar"
+                         class="w-16 h-16 rounded-full object-cover border border-gray-200">
+                @else
+                    <div id="avatar-initials" class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                    <img id="avatar-preview" src="" alt="Avatar"
+                         class="w-16 h-16 rounded-full object-cover border border-gray-200 hidden">
+                @endif
+            </div>
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                <input type="file" name="avatar" id="avatar-input" accept="image/*"
+                       class="block text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                @error('avatar') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                <p class="mt-1 text-xs text-gray-400">JPG, PNG, WEBP — max 5 MB</p>
+            </div>
+        </div>
+        <script>
+            document.getElementById('avatar-input').addEventListener('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+                const preview = document.getElementById('avatar-preview');
+                const initials = document.getElementById('avatar-initials');
+                preview.src = URL.createObjectURL(file);
+                preview.classList.remove('hidden');
+                if (initials) initials.classList.add('hidden');
+            });
+        </script>
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
             <input type="text" value="{{ $user->username }}" disabled
                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
-            <p class="mt-1 text-xs text-gray-400">Username cannot be changed.</p>
+            <p class="mt-1 text-xs text-gray-400">Username cannot be changed directly — use the request form below.</p>
         </div>
 
         <div>
@@ -98,14 +135,36 @@
         @endif
     </div>
 
-    <div class="bg-white rounded-xl border border-red-100 shadow-sm p-6">
-        <h3 class="font-semibold text-red-700 mb-2">Delete Account</h3>
-        <p class="text-sm text-gray-500 mb-4">Permanent — cannot be undone.</p>
-        <form method="POST" action="{{ route('profile.destroy') }}"
-              onsubmit="return confirm('Permanently delete your account?')">
-            @csrf @method('DELETE')
-            <button class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition">
-                Delete My Account
+    {{-- Username change request --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-semibold text-gray-800">Request Username Change</h3>
+        <p class="text-sm text-gray-500">Submit a request — an admin will review and apply it.</p>
+        <form method="POST" action="{{ route('profile.request-username-change') }}" class="flex gap-3">
+            @csrf
+            <input type="text" name="new_username" placeholder="New username"
+                   pattern="[a-zA-Z0-9_\-]{3,50}" title="3–50 characters: letters, numbers, underscores, hyphens"
+                   class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm @error('new_username') border-red-400 @enderror">
+            <button type="submit" class="px-5 py-2 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition">
+                Submit Request
+            </button>
+        </form>
+        @error('new_username') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+    </div>
+
+    {{-- Account deletion request --}}
+    <div class="bg-white rounded-xl border border-red-100 shadow-sm p-6 space-y-4">
+        <h3 class="font-semibold text-red-700">Request Account Deletion</h3>
+        <p class="text-sm text-gray-500">
+            Submits a deletion request for admin review. Your account will not be removed until an admin approves it.
+        </p>
+        <form method="POST" action="{{ route('profile.request-deletion') }}" class="space-y-3">
+            @csrf
+            <textarea name="reason" rows="2" placeholder="Reason (optional)"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+            <button type="submit"
+                    onclick="return confirm('Submit account deletion request?')"
+                    class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition">
+                Submit Deletion Request
             </button>
         </form>
     </div>

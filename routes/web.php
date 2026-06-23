@@ -46,9 +46,11 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::patch('/notifications/{notification}/read', [Client\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::delete('/notifications/{notification}',     [Client\NotificationController::class, 'destroy'])->name('notifications.destroy');
 
-    Route::get('/profile',    [Client\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile',  [Client\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [Client\ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile',                   [Client\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile',                 [Client\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile',                [Client\ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/request-username', [Client\ProfileController::class, 'requestUsernameChange'])->name('profile.request-username-change');
+    Route::post('/profile/request-deletion', [Client\ProfileController::class, 'requestDeletion'])->name('profile.request-deletion');
 });
 
 // Public share link (no auth required)
@@ -75,6 +77,11 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::post('documents/bulk/trash',            [Admin\DocumentController::class, 'bulkTrash'])->name('documents.bulk-trash');
     Route::post('documents/bulk/reject',           [Admin\DocumentController::class, 'bulkReject'])->name('documents.bulk-reject');
     Route::post('documents/bulk/assign-category',  [Admin\DocumentController::class, 'bulkAssignCategory'])->name('documents.bulk-assign-category');
+    Route::post('documents/bulk/download',         [Admin\DocumentController::class, 'bulkDownload'])->name('documents.bulk-download');
+
+    // Chunked upload
+    Route::post('documents/upload/chunk',    [Admin\ChunkedUploadController::class, 'chunk'])->name('documents.upload.chunk');
+    Route::post('documents/upload/assemble', [Admin\ChunkedUploadController::class, 'assemble'])->name('documents.upload.assemble');
 
     // Versions
     Route::post('documents/{resource}/versions',              [Admin\VersionController::class, 'store'])->name('versions.store');
@@ -116,6 +123,13 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     // Notifications (index accessible by editors too)
     Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/broadcast', [Admin\NotificationController::class, 'broadcast'])->name('notifications.broadcast');
+
+    // Account requests (admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('account-requests',                          [Admin\AccountRequestController::class, 'index'])->name('account-requests.index');
+        Route::patch('account-requests/{accountRequest}/approve', [Admin\AccountRequestController::class, 'approve'])->name('account-requests.approve');
+        Route::patch('account-requests/{accountRequest}/reject',  [Admin\AccountRequestController::class, 'reject'])->name('account-requests.reject');
+    });
 
     // Settings (admin only)
     Route::middleware('role:admin')->group(function () {

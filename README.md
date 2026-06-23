@@ -159,7 +159,7 @@ A clean document portal for all authenticated users.
 | Saved Searches | `/saved-searches` | Manage saved search queries |
 | Reading Lists | `/reading-lists` | Create and manage named document collections (e.g. "Linux study pack") |
 | Notifications | `/notifications` | Inbox — mark as read, dismiss, manage notification preferences |
-| Profile | `/profile` | Edit name, email, password, avatar, notification preferences |
+| Profile | `/profile` | Edit name, password, avatar, notification preferences |
 
 ---
 
@@ -175,7 +175,6 @@ A clean document portal for all authenticated users.
 * Remember me / persistent session (configurable)
 * Account lockout after N consecutive failed login attempts — configurable via `ACCOUNT_LOCKOUT_ATTEMPTS` / `ACCOUNT_LOCKOUT_MINUTES`
 * Session-based authentication (Laravel Breeze)
-* Optional two-factor authentication (2FA via TOTP)
 * Role-based + Permission-based access control (RBAC)
 
   * Admin
@@ -294,7 +293,7 @@ A clean document portal for all authenticated users.
 * In-document Page Bookmarks — save a specific page number within a PDF; resume reading from where you left off; multiple bookmarks per document with optional label
 * Document Ratings — rate any document 1–5 stars; average rating visible on document cards and detail pages; used as a search ranking signal
 * Notification inbox — mark as read, dismiss, manage notification preferences per event type
-* Profile page — edit display name, optional email, avatar, change password, toggle 2FA, set notification preferences
+* Profile page — edit display name, avatar, change password, set notification preferences
 * Username change request — submit a request to Admin (username cannot be changed directly by the user)
 * Account deletion request — submit a deletion request; Admin reviews and processes it
 
@@ -736,7 +735,7 @@ Monitor failed jobs at `/admin/jobs`.
 | File uploaded | ✔ | ✔ (optional) |
 | Version updated | ✔ | ✔ (optional) |
 | Access denied | ✔ (admin) | ✔ (optional) |
-| Account locked | ✔ | ✔ (only if user has provided optional email) |
+| Account locked | ✔ | ✗ |
 | New pending registration | ✔ (admin) | ✗ |
 | Account activated / rejected | ✔ (user) | ✗ |
 | Document approved / rejected | ✔ (editor) | ✔ (optional) |
@@ -745,7 +744,7 @@ Monitor failed jobs at `/admin/jobs`.
 **Delivery:**
 
 * In-app notifications always active (stored in `notifications` table with `is_read` flag)
-* Email notifications optional — only sent if SMTP is configured and user has provided an optional email address in their profile
+* Email notifications optional — only sent if SMTP is configured and the user account has an email address
 
 **User preferences:**
 
@@ -822,7 +821,7 @@ For large-scale deployments:
 | Ranking Engine | Custom hybrid scorer |
 | Storage | Local Disk (`storage/app/resources/`) |
 | PHP Libraries | smalot/pdfparser, phpoffice/phpword, ZipArchive |
-| Auth | Laravel Breeze + Sanctum (API) + optional 2FA (TOTP) |
+| Auth | Laravel Breeze + Sanctum (API) |
 
 ---
 
@@ -873,7 +872,7 @@ This system is a **complete enterprise-grade document management platform** feat
 ✔ Dual-app architecture — Admin Panel (`/admin`) + Client Web App (`/`)
 ✔ Offline-capable UI (Tailwind CSS + Alpine.js + Flowbite, no CDN)
 ✔ Local file storage (XAMPP)
-✔ Secure role-based authentication (RBAC) with 2FA and account lockout
+✔ Secure role-based authentication (RBAC) with account lockout
 ✔ Client self-registration (username + password) with mandatory Admin activation before first login
 ✔ Hybrid search engine (keyword + full-text + AI vector search)
 ✔ Combinable search filters + sort options

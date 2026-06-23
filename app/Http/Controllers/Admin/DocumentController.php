@@ -58,10 +58,15 @@ class DocumentController extends Controller
             return back()->withErrors(['file' => 'This upload would exceed your storage quota.'])->withInput();
         }
 
+        $hash         = hash_file('sha256', $file->getRealPath());
+        $duplicate    = Resource::where('file_hash', $hash)->whereNull('deleted_at')->first();
+        if ($duplicate) {
+            return back()->withErrors(['file' => "A document with identical content already exists: \"{$duplicate->title}\" (ID {$duplicate->id})."])->withInput();
+        }
+
         $originalName    = $file->getClientOriginalName();
         $storedName      = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path            = $file->storeAs('resources', $storedName, 'local');
-        $hash            = hash_file('sha256', $file->getRealPath());
 
         $resource = Resource::create([
             'title'             => $request->title,
@@ -244,6 +249,60 @@ class DocumentController extends Controller
         self::clearDocumentCaches();
 
         return back()->with('message', "{$count} document(s) assigned to category.");
+    }
+
+    public function bulkDownload(Request $request)
+    {
+        $request->validate(['ids' => ['required', 'array', 'max:100'], 'ids.*' => ['integer']]);
+
+        $documents = Resource::whereIn('id', $request->ids)->whereNull('deleted_at')
+            ->get(['id', 'title', 'file_path', 'original_filename']);
+
+        if ($documents->isEmpty()) {
+            return back()->withErrors(['ids' => 'No documents found for the selected IDs.']);
+        }
+
+        $tmpDir  = storage_path('app/temp');
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0755, true);
+        }
+
+        $zipPath = $tmpDir . '/bulk_' . uniqid() . '.zip';
+        $zip     = new \ZipArchive();
+
+        if ($zip->open($zipPath, \ZipArchive::CREATE) !== true) {
+            return back()->withErrors(['ids' => 'Could not create ZIP archive.']);
+        }
+
+        $seen = [];
+        foreach ($documents as $doc) {
+            $fullPath = storage_path('app/' . $doc->file_path);
+            if (!file_exists($fullPath)) {
+                continue;
+            }
+            // Deduplicate filenames inside the ZIP
+            $name = $doc->original_filename;
+            if (isset($seen[$name])) {
+                $seen[$name]++;
+                $ext  = pathinfo($name, PATHINFO_EXTENSION);
+                $base = pathinfo($name, PATHINFO_FILENAME);
+                $name = $ext ? "{$base}_{$seen[$name]}.{$ext}" : "{$base}_{$seen[$name]}";
+            } else {
+                $seen[$name] = 0;
+            }
+            $zip->addFile($fullPath, $name);
+        }
+
+        $zip->close();
+
+        AuditLog::record('document.bulk_downloaded', null, [
+            'count' => $documents->count(),
+            'ids'   => $request->ids,
+        ]);
+
+        return response()
+            ->download($zipPath, 'documents_' . now()->format('Ymd_His') . '.zip')
+            ->deleteFileAfterSend(true);
     }
 
     private static function clearDocumentCaches(): void
