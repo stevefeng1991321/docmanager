@@ -96,7 +96,7 @@ npm run build
 rm -f public/hot
 
 # Start Laravel only
-php artisan serve --host=127.0.0.1 --port=8000
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 > All fonts and assets are self-hosted. No CDN dependencies.
