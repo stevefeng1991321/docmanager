@@ -179,8 +179,8 @@
                 <label class="text-xs text-gray-500 whitespace-nowrap">Per page</label>
                 <select name="per_page" onchange="this.form.submit()"
                         class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
-                    @foreach([10, 20, 30, 40] as $n)
-                        <option value="{{ $n }}" @selected((int) request('per_page', 20) === $n)>{{ $n }}</option>
+                    @foreach(config('pagination.per_page_options') as $n)
+                        <option value="{{ $n }}" @selected((int) request('per_page', config('pagination.default_per_page')) === $n)>{{ $n }}</option>
                     @endforeach
                 </select>
             </form>

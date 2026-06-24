@@ -35,7 +35,9 @@ class DocumentController extends Controller
 
         $query = $query->sorted($sort);
 
-        $perPage    = in_array((int) $request->input('per_page'), [10, 20, 30, 40]) ? (int) $request->input('per_page') : 20;
+        $perPage    = in_array((int) $request->input('per_page'), config('pagination.per_page_options'))
+            ? (int) $request->input('per_page')
+            : config('pagination.default_per_page');
         $documents  = $query->paginate($perPage)->withQueryString();
         $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
 

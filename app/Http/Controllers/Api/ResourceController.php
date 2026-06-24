@@ -27,7 +27,7 @@ class ResourceController extends Controller
         $categoryId = $request->input('category_id');
         $status     = $request->input('status', 'published');
         $sort       = $request->input('sort', 'date_desc');
-        $perPage    = min((int) $request->input('per_page', 15), 100);
+        $perPage    = min((int) $request->input('per_page', config('pagination.api_default_per_page')), config('pagination.api_max_per_page'));
 
         $builder = Resource::with(['category', 'tags', 'uploader'])
             ->withAvg('ratings', 'rating')

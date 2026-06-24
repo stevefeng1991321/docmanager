@@ -18,7 +18,7 @@ class SearchController extends Controller
         $dateFrom   = $request->input('date_from');
         $dateTo     = $request->input('date_to');
         $sort       = $request->input('sort', 'relevance');
-        $perPage    = min((int) $request->input('per_page', 15), 100);
+        $perPage    = min((int) $request->input('per_page', config('pagination.api_default_per_page')), config('pagination.api_max_per_page'));
 
         $builder = Resource::published()
             ->with(['category', 'tags'])

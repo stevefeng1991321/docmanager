@@ -57,8 +57,8 @@
         onchange="document.dispatchEvent(new CustomEvent('per-page-change', { detail: { perPage: parseInt(this.value) } }))"
         class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
     >
-        @foreach([10, 20, 30] as $size)
-            <option value="{{ $size }}" @selected(($perPage ?? 20) == $size)>{{ $size }} / page</option>
+        @foreach(config('pagination.per_page_options') as $size)
+            <option value="{{ $size }}" @selected(($perPage ?? config('pagination.default_per_page')) == $size)>{{ $size }} / page</option>
         @endforeach
     </select>
     @endif

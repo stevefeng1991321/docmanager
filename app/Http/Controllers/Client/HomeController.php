@@ -6,15 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Resource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
     public function index(Request $request)
     {
+        $prefs   = Auth::user()->preferences;
         $sort    = $request->input('sort', 'date_desc');
-        $view    = $request->input('view', session('doc_view', 'grid'));
-        $perPage = in_array((int) $request->input('per_page'), [10, 20, 30]) ? (int) $request->input('per_page') : 20;
+        $view    = $request->input('view', $prefs?->view_mode ?? 'grid');
+        $perPage = in_array((int) $request->input('per_page'), config('pagination.per_page_options'))
+            ? (int) $request->input('per_page')
+            : ($prefs?->items_per_page ?? config('pagination.default_per_page'));
         session(['doc_view' => $view]);
 
         $categories = Cache::remember('home.categories.tree', 3600, function () {
@@ -38,9 +42,12 @@ class HomeController extends Controller
 
     public function browse(Request $request)
     {
+        $prefs        = Auth::user()->preferences;
         $sort         = $request->input('sort', 'date_desc');
-        $view         = $request->input('view', session('doc_view', 'grid'));
-        $perPage      = in_array((int) $request->input('per_page'), [10, 20, 30]) ? (int) $request->input('per_page') : 20;
+        $view         = $request->input('view', session('doc_view', $prefs?->view_mode ?? 'grid'));
+        $perPage      = in_array((int) $request->input('per_page'), config('pagination.per_page_options'))
+            ? (int) $request->input('per_page')
+            : ($prefs?->items_per_page ?? config('pagination.default_per_page'));
         $categorySlug = $request->input('category');
 
         $category = $categorySlug
