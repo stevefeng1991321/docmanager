@@ -23,6 +23,17 @@ class DatabaseSeeder extends Seeder
                 'status'   => 'active',
             ]
         );
+        // First Editor account
+        User::firstOrCreate(
+            ['username' => 'editor'],
+            [
+                'name'     => 'Editor',
+                'email'    => null,
+                'password' => Hash::make('123456'),
+                'role'     => 'editor',
+                'status'   => 'active',
+            ]
+        );
         // First User account
         User::firstOrCreate(
             ['username' => 'user'],
