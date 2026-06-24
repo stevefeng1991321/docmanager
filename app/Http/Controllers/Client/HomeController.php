@@ -24,15 +24,6 @@ class HomeController extends Controller
                 ->get();
         });
 
-        $featured = Cache::remember('home.featured', 900, function () {
-            return Resource::published()
-                ->withAvg('ratings', 'rating')
-                ->with(['category'])
-                ->orderByDesc('download_count')
-                ->take(6)
-                ->get();
-        });
-
         $allDocs = Resource::published()
             ->withAvg('ratings', 'rating')
             ->with(['category']);
@@ -48,7 +39,7 @@ class HomeController extends Controller
 
         $allDocs = $allDocs->paginate(18)->withQueryString();
 
-        return view('home.index', compact('categories', 'featured', 'allDocs', 'sort', 'view'));
+        return view('home.index', compact('categories', 'allDocs', 'sort', 'view'));
     }
 
     public function browse(Request $request)
@@ -66,14 +57,6 @@ class HomeController extends Controller
             $categoryIds = [$category->id, ...$category->children->pluck('id')->toArray()];
         }
 
-        $featured = Resource::published()
-            ->withAvg('ratings', 'rating')
-            ->with(['category'])
-            ->when($categoryIds, fn ($q) => $q->whereIn('category_id', $categoryIds))
-            ->orderByDesc('download_count')
-            ->take(6)
-            ->get();
-
         $allDocs = Resource::published()
             ->withAvg('ratings', 'rating')
             ->with(['category'])
@@ -90,6 +73,6 @@ class HomeController extends Controller
 
         $allDocs = $allDocs->paginate(18)->withQueryString();
 
-        return view('home._docs', compact('featured', 'allDocs', 'sort', 'view', 'category'));
+        return view('home._docs', compact('allDocs', 'sort', 'view', 'category'));
     }
 }
