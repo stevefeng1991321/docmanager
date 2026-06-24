@@ -8,6 +8,11 @@ class AccountRequest extends Model
 {
     protected $fillable = [
         'user_id', 'type', 'new_username', 'reason', 'status', 'admin_note',
+        'reset_token', 'reset_token_expires_at',
+    ];
+
+    protected $casts = [
+        'reset_token_expires_at' => 'datetime',
     ];
 
     public function user() { return $this->belongsTo(User::class); }

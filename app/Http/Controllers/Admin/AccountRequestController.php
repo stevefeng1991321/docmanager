@@ -7,6 +7,7 @@ use App\Models\AccountRequest;
 use App\Models\AuditLog;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AccountRequestController extends Controller
 {
@@ -20,6 +21,34 @@ class AccountRequestController extends Controller
             ->withQueryString();
 
         return view('admin.account-requests.index', compact('requests'));
+    }
+
+    public function generateResetLink(AccountRequest $accountRequest)
+    {
+        if ($accountRequest->type !== 'password_reset' || !$accountRequest->isPending()) {
+            return back()->with('error', 'Invalid request.');
+        }
+
+        if (!$accountRequest->user) {
+            $accountRequest->update(['status' => 'rejected', 'admin_note' => 'User no longer exists.']);
+            return back()->with('error', 'User no longer exists — request rejected.');
+        }
+
+        $token = Str::random(64);
+
+        $accountRequest->update([
+            'reset_token'            => $token,
+            'reset_token_expires_at' => now()->addHours(24),
+        ]);
+
+        $resetUrl = route('password.reset', $token);
+
+        AuditLog::record('account_request.reset_link_generated', null, [
+            'request_id' => $accountRequest->id,
+            'user_id'    => $accountRequest->user->id,
+        ]);
+
+        return back()->with('reset_url', $resetUrl)->with('reset_request_id', $accountRequest->id);
     }
 
     public function approve(Request $request, AccountRequest $accountRequest)
@@ -64,6 +93,10 @@ class AccountRequestController extends Controller
             $user?->delete();
 
             return back()->with('message', 'Account deletion approved and account removed.');
+        }
+
+        if ($accountRequest->type === 'password_reset') {
+            return back()->with('error', 'Use "Generate Reset Link" to handle password reset requests.');
         }
 
         return back()->with('error', 'Unknown request type.');

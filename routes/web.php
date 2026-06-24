@@ -140,9 +140,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     // Account requests (admin only)
     Route::middleware('role:admin')->group(function () {
-        Route::get('account-requests',                          [Admin\AccountRequestController::class, 'index'])->name('account-requests.index');
-        Route::patch('account-requests/{accountRequest}/approve', [Admin\AccountRequestController::class, 'approve'])->name('account-requests.approve');
-        Route::patch('account-requests/{accountRequest}/reject',  [Admin\AccountRequestController::class, 'reject'])->name('account-requests.reject');
+        Route::get('account-requests',                                     [Admin\AccountRequestController::class, 'index'])->name('account-requests.index');
+        Route::patch('account-requests/{accountRequest}/approve',          [Admin\AccountRequestController::class, 'approve'])->name('account-requests.approve');
+        Route::patch('account-requests/{accountRequest}/reject',           [Admin\AccountRequestController::class, 'reject'])->name('account-requests.reject');
+        Route::post('account-requests/{accountRequest}/generate-reset-link', [Admin\AccountRequestController::class, 'generateResetLink'])->name('account-requests.generate-reset-link');
     });
 
     // Settings (admin only)
