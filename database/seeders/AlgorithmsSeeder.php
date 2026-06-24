@@ -16,14 +16,14 @@ class AlgorithmsSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($this->problems()) . ' Algorithms problems (301–339).');
+        $this->command->info('Seeded ' . count($this->problems()) . ' Algorithms problems (301–330).');
     }
 
     private function problems(): array
     {
         return [
 
-            // ─── EASY ───────────────────────────────────────────────────────────────
+            // ─── EASY ────────────────────────────────────────────────────────────────
 
             [
                 'title'       => 'Binary Search',
@@ -46,8 +46,211 @@ console.log(binarySearch([1, 3, 5, 7, 9, 11], 6));    // -1
 console.log(binarySearch([1], 1));                     // 0
 JS,
             ],
+            [
+                'title'       => 'Linear Search',
+                'difficulty'  => 'easy',
+                'description' => 'Search for a target value in an unsorted array by checking each element. Return its index, or -1 if not found.',
+                'solution_code' => <<<'JS'
+function linearSearch(arr, target) {
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === target) return i;
+    }
+    return -1;
+}
 
-            // ─── MEDIUM – SORTING & CLASSIC ALGORITHMS ───────────────────────────────
+console.log(linearSearch([4, 2, 9, 1, 7], 9));    // 2
+console.log(linearSearch([4, 2, 9, 1, 7], 5));    // -1
+console.log(linearSearch([], 1));                  // -1
+JS,
+            ],
+            [
+                'title'       => 'Selection Sort',
+                'difficulty'  => 'easy',
+                'description' => 'Implement Selection Sort: repeatedly find the minimum element from the unsorted part and place it at the beginning. O(n²) time, O(1) space.',
+                'solution_code' => <<<'JS'
+function selectionSort(arr) {
+    const a = [...arr];
+    const n = a.length;
+    for (let i = 0; i < n - 1; i++) {
+        let minIdx = i;
+        for (let j = i + 1; j < n; j++) {
+            if (a[j] < a[minIdx]) minIdx = j;
+        }
+        if (minIdx !== i) [a[i], a[minIdx]] = [a[minIdx], a[i]];
+    }
+    return a;
+}
+
+console.log(selectionSort([64, 25, 12, 22, 11]));   // [11, 12, 22, 25, 64]
+console.log(selectionSort([5, 4, 3, 2, 1]));         // [1, 2, 3, 4, 5]
+JS,
+            ],
+            [
+                'title'       => 'Insertion Sort',
+                'difficulty'  => 'easy',
+                'description' => 'Implement Insertion Sort: build the sorted array one element at a time by inserting each element into its correct position. O(n²) worst case, O(n) best case (already sorted).',
+                'solution_code' => <<<'JS'
+function insertionSort(arr) {
+    const a = [...arr];
+    for (let i = 1; i < a.length; i++) {
+        const key = a[i];
+        let j = i - 1;
+        while (j >= 0 && a[j] > key) {
+            a[j + 1] = a[j];
+            j--;
+        }
+        a[j + 1] = key;
+    }
+    return a;
+}
+
+console.log(insertionSort([12, 11, 13, 5, 6]));   // [5, 6, 11, 12, 13]
+console.log(insertionSort([1, 2, 3, 4, 5]));       // [1, 2, 3, 4, 5] (best case)
+JS,
+            ],
+            [
+                'title'       => 'Find Peak Element',
+                'difficulty'  => 'easy',
+                'description' => 'A peak element is one that is strictly greater than its neighbors. Find any peak index in O(log n) using binary search. Assume arr[-1] = arr[n] = -∞.',
+                'solution_code' => <<<'JS'
+function findPeak(arr) {
+    let left = 0, right = arr.length - 1;
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (arr[mid] < arr[mid + 1]) left = mid + 1;
+        else right = mid;
+    }
+    return left;
+}
+
+const a = [1, 2, 3, 1];
+console.log(findPeak(a), "→", a[findPeak(a)]);    // 2 → 3
+
+const b = [1, 2, 1, 3, 5, 6, 4];
+const p = findPeak(b);
+console.log(p, "→", b[p]);    // 5 → 6  (or 1 → 2, both valid peaks)
+
+console.log(findPeak([1]));    // 0
+JS,
+            ],
+            [
+                'title'       => 'Counting Sort',
+                'difficulty'  => 'easy',
+                'description' => 'Sort an array of non-negative integers in O(n + k) time using counting sort, where k is the maximum value.',
+                'solution_code' => <<<'JS'
+function countingSort(arr) {
+    if (!arr.length) return [];
+    const max = Math.max(...arr);
+    const count = new Array(max + 1).fill(0);
+    for (const n of arr) count[n]++;
+    const result = [];
+    for (let i = 0; i <= max; i++) {
+        while (count[i]-- > 0) result.push(i);
+    }
+    return result;
+}
+
+console.log(countingSort([4, 2, 2, 8, 3, 3, 1]));   // [1, 2, 2, 3, 3, 4, 8]
+console.log(countingSort([0, 5, 3, 5, 0, 2]));       // [0, 0, 2, 3, 5, 5]
+JS,
+            ],
+            [
+                'title'       => 'First and Last Position in Sorted Array',
+                'difficulty'  => 'easy',
+                'description' => 'Given a sorted array and a target, return [firstIndex, lastIndex] of the target. Return [-1, -1] if not found. Use two binary searches for O(log n).',
+                'solution_code' => <<<'JS'
+function searchRange(arr, target) {
+    function bound(isLeft) {
+        let lo = 0, hi = arr.length - 1, idx = -1;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (arr[mid] === target) {
+                idx = mid;
+                if (isLeft) hi = mid - 1;
+                else lo = mid + 1;
+            } else if (arr[mid] < target) lo = mid + 1;
+            else hi = mid - 1;
+        }
+        return idx;
+    }
+    return [bound(true), bound(false)];
+}
+
+console.log(searchRange([5,7,7,8,8,10], 8));   // [3, 4]
+console.log(searchRange([5,7,7,8,8,10], 6));   // [-1, -1]
+console.log(searchRange([1,1,1,1,1], 1));      // [0, 4]
+JS,
+            ],
+            [
+                'title'       => 'Sliding Window – Maximum Sum Subarray of Size K',
+                'difficulty'  => 'easy',
+                'description' => 'Given an array and an integer k, find the maximum sum of any contiguous subarray of size k using the sliding window technique in O(n).',
+                'solution_code' => <<<'JS'
+function maxSumSubarray(arr, k) {
+    if (arr.length < k) return null;
+    let windowSum = arr.slice(0, k).reduce((a, b) => a + b, 0);
+    let maxSum = windowSum;
+    for (let i = k; i < arr.length; i++) {
+        windowSum += arr[i] - arr[i - k];
+        maxSum = Math.max(maxSum, windowSum);
+    }
+    return maxSum;
+}
+
+console.log(maxSumSubarray([2, 1, 5, 1, 3, 2], 3));     // 9  (5+1+3)
+console.log(maxSumSubarray([2, 3, 4, 1, 5], 2));         // 7  (3+4)
+console.log(maxSumSubarray([-1, -2, -3, -4], 2));        // -3 (-1+-2)
+JS,
+            ],
+            [
+                'title'       => 'Two Pointers – Remove Duplicates from Sorted Array',
+                'difficulty'  => 'easy',
+                'description' => 'Given a sorted array, remove duplicates in-place using two pointers and return the new length. The relative order of unique elements must be maintained.',
+                'solution_code' => <<<'JS'
+function removeDuplicates(arr) {
+    if (!arr.length) return 0;
+    let slow = 0;
+    for (let fast = 1; fast < arr.length; fast++) {
+        if (arr[fast] !== arr[slow]) {
+            slow++;
+            arr[slow] = arr[fast];
+        }
+    }
+    return slow + 1;
+}
+
+const a = [1, 1, 2, 2, 3, 4, 4, 5];
+const len = removeDuplicates(a);
+console.log(len);           // 5
+console.log(a.slice(0, len)); // [1, 2, 3, 4, 5]
+
+const b = [0, 0, 1, 1, 1, 2, 2, 3, 3, 4];
+const len2 = removeDuplicates(b);
+console.log(len2);            // 5
+console.log(b.slice(0, len2)); // [0, 1, 2, 3, 4]
+JS,
+            ],
+            [
+                'title'       => 'Two Pointers – Move Zeros to End',
+                'difficulty'  => 'easy',
+                'description' => 'Move all zeros in an array to the end while preserving the relative order of non-zero elements. Do it in-place with O(1) extra space.',
+                'solution_code' => <<<'JS'
+function moveZeros(arr) {
+    let insertPos = 0;
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== 0) arr[insertPos++] = arr[i];
+    }
+    while (insertPos < arr.length) arr[insertPos++] = 0;
+    return arr;
+}
+
+console.log(moveZeros([0, 1, 0, 3, 12]));     // [1, 3, 12, 0, 0]
+console.log(moveZeros([0, 0, 1]));             // [1, 0, 0]
+console.log(moveZeros([1, 2, 3]));             // [1, 2, 3]
+JS,
+            ],
+
+            // ─── MEDIUM ──────────────────────────────────────────────────────────────
 
             [
                 'title'       => 'Maximum Subarray (Kadane\'s Algorithm)',
@@ -72,12 +275,12 @@ JS,
             [
                 'title'       => 'Merge Sort',
                 'difficulty'  => 'medium',
-                'description' => 'Implement the Merge Sort algorithm to sort an array of numbers in ascending order.',
+                'description' => 'Implement the Merge Sort algorithm to sort an array of numbers in ascending order. O(n log n) time, O(n) space.',
                 'solution_code' => <<<'JS'
 function mergeSort(arr) {
     if (arr.length <= 1) return arr;
     const mid = Math.floor(arr.length / 2);
-    const left = mergeSort(arr.slice(0, mid));
+    const left  = mergeSort(arr.slice(0, mid));
     const right = mergeSort(arr.slice(mid));
     return merge(left, right);
 }
@@ -99,7 +302,7 @@ JS,
             [
                 'title'       => 'Quick Sort',
                 'difficulty'  => 'medium',
-                'description' => 'Implement the Quick Sort algorithm to sort an array of numbers.',
+                'description' => 'Implement the Quick Sort algorithm using a median-of-three pivot strategy. O(n log n) average, O(n²) worst case.',
                 'solution_code' => <<<'JS'
 function quickSort(arr) {
     if (arr.length <= 1) return arr;
@@ -110,38 +313,10 @@ function quickSort(arr) {
     return [...quickSort(left), ...mid, ...quickSort(right)];
 }
 
-console.log(quickSort([3, 6, 8, 10, 1, 2, 1]));    // [1, 1, 2, 3, 6, 8, 10]
-console.log(quickSort([5, 4, 3, 2, 1]));             // [1, 2, 3, 4, 5]
+console.log(quickSort([3, 6, 8, 10, 1, 2, 1]));   // [1, 1, 2, 3, 6, 8, 10]
+console.log(quickSort([5, 4, 3, 2, 1]));            // [1, 2, 3, 4, 5]
 JS,
             ],
-            [
-                'title'       => 'Bubble Sort',
-                'difficulty'  => 'medium',
-                'description' => 'Implement the Bubble Sort algorithm. Optimize by stopping early if no swaps occurred in a pass.',
-                'solution_code' => <<<'JS'
-function bubbleSort(arr) {
-    const a = [...arr];
-    const n = a.length;
-    for (let i = 0; i < n - 1; i++) {
-        let swapped = false;
-        for (let j = 0; j < n - i - 1; j++) {
-            if (a[j] > a[j + 1]) {
-                [a[j], a[j + 1]] = [a[j + 1], a[j]];
-                swapped = true;
-            }
-        }
-        if (!swapped) break;
-    }
-    return a;
-}
-
-console.log(bubbleSort([64, 34, 25, 12, 22, 11, 90]));
-// [11, 12, 22, 25, 34, 64, 90]
-JS,
-            ],
-
-            // ─── MEDIUM – DATA STRUCTURES ─────────────────────────────────────────────
-
             [
                 'title'       => 'Stack Implementation',
                 'difficulty'  => 'medium',
@@ -170,7 +345,7 @@ JS,
             [
                 'title'       => 'Queue Implementation',
                 'difficulty'  => 'medium',
-                'description' => 'Implement a Queue data structure with O(1) enqueue and dequeue using an object-based approach.',
+                'description' => 'Implement a Queue with O(1) enqueue and dequeue using an object-based approach with head and tail pointers.',
                 'solution_code' => <<<'JS'
 class Queue {
     constructor() { this.items = {}; this.head = 0; this.tail = 0; }
@@ -188,47 +363,10 @@ class Queue {
 }
 
 const q = new Queue();
-q.enqueue("a");
-q.enqueue("b");
-q.enqueue("c");
-console.log(q.dequeue());    // "a"
-console.log(q.front());      // "b"
-console.log(q.size());       // 2
-JS,
-            ],
-            [
-                'title'       => 'Linked List – Append & Traverse',
-                'difficulty'  => 'medium',
-                'description' => 'Implement a singly linked list with append and toArray methods.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.next = null; }
-}
-
-class LinkedList {
-    constructor() { this.head = null; }
-
-    append(val) {
-        const node = new Node(val);
-        if (!this.head) { this.head = node; return; }
-        let curr = this.head;
-        while (curr.next) curr = curr.next;
-        curr.next = node;
-    }
-
-    toArray() {
-        const arr = [];
-        let curr = this.head;
-        while (curr) { arr.push(curr.val); curr = curr.next; }
-        return arr;
-    }
-}
-
-const list = new LinkedList();
-list.append(1);
-list.append(2);
-list.append(3);
-console.log(list.toArray());    // [1, 2, 3]
+q.enqueue("a"); q.enqueue("b"); q.enqueue("c");
+console.log(q.dequeue());   // "a"
+console.log(q.front());     // "b"
+console.log(q.size());      // 2
 JS,
             ],
             [
@@ -272,75 +410,9 @@ console.log(toArray(reverseList(head)));    // [5, 4, 3, 2, 1]
 JS,
             ],
             [
-                'title'       => 'Detect Cycle in Linked List',
-                'difficulty'  => 'medium',
-                'description' => 'Detect if a linked list has a cycle using Floyd\'s Tortoise and Hare algorithm.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.next = null; }
-}
-
-function hasCycle(head) {
-    let slow = head, fast = head;
-    while (fast && fast.next) {
-        slow = slow.next;
-        fast = fast.next.next;
-        if (slow === fast) return true;
-    }
-    return false;
-}
-
-// List with cycle: 1 → 2 → 3 → 4 → 2
-const n1 = new Node(1), n2 = new Node(2), n3 = new Node(3), n4 = new Node(4);
-n1.next = n2; n2.next = n3; n3.next = n4; n4.next = n2;
-console.log(hasCycle(n1));    // true
-
-// No cycle
-const a = new Node(1), b = new Node(2);
-a.next = b;
-console.log(hasCycle(a));     // false
-JS,
-            ],
-            [
-                'title'       => 'Merge Two Sorted Linked Lists',
-                'difficulty'  => 'medium',
-                'description' => 'Merge two sorted linked lists and return the merged list head.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.next = null; }
-}
-
-function mergeLists(l1, l2) {
-    const dummy = new Node(0);
-    let curr = dummy;
-    while (l1 && l2) {
-        if (l1.val <= l2.val) { curr.next = l1; l1 = l1.next; }
-        else { curr.next = l2; l2 = l2.next; }
-        curr = curr.next;
-    }
-    curr.next = l1 || l2;
-    return dummy.next;
-}
-
-function build(arr) {
-    let head = null, tail = null;
-    for (const v of arr) {
-        const n = new Node(v);
-        if (!tail) head = tail = n;
-        else { tail.next = n; tail = n; }
-    }
-    return head;
-}
-function toArr(h) { const a = []; while (h) { a.push(h.val); h = h.next; } return a; }
-
-console.log(toArr(mergeLists(build([1,3,5]), build([2,4,6]))));
-// [1, 2, 3, 4, 5, 6]
-JS,
-            ],
-            [
                 'title'       => 'Binary Search Tree – Insert & Search',
                 'difficulty'  => 'medium',
-                'description' => 'Implement a Binary Search Tree with insert and search methods.',
+                'description' => 'Implement a Binary Search Tree with iterative insert and search methods.',
                 'solution_code' => <<<'JS'
 class BSTNode {
     constructor(val) { this.val = val; this.left = this.right = null; }
@@ -381,62 +453,9 @@ console.log(bst.search(6));    // false
 JS,
             ],
             [
-                'title'       => 'BST Inorder Traversal',
-                'difficulty'  => 'medium',
-                'description' => 'Perform an inorder traversal of a Binary Search Tree and return the values in sorted order.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.left = this.right = null; }
-}
-
-function insert(root, val) {
-    if (!root) return new Node(val);
-    if (val < root.val) root.left = insert(root.left, val);
-    else root.right = insert(root.right, val);
-    return root;
-}
-
-function inorder(root, result = []) {
-    if (!root) return result;
-    inorder(root.left, result);
-    result.push(root.val);
-    inorder(root.right, result);
-    return result;
-}
-
-let root = null;
-for (const v of [5, 3, 7, 1, 4, 6, 8]) root = insert(root, v);
-console.log(inorder(root));    // [1, 3, 4, 5, 6, 7, 8]
-JS,
-            ],
-            [
-                'title'       => 'Tree Height (Max Depth)',
-                'difficulty'  => 'medium',
-                'description' => 'Find the maximum depth (height) of a binary tree.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val, left = null, right = null) {
-        this.val = val; this.left = left; this.right = right;
-    }
-}
-
-function maxDepth(root) {
-    if (!root) return 0;
-    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
-}
-
-const tree = new Node(1,
-    new Node(2, new Node(4), new Node(5)),
-    new Node(3)
-);
-console.log(maxDepth(tree));    // 3
-console.log(maxDepth(null));    // 0
-JS,
-            ],
-            [
                 'title'       => 'Level Order Traversal (BFS)',
                 'difficulty'  => 'medium',
-                'description' => 'Return the level order traversal of a binary tree as an array of arrays (one per level).',
+                'description' => 'Return the level order traversal of a binary tree as an array of arrays (one array per level).',
                 'solution_code' => <<<'JS'
 class Node {
     constructor(val, left = null, right = null) {
@@ -466,13 +485,10 @@ console.log(JSON.stringify(levelOrder(tree)));
 // [[3],[9,20],[15,7]]
 JS,
             ],
-
-            // ─── MEDIUM – GRAPHS ──────────────────────────────────────────────────────
-
             [
                 'title'       => 'Graph BFS',
                 'difficulty'  => 'medium',
-                'description' => 'Implement Breadth-First Search on a graph represented as an adjacency list.',
+                'description' => 'Implement Breadth-First Search on an undirected graph represented as an adjacency list. Return the traversal order.',
                 'solution_code' => <<<'JS'
 function bfs(graph, start) {
     const visited = new Set([start]);
@@ -495,98 +511,15 @@ const graph = {
     A: ["B", "C"],
     B: ["A", "D", "E"],
     C: ["A", "F"],
-    D: ["B"],
-    E: ["B", "F"],
-    F: ["C", "E"],
+    D: ["B"], E: ["B", "F"], F: ["C", "E"],
 };
 console.log(bfs(graph, "A"));    // ["A", "B", "C", "D", "E", "F"]
 JS,
             ],
             [
-                'title'       => 'Graph DFS',
-                'difficulty'  => 'medium',
-                'description' => 'Implement Depth-First Search on a graph represented as an adjacency list.',
-                'solution_code' => <<<'JS'
-function dfs(graph, start, visited = new Set(), order = []) {
-    visited.add(start);
-    order.push(start);
-    for (const neighbor of (graph[start] || [])) {
-        if (!visited.has(neighbor)) {
-            dfs(graph, neighbor, visited, order);
-        }
-    }
-    return order;
-}
-
-const graph = {
-    A: ["B", "C"],
-    B: ["A", "D", "E"],
-    C: ["A", "F"],
-    D: ["B"],
-    E: ["B", "F"],
-    F: ["C", "E"],
-};
-console.log(dfs(graph, "A"));    // ["A", "B", "D", "E", "F", "C"]
-JS,
-            ],
-            [
-                'title'       => 'Number of Islands',
-                'difficulty'  => 'medium',
-                'description' => 'Given a 2D grid of "1" (land) and "0" (water), count the number of islands using DFS flood fill.',
-                'solution_code' => <<<'JS'
-function numIslands(grid) {
-    let count = 0;
-    function sink(r, c) {
-        if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || grid[r][c] !== "1") return;
-        grid[r][c] = "0";
-        sink(r+1,c); sink(r-1,c); sink(r,c+1); sink(r,c-1);
-    }
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[0].length; c++) {
-            if (grid[r][c] === "1") { count++; sink(r, c); }
-        }
-    }
-    return count;
-}
-
-const grid = [
-    ["1","1","0","0","0"],
-    ["1","1","0","0","0"],
-    ["0","0","1","0","0"],
-    ["0","0","0","1","1"],
-];
-console.log(numIslands(grid));    // 3
-JS,
-            ],
-            [
-                'title'       => 'Flood Fill',
-                'difficulty'  => 'medium',
-                'description' => 'Implement the flood fill algorithm: given a starting pixel, replace its color and all connected same-colored pixels with a new color.',
-                'solution_code' => <<<'JS'
-function floodFill(image, sr, sc, newColor) {
-    const originalColor = image[sr][sc];
-    if (originalColor === newColor) return image;
-
-    function fill(r, c) {
-        if (r < 0 || r >= image.length || c < 0 || c >= image[0].length) return;
-        if (image[r][c] !== originalColor) return;
-        image[r][c] = newColor;
-        fill(r+1,c); fill(r-1,c);
-        fill(r,c+1); fill(r,c-1);
-    }
-    fill(sr, sc);
-    return image;
-}
-
-const image = [[1,1,1],[1,1,0],[1,0,1]];
-console.log(JSON.stringify(floodFill(image, 1, 1, 2)));
-// [[2,2,2],[2,2,0],[2,0,1]]
-JS,
-            ],
-            [
                 'title'       => 'Topological Sort',
                 'difficulty'  => 'medium',
-                'description' => "Given a directed acyclic graph as a list of edges, return a valid topological ordering using Kahn's algorithm.",
+                'description' => "Given a directed acyclic graph, return a valid topological ordering using Kahn's algorithm (BFS-based). Returns [] if the graph has a cycle.",
                 'solution_code' => <<<'JS'
 function topoSort(numNodes, edges) {
     const inDegree = new Array(numNodes).fill(0);
@@ -610,56 +543,20 @@ function topoSort(numNodes, edges) {
             if (--inDegree[neighbor] === 0) queue.push(neighbor);
         }
     }
-    return order.length === numNodes ? order : [];  // [] if cycle
+    return order.length === numNodes ? order : [];
 }
 
 console.log(topoSort(6, [[5,2],[5,0],[4,0],[4,1],[2,3],[3,1]]));
-// one valid order: [4, 5, 0, 2, 1, 3]
-JS,
-            ],
-            [
-                'title'       => 'LRU Cache',
-                'difficulty'  => 'medium',
-                'description' => 'Implement a Least Recently Used (LRU) Cache with O(1) get and put operations using JavaScript\'s Map (insertion-order guaranteed).',
-                'solution_code' => <<<'JS'
-class LRUCache {
-    constructor(capacity) {
-        this.capacity = capacity;
-        this.cache = new Map();
-    }
-
-    get(key) {
-        if (!this.cache.has(key)) return -1;
-        const val = this.cache.get(key);
-        this.cache.delete(key);
-        this.cache.set(key, val);
-        return val;
-    }
-
-    put(key, value) {
-        if (this.cache.has(key)) this.cache.delete(key);
-        else if (this.cache.size >= this.capacity) {
-            this.cache.delete(this.cache.keys().next().value);  // evict LRU
-        }
-        this.cache.set(key, value);
-    }
-}
-
-const cache = new LRUCache(2);
-cache.put(1, 1);
-cache.put(2, 2);
-console.log(cache.get(1));    // 1
-cache.put(3, 3);               // evicts key 2
-console.log(cache.get(2));    // -1
+// [4, 5, 0, 2, 1, 3] (one valid order)
 JS,
             ],
 
-            // ─── HARD ───────────────────────────────────────────────────────────────
+            // ─── HARD ────────────────────────────────────────────────────────────────
 
             [
                 'title'       => 'Word Search',
                 'difficulty'  => 'hard',
-                'description' => 'Given a 2D grid of characters and a word, determine if the word exists by connecting adjacent cells (up/down/left/right). Each cell may only be used once.',
+                'description' => 'Given a 2D grid of characters and a word, determine if the word exists by connecting adjacent cells (up/down/left/right). Each cell may only be used once per path.',
                 'solution_code' => <<<'JS'
 function exist(board, word) {
     const rows = board.length, cols = board[0].length;
@@ -687,178 +584,42 @@ console.log(exist(board, "ABCB"));      // false
 JS,
             ],
             [
-                'title'       => 'Jump Game II (Minimum Jumps)',
+                'title'       => 'N-Queens',
                 'difficulty'  => 'hard',
-                'description' => 'Given an array where each element is the max jump from that position, return the minimum number of jumps to reach the last index.',
+                'description' => 'Place n queens on an n×n chessboard so no two queens attack each other. Return all valid board configurations using backtracking with O(1) conflict detection via sets.',
                 'solution_code' => <<<'JS'
-function jump(nums) {
-    let jumps = 0, currentEnd = 0, farthest = 0;
-    for (let i = 0; i < nums.length - 1; i++) {
-        farthest = Math.max(farthest, i + nums[i]);
-        if (i === currentEnd) {
-            jumps++;
-            currentEnd = farthest;
+function solveNQueens(n) {
+    const results = [];
+    const cols = new Set(), diag1 = new Set(), diag2 = new Set();
+    const board = Array.from({ length: n }, () => Array(n).fill("."));
+
+    function backtrack(row) {
+        if (row === n) {
+            results.push(board.map(r => r.join("")));
+            return;
+        }
+        for (let col = 0; col < n; col++) {
+            if (cols.has(col) || diag1.has(row - col) || diag2.has(row + col)) continue;
+            cols.add(col); diag1.add(row - col); diag2.add(row + col);
+            board[row][col] = "Q";
+            backtrack(row + 1);
+            board[row][col] = ".";
+            cols.delete(col); diag1.delete(row - col); diag2.delete(row + col);
         }
     }
-    return jumps;
+    backtrack(0);
+    return results;
 }
 
-console.log(jump([2, 3, 1, 1, 4]));    // 2
-console.log(jump([2, 3, 0, 1, 4]));    // 2
-console.log(jump([1, 2, 3]));           // 2
-JS,
-            ],
-            [
-                'title'       => 'Merge K Sorted Arrays',
-                'difficulty'  => 'hard',
-                'description' => 'Merge k sorted arrays into one sorted array.',
-                'solution_code' => <<<'JS'
-function mergeKSorted(arrays) {
-    const result = [];
-    const pointers = new Array(arrays.length).fill(0);
-    while (true) {
-        let minVal = Infinity, minIdx = -1;
-        for (let i = 0; i < arrays.length; i++) {
-            if (pointers[i] < arrays[i].length && arrays[i][pointers[i]] < minVal) {
-                minVal = arrays[i][pointers[i]];
-                minIdx = i;
-            }
-        }
-        if (minIdx === -1) break;
-        result.push(minVal);
-        pointers[minIdx]++;
-    }
-    return result;
-}
-
-console.log(mergeKSorted([[1,4,7],[2,5,8],[3,6,9]]));
-// [1, 2, 3, 4, 5, 6, 7, 8, 9]
-JS,
-            ],
-            [
-                'title'       => 'Find All Permutations',
-                'difficulty'  => 'hard',
-                'description' => 'Given an array of distinct integers, return all possible permutations using backtracking.',
-                'solution_code' => <<<'JS'
-function permutations(nums) {
-    const result = [];
-    function backtrack(current, remaining) {
-        if (!remaining.length) { result.push([...current]); return; }
-        for (let i = 0; i < remaining.length; i++) {
-            current.push(remaining[i]);
-            backtrack(current, [...remaining.slice(0, i), ...remaining.slice(i + 1)]);
-            current.pop();
-        }
-    }
-    backtrack([], nums);
-    return result;
-}
-
-const perms = permutations([1, 2, 3]);
-console.log(perms.length);              // 6
-console.log(JSON.stringify(perms[0]));  // [1,2,3]
-console.log(JSON.stringify(perms[5]));  // [3,2,1]
-JS,
-            ],
-            [
-                'title'       => 'Power Set (All Subsets)',
-                'difficulty'  => 'hard',
-                'description' => 'Given an array of distinct integers, return all possible subsets (the power set).',
-                'solution_code' => <<<'JS'
-function subsets(nums) {
-    const result = [[]];
-    for (const n of nums) {
-        const newSubsets = result.map(sub => [...sub, n]);
-        result.push(...newSubsets);
-    }
-    return result;
-}
-
-console.log(JSON.stringify(subsets([1, 2, 3])));
-// [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
-console.log(subsets([1, 2, 3]).length);   // 8 = 2^3
-JS,
-            ],
-            [
-                'title'       => 'Spiral Matrix',
-                'difficulty'  => 'hard',
-                'description' => 'Given an m×n matrix, return all elements in spiral order.',
-                'solution_code' => <<<'JS'
-function spiralOrder(matrix) {
-    const result = [];
-    let top = 0, bottom = matrix.length - 1;
-    let left = 0, right = matrix[0].length - 1;
-    while (top <= bottom && left <= right) {
-        for (let i = left; i <= right; i++) result.push(matrix[top][i]);
-        top++;
-        for (let i = top; i <= bottom; i++) result.push(matrix[i][right]);
-        right--;
-        if (top <= bottom) {
-            for (let i = right; i >= left; i--) result.push(matrix[bottom][i]);
-            bottom--;
-        }
-        if (left <= right) {
-            for (let i = bottom; i >= top; i--) result.push(matrix[i][left]);
-            left++;
-        }
-    }
-    return result;
-}
-
-console.log(spiralOrder([[1,2,3],[4,5,6],[7,8,9]]));
-// [1,2,3,6,9,8,7,4,5]
-JS,
-            ],
-            [
-                'title'       => 'Rotate Matrix 90 Degrees',
-                'difficulty'  => 'hard',
-                'description' => 'Rotate an n×n matrix 90 degrees clockwise in place. Approach: transpose then reverse each row.',
-                'solution_code' => <<<'JS'
-function rotateMatrix(matrix) {
-    const n = matrix.length;
-    for (let i = 0; i < n; i++)
-        for (let j = i + 1; j < n; j++)
-            [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];
-    for (let i = 0; i < n; i++)
-        matrix[i].reverse();
-    return matrix;
-}
-
-const m = [[1,2,3],[4,5,6],[7,8,9]];
-console.log(JSON.stringify(rotateMatrix(m)));
-// [[7,4,1],[8,5,2],[9,6,3]]
-JS,
-            ],
-            [
-                'title'       => 'Search in Rotated Sorted Array',
-                'difficulty'  => 'hard',
-                'description' => 'A sorted array was rotated at some pivot. Search for a target and return its index (or -1).',
-                'solution_code' => <<<'JS'
-function searchRotated(nums, target) {
-    let left = 0, right = nums.length - 1;
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        if (nums[mid] === target) return mid;
-        if (nums[left] <= nums[mid]) {
-            if (nums[left] <= target && target < nums[mid]) right = mid - 1;
-            else left = mid + 1;
-        } else {
-            if (nums[mid] < target && target <= nums[right]) left = mid + 1;
-            else right = mid - 1;
-        }
-    }
-    return -1;
-}
-
-console.log(searchRotated([4, 5, 6, 7, 0, 1, 2], 0));    // 4
-console.log(searchRotated([4, 5, 6, 7, 0, 1, 2], 3));    // -1
-console.log(searchRotated([1], 0));                        // -1
+const sol4 = solveNQueens(4);
+console.log(sol4.length);    // 2
+console.log(sol4[0]);        // [".Q..","...Q","Q...","..Q."]
 JS,
             ],
             [
                 'title'       => 'Trapping Rain Water',
                 'difficulty'  => 'hard',
-                'description' => 'Given an array of heights representing an elevation map, compute how much water it can trap after raining.',
+                'description' => 'Given an array of heights representing an elevation map, compute how much water it can trap after raining. Use the two-pointer approach for O(n) time and O(1) space.',
                 'solution_code' => <<<'JS'
 function trap(height) {
     let left = 0, right = height.length - 1;
@@ -884,7 +645,7 @@ JS,
             [
                 'title'       => 'Largest Rectangle in Histogram',
                 'difficulty'  => 'hard',
-                'description' => 'Find the largest rectangle that can be formed in a histogram (array of bar heights).',
+                'description' => 'Find the area of the largest rectangle that fits entirely within a histogram. Use a monotonic stack for O(n) time.',
                 'solution_code' => <<<'JS'
 function largestRectangle(heights) {
     const stack = [];
@@ -904,146 +665,136 @@ function largestRectangle(heights) {
 
 console.log(largestRectangle([2,1,5,6,2,3]));    // 10
 console.log(largestRectangle([2,4]));              // 4
+console.log(largestRectangle([6,2,5,4,5,1,6]));   // 12
 JS,
             ],
             [
-                'title'       => 'First Missing Positive',
+                'title'       => 'Search in Rotated Sorted Array',
                 'difficulty'  => 'hard',
-                'description' => 'Find the smallest missing positive integer in an unsorted array. Must run in O(n) time and O(1) extra space.',
+                'description' => 'A sorted array was rotated at an unknown pivot. Search for a target in O(log n) using a modified binary search that identifies the sorted half at each step.',
                 'solution_code' => <<<'JS'
-function firstMissingPositive(nums) {
-    const n = nums.length;
-    for (let i = 0; i < n; i++) {
-        while (nums[i] > 0 && nums[i] <= n && nums[nums[i] - 1] !== nums[i]) {
-            [nums[nums[i] - 1], nums[i]] = [nums[i], nums[nums[i] - 1]];
+function searchRotated(nums, target) {
+    let left = 0, right = nums.length - 1;
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (nums[mid] === target) return mid;
+        if (nums[left] <= nums[mid]) {
+            if (nums[left] <= target && target < nums[mid]) right = mid - 1;
+            else left = mid + 1;
+        } else {
+            if (nums[mid] < target && target <= nums[right]) left = mid + 1;
+            else right = mid - 1;
         }
     }
-    for (let i = 0; i < n; i++) {
-        if (nums[i] !== i + 1) return i + 1;
-    }
-    return n + 1;
+    return -1;
 }
 
-console.log(firstMissingPositive([1, 2, 0]));      // 3
-console.log(firstMissingPositive([3, 4, -1, 1]));  // 2
-console.log(firstMissingPositive([7, 8, 9]));       // 1
+console.log(searchRotated([4, 5, 6, 7, 0, 1, 2], 0));    // 4
+console.log(searchRotated([4, 5, 6, 7, 0, 1, 2], 3));    // -1
+console.log(searchRotated([1], 0));                        // -1
 JS,
             ],
             [
-                'title'       => 'Median of Two Sorted Arrays',
+                'title'       => 'Merge K Sorted Arrays',
                 'difficulty'  => 'hard',
-                'description' => 'Find the median of two sorted arrays in O(log(min(m,n))) time using binary search on the shorter array.',
+                'description' => 'Merge k sorted arrays into one sorted array. Use a min-heap approach: track the current front of each array and always extract the minimum.',
                 'solution_code' => <<<'JS'
-function findMedianSortedArrays(nums1, nums2) {
-    if (nums1.length > nums2.length) return findMedianSortedArrays(nums2, nums1);
-    const m = nums1.length, n = nums2.length;
-    let lo = 0, hi = m;
-    while (lo <= hi) {
-        const px = Math.floor((lo + hi) / 2);
-        const py = Math.floor((m + n + 1) / 2) - px;
-        const maxLeftX  = px === 0 ? -Infinity : nums1[px - 1];
-        const minRightX = px === m ?  Infinity : nums1[px];
-        const maxLeftY  = py === 0 ? -Infinity : nums2[py - 1];
-        const minRightY = py === n ?  Infinity : nums2[py];
-        if (maxLeftX <= minRightY && maxLeftY <= minRightX) {
-            if ((m + n) % 2 === 0)
-                return (Math.max(maxLeftX, maxLeftY) + Math.min(minRightX, minRightY)) / 2;
-            return Math.max(maxLeftX, maxLeftY);
-        } else if (maxLeftX > minRightY) hi = px - 1;
-        else lo = px + 1;
+function mergeKSorted(arrays) {
+    // Min-heap via array + sort (for clarity; a real heap would be O(n log k))
+    const result = [];
+    // Entries: [value, arrayIndex, elementIndex]
+    const heap = [];
+    for (let i = 0; i < arrays.length; i++) {
+        if (arrays[i].length > 0) heap.push([arrays[i][0], i, 0]);
     }
-}
+    heap.sort((a, b) => a[0] - b[0]);
 
-console.log(findMedianSortedArrays([1,3],[2]));      // 2
-console.log(findMedianSortedArrays([1,2],[3,4]));    // 2.5
-JS,
-            ],
-            [
-                'title'       => 'N-Queens',
-                'difficulty'  => 'hard',
-                'description' => 'Place n queens on an n×n chessboard so no two queens attack each other. Return all valid board configurations.',
-                'solution_code' => <<<'JS'
-function solveNQueens(n) {
-    const results = [];
-    const cols = new Set(), diag1 = new Set(), diag2 = new Set();
-    const board = Array.from({ length: n }, () => Array(n).fill("."));
-
-    function backtrack(row) {
-        if (row === n) {
-            results.push(board.map(r => r.join("")));
-            return;
-        }
-        for (let col = 0; col < n; col++) {
-            if (cols.has(col) || diag1.has(row - col) || diag2.has(row + col)) continue;
-            cols.add(col); diag1.add(row - col); diag2.add(row + col);
-            board[row][col] = "Q";
-            backtrack(row + 1);
-            board[row][col] = ".";
-            cols.delete(col); diag1.delete(row - col); diag2.delete(row + col);
+    while (heap.length) {
+        const [val, ai, ei] = heap.shift();
+        result.push(val);
+        if (ei + 1 < arrays[ai].length) {
+            // insert next element from same array, keep sorted
+            const next = [arrays[ai][ei + 1], ai, ei + 1];
+            let pos = heap.findIndex(x => x[0] > next[0]);
+            if (pos === -1) heap.push(next);
+            else heap.splice(pos, 0, next);
         }
     }
-    backtrack(0);
-    return results;
+    return result;
 }
 
-const solutions = solveNQueens(4);
-console.log(solutions.length);    // 2
-console.log(solutions[0]);        // [".Q..","...Q","Q...","..Q."]
+console.log(mergeKSorted([[1,4,7],[2,5,8],[3,6,9]]));
+// [1, 2, 3, 4, 5, 6, 7, 8, 9]
+console.log(mergeKSorted([[1,2,3],[4,5,6],[7,8,9]]));
+// [1, 2, 3, 4, 5, 6, 7, 8, 9]
 JS,
             ],
             [
-                'title'       => 'Serialize and Deserialize BST',
+                'title'       => 'Find All Permutations',
                 'difficulty'  => 'hard',
-                'description' => 'Implement functions to serialize a Binary Search Tree to a string and deserialize it back to a BST.',
+                'description' => 'Given an array of distinct integers, return all possible permutations using backtracking.',
                 'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.left = this.right = null; }
-}
-
-function serialize(root) {
-    const vals = [];
-    function preorder(node) {
-        if (!node) { vals.push("null"); return; }
-        vals.push(node.val);
-        preorder(node.left);
-        preorder(node.right);
+function permutations(nums) {
+    const result = [];
+    function backtrack(current, remaining) {
+        if (!remaining.length) { result.push([...current]); return; }
+        for (let i = 0; i < remaining.length; i++) {
+            current.push(remaining[i]);
+            backtrack(current, [...remaining.slice(0, i), ...remaining.slice(i + 1)]);
+            current.pop();
+        }
     }
-    preorder(root);
-    return vals.join(",");
+    backtrack([], nums);
+    return result;
 }
 
-function deserialize(data) {
-    const vals = data.split(",");
-    let idx = 0;
-    function build() {
-        if (vals[idx] === "null") { idx++; return null; }
-        const node = new Node(Number(vals[idx++]));
-        node.left = build();
-        node.right = build();
-        return node;
+const perms = permutations([1, 2, 3]);
+console.log(perms.length);               // 6
+console.log(JSON.stringify(perms[0]));   // [1,2,3]
+console.log(JSON.stringify(perms[5]));   // [3,2,1]
+JS,
+            ],
+            [
+                'title'       => "Dijkstra's Shortest Path",
+                'difficulty'  => 'hard',
+                'description' => "Find the shortest path from a source node to all other nodes in a weighted graph using Dijkstra's algorithm.",
+                'solution_code' => <<<'JS'
+function dijkstra(graph, src) {
+    const dist = {};
+    const visited = new Set();
+    for (const node in graph) dist[node] = Infinity;
+    dist[src] = 0;
+    const pq = [[0, src]];
+
+    while (pq.length) {
+        pq.sort((a, b) => a[0] - b[0]);
+        const [d, u] = pq.shift();
+        if (visited.has(u)) continue;
+        visited.add(u);
+        for (const [v, weight] of (graph[u] || [])) {
+            if (dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                pq.push([dist[v], v]);
+            }
+        }
     }
-    return build();
+    return dist;
 }
 
-function insert(root, val) {
-    if (!root) return new Node(val);
-    if (val < root.val) root.left = insert(root.left, val);
-    else root.right = insert(root.right, val);
-    return root;
-}
-
-let root = null;
-for (const v of [5, 3, 7, 1, 4]) root = insert(root, v);
-const str = serialize(root);
-console.log(str);
-const rebuilt = deserialize(str);
-console.log(serialize(rebuilt) === str);    // true
+const graph = {
+    A: [["B", 1], ["C", 4]],
+    B: [["C", 2], ["D", 5]],
+    C: [["D", 1]],
+    D: [],
+};
+console.log(dijkstra(graph, "A"));
+// { A: 0, B: 1, C: 3, D: 4 }
 JS,
             ],
             [
                 'title'       => 'Trie – Insert and Search',
                 'difficulty'  => 'hard',
-                'description' => 'Implement a Trie (prefix tree) with insert, search, and startsWith methods.',
+                'description' => 'Implement a Trie (prefix tree) with insert, search, and startsWith methods. Used in autocomplete, spell checking, and IP routing.',
                 'solution_code' => <<<'JS'
 class TrieNode {
     constructor() { this.children = {}; this.isEnd = false; }
@@ -1092,7 +843,7 @@ JS,
             [
                 'title'       => 'Max Heap Implementation',
                 'difficulty'  => 'hard',
-                'description' => 'Implement a Max Heap with insert and extractMax operations.',
+                'description' => 'Implement a Max Heap from scratch with insert (bubble-up) and extractMax (sink-down) operations. Both run in O(log n).',
                 'solution_code' => <<<'JS'
 class MaxHeap {
     constructor() { this.heap = []; }
@@ -1137,76 +888,7 @@ const h = new MaxHeap();
 [3, 10, 1, 7, 15, 4].forEach(v => h.insert(v));
 console.log(h.extractMax());    // 15
 console.log(h.extractMax());    // 10
-JS,
-            ],
-            [
-                'title'       => "Dijkstra's Shortest Path",
-                'difficulty'  => 'hard',
-                'description' => "Given a weighted graph as an adjacency list, find the shortest path from a source node to all other nodes using Dijkstra's algorithm.",
-                'solution_code' => <<<'JS'
-function dijkstra(graph, src) {
-    const dist = {};
-    const visited = new Set();
-    for (const node in graph) dist[node] = Infinity;
-    dist[src] = 0;
-
-    const pq = [[0, src]];
-
-    while (pq.length) {
-        pq.sort((a, b) => a[0] - b[0]);
-        const [d, u] = pq.shift();
-        if (visited.has(u)) continue;
-        visited.add(u);
-
-        for (const [v, weight] of (graph[u] || [])) {
-            if (dist[u] + weight < dist[v]) {
-                dist[v] = dist[u] + weight;
-                pq.push([dist[v], v]);
-            }
-        }
-    }
-    return dist;
-}
-
-const graph = {
-    A: [["B", 1], ["C", 4]],
-    B: [["C", 2], ["D", 5]],
-    C: [["D", 1]],
-    D: [],
-};
-console.log(dijkstra(graph, "A"));
-// { A: 0, B: 1, C: 3, D: 4 }
-JS,
-            ],
-            [
-                'title'       => 'Lowest Common Ancestor (BST)',
-                'difficulty'  => 'hard',
-                'description' => 'Find the Lowest Common Ancestor of two nodes in a Binary Search Tree using the BST property.',
-                'solution_code' => <<<'JS'
-class Node {
-    constructor(val) { this.val = val; this.left = this.right = null; }
-}
-
-function lca(root, p, q) {
-    while (root) {
-        if (p < root.val && q < root.val) root = root.left;
-        else if (p > root.val && q > root.val) root = root.right;
-        else return root.val;
-    }
-    return null;
-}
-
-function insert(root, val) {
-    if (!root) return new Node(val);
-    if (val < root.val) root.left = insert(root.left, val);
-    else root.right = insert(root.right, val);
-    return root;
-}
-
-let root = null;
-for (const v of [6, 2, 8, 0, 4, 7, 9, 3, 5]) root = insert(root, v);
-console.log(lca(root, 2, 8));    // 6
-console.log(lca(root, 2, 4));    // 2
+console.log(h.extractMax());    // 7
 JS,
             ],
         ];

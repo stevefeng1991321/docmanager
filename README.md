@@ -59,11 +59,14 @@ php artisan db:seed
 # Refresh database and re-run all seeders
 php artisan migrate:fresh --seed
 
+# Delete stale Algorithms records from database
+php artisan tinker --execute="App\Models\Problem::where('category', 'Algorithms')->delete()
+
 # Refresh database and run a specific seeder
-php artisan migrate:fresh --seed --seeder=JavaScriptSeeder
-php artisan migrate:fresh --seed --seeder=MathSeeder
-php artisan migrate:fresh --seed --seeder=AlgorithmsSeeder
-php artisan migrate:fresh --seed --seeder=AISeeder
+php artisan db:seed --class=JavaScriptSeeder
+php artisan db:seed --class=MathSeeder
+php artisan db:seed --class=AlgorithmsSeeder
+php artisan db:seed --class=AISeeder
 ```
 
 The seeder creates:

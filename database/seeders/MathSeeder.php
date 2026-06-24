@@ -16,29 +16,15 @@ class MathSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($this->problems()) . ' Math problems (201–243).');
+        $this->command->info('Seeded ' . count($this->problems()) . ' Math problems (201–230).');
     }
 
     private function problems(): array
     {
         return [
 
-            // ─── FROM PROBLEMSEEDER (MATH/EASY) ─────────────────────────────────────
+            // ─── EASY ────────────────────────────────────────────────────────────────
 
-            [
-                'title'       => 'Sum of Two Numbers',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that takes two numbers and returns their sum.',
-                'solution_code' => <<<'JS'
-function sum(a, b) {
-    return a + b;
-}
-
-console.log(sum(3, 7));    // 10
-console.log(sum(-1, 5));   // 4
-console.log(sum(0, 0));    // 0
-JS,
-            ],
             [
                 'title'       => 'Fibonacci Sequence',
                 'difficulty'  => 'easy',
@@ -114,7 +100,7 @@ JS,
             [
                 'title'       => 'LCM (Least Common Multiple)',
                 'difficulty'  => 'easy',
-                'description' => 'Find the LCM of two positive integers. Use: LCM(a, b) = (a × b) / GCD(a, b).',
+                'description' => 'Find the LCM of two positive integers. Use: LCM(a, b) = (a × b) / GCD(a, b). Also compute the LCM of an array.',
                 'solution_code' => <<<'JS'
 function gcd(a, b) {
     while (b !== 0) [a, b] = [b, a % b];
@@ -129,15 +115,15 @@ function lcmArray(nums) {
     return nums.reduce(lcm);
 }
 
-console.log(lcm(4, 6));                    // 12
-console.log(lcm(12, 18));                  // 36
-console.log(lcmArray([2, 3, 4, 5]));       // 60
+console.log(lcm(4, 6));               // 12
+console.log(lcm(12, 18));             // 36
+console.log(lcmArray([2, 3, 4, 5])); // 60
 JS,
             ],
             [
                 'title'       => 'Power of Two Check',
                 'difficulty'  => 'easy',
-                'description' => 'Write a function that returns true if a number is a power of two using the bit trick: n & (n-1) === 0.',
+                'description' => 'Write a function that returns true if a number is a power of two using the bit trick: n & (n−1) === 0.',
                 'solution_code' => <<<'JS'
 function isPowerOfTwo(n) {
     if (n <= 0) return false;
@@ -148,40 +134,6 @@ console.log(isPowerOfTwo(1));    // true
 console.log(isPowerOfTwo(16));   // true
 console.log(isPowerOfTwo(18));   // false
 console.log(isPowerOfTwo(0));    // false
-JS,
-            ],
-            [
-                'title'       => 'Number to Binary',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that converts a non-negative integer to its binary string representation.',
-                'solution_code' => <<<'JS'
-function toBinary(n) {
-    return (n >>> 0).toString(2);
-}
-
-console.log(toBinary(5));     // "101"
-console.log(toBinary(10));    // "1010"
-console.log(toBinary(255));   // "11111111"
-console.log(toBinary(0));     // "0"
-JS,
-            ],
-            [
-                'title'       => 'Celsius to Fahrenheit',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that converts a temperature from Celsius to Fahrenheit using F = (C × 9/5) + 32.',
-                'solution_code' => <<<'JS'
-function celsiusToFahrenheit(c) {
-    return (c * 9 / 5) + 32;
-}
-
-function fahrenheitToCelsius(f) {
-    return (f - 32) * 5 / 9;
-}
-
-console.log(celsiusToFahrenheit(0));      // 32
-console.log(celsiusToFahrenheit(100));    // 212
-console.log(celsiusToFahrenheit(-40));    // -40
-console.log(fahrenheitToCelsius(32));     // 0
 JS,
             ],
             [
@@ -201,361 +153,23 @@ console.log(sumOfDigits(0));      // 0
 console.log(sumOfDigits(-42));    // 6
 JS,
             ],
-
-            // ─── MATH FUNDAMENTALS ───────────────────────────────────────────────────
-
             [
-                'title'       => 'Digital Root',
+                'title'       => 'Celsius to Fahrenheit',
                 'difficulty'  => 'easy',
-                'description' => 'The digital root is the single digit obtained by repeatedly summing the digits until one digit remains. Also has the O(1) formula: 1 + (n−1) % 9 for n > 0.',
+                'description' => 'Write functions that convert temperatures between Celsius and Fahrenheit.',
                 'solution_code' => <<<'JS'
-// Iterative
-function digitalRoot(n) {
-    while (n >= 10) {
-        n = String(n).split("").reduce((s, d) => s + +d, 0);
-    }
-    return n;
+function celsiusToFahrenheit(c) {
+    return (c * 9 / 5) + 32;
 }
 
-// O(1) formula
-function digitalRootFast(n) {
-    if (n === 0) return 0;
-    return 1 + (n - 1) % 9;
+function fahrenheitToCelsius(f) {
+    return (f - 32) * 5 / 9;
 }
 
-console.log(digitalRoot(493));         // 7
-console.log(digitalRoot(942));         // 6
-console.log(digitalRootFast(493));     // 7
-console.log(digitalRootFast(9));       // 9
-JS,
-            ],
-            [
-                'title'       => 'Count Digits in Number',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that counts the number of digits in an integer.',
-                'solution_code' => <<<'JS'
-function countDigits(n) {
-    return String(Math.abs(n)).length;
-}
-
-console.log(countDigits(0));       // 1
-console.log(countDigits(123));     // 3
-console.log(countDigits(-9876));   // 4
-console.log(countDigits(1000));    // 4
-JS,
-            ],
-            [
-                'title'       => 'Reverse Digits',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that reverses the digits of an integer (preserving sign).',
-                'solution_code' => <<<'JS'
-function reverseDigits(n) {
-    const sign = n < 0 ? -1 : 1;
-    const reversed = String(Math.abs(n)).split("").reverse().join("");
-    return sign * Number(reversed);
-}
-
-console.log(reverseDigits(1234));    // 4321
-console.log(reverseDigits(-567));    // -765
-console.log(reverseDigits(100));     // 1
-console.log(reverseDigits(0));       // 0
-JS,
-            ],
-            [
-                'title'       => 'Perfect Square Check',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns true if a number is a perfect square (without using Math.sqrt).',
-                'solution_code' => <<<'JS'
-function isPerfectSquare(n) {
-    if (n < 0) return false;
-    const root = Math.round(Math.sqrt(n));
-    return root * root === n;
-}
-
-// Without Math.sqrt — binary search approach:
-function isPerfectSquareBinary(n) {
-    if (n < 0) return false;
-    let lo = 0, hi = n;
-    while (lo <= hi) {
-        const mid = Math.floor((lo + hi) / 2);
-        const sq = mid * mid;
-        if (sq === n) return true;
-        if (sq < n) lo = mid + 1;
-        else hi = mid - 1;
-    }
-    return false;
-}
-
-console.log(isPerfectSquare(16));    // true
-console.log(isPerfectSquare(14));    // false
-console.log(isPerfectSquareBinary(25));   // true
-console.log(isPerfectSquareBinary(26));   // false
-JS,
-            ],
-            [
-                'title'       => 'Count Divisors',
-                'difficulty'  => 'easy',
-                'description' => 'Return the total number of divisors of a positive integer n. Iterate up to √n and count both i and n/i.',
-                'solution_code' => <<<'JS'
-function countDivisors(n) {
-    let count = 0;
-    for (let i = 1; i <= Math.sqrt(n); i++) {
-        if (n % i === 0) {
-            count += i === n / i ? 1 : 2;
-        }
-    }
-    return count;
-}
-
-function listDivisors(n) {
-    const divs = [];
-    for (let i = 1; i <= Math.sqrt(n); i++) {
-        if (n % i === 0) {
-            divs.push(i);
-            if (i !== n / i) divs.push(n / i);
-        }
-    }
-    return divs.sort((a, b) => a - b);
-}
-
-console.log(countDivisors(12));      // 6
-console.log(countDivisors(36));      // 9 (perfect square)
-console.log(listDivisors(12));       // [1, 2, 3, 4, 6, 12]
-JS,
-            ],
-            [
-                'title'       => 'Armstrong Number',
-                'difficulty'  => 'easy',
-                'description' => 'An Armstrong (narcissistic) number equals the sum of its own digits raised to the power of the digit count. E.g. 153 = 1³ + 5³ + 3³.',
-                'solution_code' => <<<'JS'
-function isArmstrong(n) {
-    const digits = String(n).split("");
-    const power  = digits.length;
-    const sum    = digits.reduce((acc, d) => acc + d ** power, 0);
-    return sum === n;
-}
-
-console.log(isArmstrong(1));     // true
-console.log(isArmstrong(153));   // true  (1³+5³+3³)
-console.log(isArmstrong(370));   // true  (3³+7³+0³)
-console.log(isArmstrong(9474));  // true  (9⁴+4⁴+7⁴+4⁴)
-console.log(isArmstrong(10));    // false
-JS,
-            ],
-            [
-                'title'       => 'Perfect Number Check',
-                'difficulty'  => 'easy',
-                'description' => 'A perfect number equals the sum of its proper divisors (all divisors except itself). E.g. 6 = 1+2+3.',
-                'solution_code' => <<<'JS'
-function isPerfect(n) {
-    if (n <= 1) return false;
-    let sum = 1;
-    for (let i = 2; i <= Math.sqrt(n); i++) {
-        if (n % i === 0) {
-            sum += i;
-            if (i !== n / i) sum += n / i;
-        }
-    }
-    return sum === n;
-}
-
-console.log(isPerfect(6));     // true  (1+2+3)
-console.log(isPerfect(28));    // true  (1+2+4+7+14)
-console.log(isPerfect(496));   // true
-console.log(isPerfect(12));    // false
-JS,
-            ],
-            [
-                'title'       => 'Leap Year Check',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns true if a year is a leap year. A leap year is divisible by 4, except for century years, which must be divisible by 400.',
-                'solution_code' => <<<'JS'
-function isLeapYear(year) {
-    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-}
-
-console.log(isLeapYear(2000));   // true  (divisible by 400)
-console.log(isLeapYear(1900));   // false (divisible by 100 but not 400)
-console.log(isLeapYear(2024));   // true
-console.log(isLeapYear(2023));   // false
-JS,
-            ],
-            [
-                'title'       => 'Euclidean Distance',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that calculates the Euclidean distance between two 2D points.',
-                'solution_code' => <<<'JS'
-function distance(x1, y1, x2, y2) {
-    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-}
-
-console.log(distance(0, 0, 3, 4));       // 5
-console.log(distance(1, 1, 4, 5));       // 5
-console.log(+distance(0, 0, 1, 1).toFixed(4));   // 1.4142
-JS,
-            ],
-            [
-                'title'       => 'Circle Area and Circumference',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns the area (πr²) and circumference (2πr) of a circle given its radius.',
-                'solution_code' => <<<'JS'
-function circleProps(r) {
-    return {
-        area:          +(Math.PI * r ** 2).toFixed(4),
-        circumference: +(2 * Math.PI * r).toFixed(4),
-    };
-}
-
-console.log(circleProps(1));    // { area: 3.1416, circumference: 6.2832 }
-console.log(circleProps(5));    // { area: 78.5398, circumference: 31.4159 }
-console.log(circleProps(0));    // { area: 0, circumference: 0 }
-JS,
-            ],
-            [
-                'title'       => 'Hypotenuse Length',
-                'difficulty'  => 'easy',
-                'description' => 'Given the two legs of a right triangle, return the hypotenuse using the Pythagorean theorem: c = √(a² + b²).',
-                'solution_code' => <<<'JS'
-function hypotenuse(a, b) {
-    return Math.sqrt(a * a + b * b);
-}
-
-console.log(hypotenuse(3, 4));    // 5
-console.log(hypotenuse(5, 12));   // 13
-console.log(+hypotenuse(1, 1).toFixed(4));  // 1.4142
-JS,
-            ],
-            [
-                'title'       => 'Clamp Number to Range',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that clamps a number to the [min, max] range — returns min if below, max if above, otherwise the number itself.',
-                'solution_code' => <<<'JS'
-function clamp(n, min, max) {
-    return Math.min(Math.max(n, min), max);
-}
-
-console.log(clamp(5, 1, 10));    // 5
-console.log(clamp(0, 1, 10));    // 1
-console.log(clamp(15, 1, 10));   // 10
-console.log(clamp(-5, 0, 100));  // 0
-JS,
-            ],
-            [
-                'title'       => 'Round to N Decimal Places',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that rounds a number to exactly n decimal places.',
-                'solution_code' => <<<'JS'
-function roundTo(n, decimals) {
-    const factor = 10 ** decimals;
-    return Math.round(n * factor) / factor;
-}
-
-console.log(roundTo(3.14159, 2));    // 3.14
-console.log(roundTo(1.005, 2));      // 1.01
-console.log(roundTo(1234.5678, 3));  // 1234.568
-console.log(roundTo(99.9, 0));       // 100
-JS,
-            ],
-            [
-                'title'       => 'Calculate Percentage',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that calculates what percentage one number is of another.',
-                'solution_code' => <<<'JS'
-function percentage(part, total) {
-    if (total === 0) return 0;
-    return (part / total) * 100;
-}
-
-console.log(percentage(25, 100));    // 25
-console.log(percentage(1, 3));       // 33.33333...
-console.log(+percentage(1, 3).toFixed(2));  // 33.33
-console.log(percentage(50, 200));    // 25
-JS,
-            ],
-            [
-                'title'       => 'Absolute Difference',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns the absolute difference between two numbers.',
-                'solution_code' => <<<'JS'
-function absDiff(a, b) {
-    return Math.abs(a - b);
-}
-
-console.log(absDiff(10, 3));    // 7
-console.log(absDiff(3, 10));    // 7
-console.log(absDiff(-5, 5));    // 10
-console.log(absDiff(0, 0));     // 0
-JS,
-            ],
-            [
-                'title'       => 'Midpoint Between Two Points',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns the midpoint between two 2D points.',
-                'solution_code' => <<<'JS'
-function midpoint(x1, y1, x2, y2) {
-    return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
-}
-
-console.log(midpoint(0, 0, 4, 6));    // { x: 2, y: 3 }
-console.log(midpoint(-2, -4, 2, 4));  // { x: 0, y: 0 }
-console.log(midpoint(1, 1, 3, 3));    // { x: 2, y: 2 }
-JS,
-            ],
-            [
-                'title'       => 'Sum of First N Natural Numbers',
-                'difficulty'  => 'easy',
-                'description' => 'Return the sum 1 + 2 + 3 + … + n using the closed-form formula: n(n+1)/2.',
-                'solution_code' => <<<'JS'
-function sumN(n) {
-    return (n * (n + 1)) / 2;
-}
-
-console.log(sumN(1));     // 1
-console.log(sumN(5));     // 15   (1+2+3+4+5)
-console.log(sumN(10));    // 55
-console.log(sumN(100));   // 5050
-JS,
-            ],
-            [
-                'title'       => 'Number Sign (Signum)',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns 1 if the number is positive, -1 if negative, and 0 if zero.',
-                'solution_code' => <<<'JS'
-function signum(n) {
-    if (n > 0) return 1;
-    if (n < 0) return -1;
-    return 0;
-}
-
-// Or using Math.sign:
-function signumBuiltin(n) {
-    return Math.sign(n);
-}
-
-console.log(signum(42));     // 1
-console.log(signum(-7));     // -1
-console.log(signum(0));      // 0
-console.log(Math.sign(-0));  // -0
-JS,
-            ],
-            [
-                'title'       => 'Seconds to HH:MM:SS',
-                'difficulty'  => 'easy',
-                'description' => 'Convert a total number of seconds to a HH:MM:SS time string.',
-                'solution_code' => <<<'JS'
-function toTimeString(totalSeconds) {
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
-    return [h, m, s]
-        .map(unit => String(unit).padStart(2, "0"))
-        .join(":");
-}
-
-console.log(toTimeString(0));       // "00:00:00"
-console.log(toTimeString(61));      // "00:01:01"
-console.log(toTimeString(3661));    // "01:01:01"
-console.log(toTimeString(86399));   // "23:59:59"
+console.log(celsiusToFahrenheit(0));      // 32
+console.log(celsiusToFahrenheit(100));    // 212
+console.log(celsiusToFahrenheit(-40));    // -40
+console.log(fahrenheitToCelsius(32));     // 0
 JS,
             ],
             [
@@ -582,39 +196,6 @@ console.log(sieve(50).length);    // 15 primes
 JS,
             ],
             [
-                'title'       => 'Multiples of N Up to Limit',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that returns an array of all multiples of n up to (and including) a given limit.',
-                'solution_code' => <<<'JS'
-function multiplesOf(n, limit) {
-    const result = [];
-    for (let i = n; i <= limit; i += n) result.push(i);
-    return result;
-}
-
-console.log(multiplesOf(3, 15));    // [3, 6, 9, 12, 15]
-console.log(multiplesOf(7, 30));    // [7, 14, 21, 28]
-console.log(multiplesOf(5, 4));     // []
-JS,
-            ],
-            [
-                'title'       => 'Minutes to Hours and Minutes',
-                'difficulty'  => 'easy',
-                'description' => 'Convert a number of minutes to an object with hours and remaining minutes.',
-                'solution_code' => <<<'JS'
-function minutesToTime(totalMinutes) {
-    const hours   = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return { hours, minutes };
-}
-
-console.log(minutesToTime(90));     // { hours: 1, minutes: 30 }
-console.log(minutesToTime(125));    // { hours: 2, minutes: 5 }
-console.log(minutesToTime(60));     // { hours: 1, minutes: 0 }
-console.log(minutesToTime(45));     // { hours: 0, minutes: 45 }
-JS,
-            ],
-            [
                 'title'       => "Pascal's Triangle Row",
                 'difficulty'  => 'easy',
                 'description' => "Return the nth row of Pascal's Triangle (0-indexed). Each value is the binomial coefficient C(n, k).",
@@ -633,46 +214,8 @@ console.log(pascalRow(4));    // [1, 4, 6, 4, 1]
 console.log(pascalRow(5));    // [1, 5, 10, 10, 5, 1]
 JS,
             ],
-            [
-                'title'       => 'Matrix Addition',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that adds two matrices of the same dimensions element-by-element.',
-                'solution_code' => <<<'JS'
-function addMatrices(A, B) {
-    return A.map((row, i) => row.map((val, j) => val + B[i][j]));
-}
 
-const A = [[1, 2], [3, 4]];
-const B = [[5, 6], [7, 8]];
-console.log(addMatrices(A, B));    // [[6, 8], [10, 12]]
-
-const C = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-const D = [[9, 8, 7], [6, 5, 4], [3, 2, 1]];
-console.log(addMatrices(C, D));    // [[10, 8, 7], [6, 6, 4], [3, 2, 2]]
-JS,
-            ],
-            [
-                'title'       => 'Matrix Transpose',
-                'difficulty'  => 'easy',
-                'description' => 'Write a function that transposes a matrix (flips rows and columns).',
-                'solution_code' => <<<'JS'
-function transpose(matrix) {
-    if (!matrix.length) return [];
-    const rows = matrix.length, cols = matrix[0].length;
-    return Array.from({ length: cols }, (_, j) =>
-        Array.from({ length: rows }, (_, i) => matrix[i][j])
-    );
-}
-
-const m = [[1, 2, 3], [4, 5, 6]];
-console.log(transpose(m));    // [[1, 4], [2, 5], [3, 6]]
-
-const square = [[1, 2], [3, 4]];
-console.log(transpose(square));    // [[1, 3], [2, 4]]
-JS,
-            ],
-
-            // ─── FROM MATHPROBLEMSEEDER (UNIQUE) ────────────────────────────────────
+            // ─── MEDIUM ──────────────────────────────────────────────────────────────
 
             [
                 'title'       => 'Fast Exponentiation',
@@ -693,7 +236,6 @@ console.log(fastPow(2, 10));    // 1024
 console.log(fastPow(3, 5));     // 243
 console.log(fastPow(2, -3));    // 0.125
 console.log(fastPow(7, 0));     // 1
-console.log(fastPow(2, 32));    // 4294967296
 JS,
             ],
             [
@@ -736,102 +278,24 @@ function nCr(n, r) {
 console.log(nCr(5, 2));     // 10
 console.log(nCr(10, 3));    // 120
 console.log(nCr(6, 6));     // 1
-console.log(nCr(52, 5));    // 2598960 (5-card poker hands)
+console.log(nCr(52, 5));    // 2598960
 JS,
             ],
             [
                 'title'       => 'Standard Deviation',
                 'difficulty'  => 'medium',
-                'description' => 'Compute the population standard deviation of an array: σ = √( (1/n) × Σ(xi − μ)² ).',
+                'description' => 'Compute both the population standard deviation σ = √((1/n)·Σ(xi−μ)²) and the sample standard deviation (dividing by n−1).',
                 'solution_code' => <<<'JS'
-function standardDeviation(nums) {
+function standardDeviation(nums, sample = false) {
     const n    = nums.length;
     const mean = nums.reduce((s, x) => s + x, 0) / n;
-    const variance = nums.reduce((s, x) => s + (x - mean) ** 2, 0) / n;
-    return Math.sqrt(variance);
-}
-
-function sampleStdDev(nums) {
-    const n    = nums.length;
-    const mean = nums.reduce((s, x) => s + x, 0) / n;
-    const variance = nums.reduce((s, x) => s + (x - mean) ** 2, 0) / (n - 1);
+    const variance = nums.reduce((s, x) => s + (x - mean) ** 2, 0) / (sample ? n - 1 : n);
     return Math.sqrt(variance);
 }
 
 const data = [2, 4, 4, 4, 5, 5, 7, 9];
-console.log(+standardDeviation(data).toFixed(4));    // 2
-console.log(+sampleStdDev(data).toFixed(4));         // 2.1381
-JS,
-            ],
-            [
-                'title'       => 'Collatz Sequence Length',
-                'difficulty'  => 'easy',
-                'description' => 'Starting from n, repeatedly apply n/2 if even or 3n+1 if odd. Return the number of steps to reach 1.',
-                'solution_code' => <<<'JS'
-function collatzLength(n) {
-    let steps = 0;
-    while (n !== 1) {
-        n = n % 2 === 0 ? n / 2 : 3 * n + 1;
-        steps++;
-    }
-    return steps;
-}
-
-console.log(collatzLength(1));     // 0
-console.log(collatzLength(6));     // 8   (6→3→10→5→16→8→4→2→1)
-console.log(collatzLength(27));    // 111
-console.log(collatzLength(100));   // 25
-JS,
-            ],
-            [
-                'title'       => 'Average, Median and Mode',
-                'difficulty'  => 'medium',
-                'description' => 'Compute the three measures of central tendency for an array of numbers: Mean, Median, and Mode (most frequent values).',
-                'solution_code' => <<<'JS'
-function statistics(nums) {
-    const n = nums.length;
-    const mean = nums.reduce((s, x) => s + x, 0) / n;
-
-    const sorted = [...nums].sort((a, b) => a - b);
-    const median = n % 2 === 0
-        ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
-        : sorted[Math.floor(n / 2)];
-
-    const freq = nums.reduce((map, x) => { map[x] = (map[x] || 0) + 1; return map; }, {});
-    const maxFreq = Math.max(...Object.values(freq));
-    const mode = Object.keys(freq).filter(k => freq[k] === maxFreq).map(Number);
-
-    return { mean, median, mode };
-}
-
-const data = [1, 2, 2, 3, 4, 4, 4, 5];
-const s = statistics(data);
-console.log("Mean:",   s.mean);      // 3.125
-console.log("Median:", s.median);    // 3.5
-console.log("Mode:",   s.mode);      // [4]
-JS,
-            ],
-            [
-                'title'       => 'Sum of First N Squares',
-                'difficulty'  => 'easy',
-                'description' => 'Return the sum 1² + 2² + 3² + … + n² using the closed-form formula: n(n+1)(2n+1)/6.',
-                'solution_code' => <<<'JS'
-function sumOfSquares(n) {
-    return (n * (n + 1) * (2 * n + 1)) / 6;
-}
-
-console.log(sumOfSquares(1));      // 1
-console.log(sumOfSquares(3));      // 14   (1+4+9)
-console.log(sumOfSquares(10));     // 385
-console.log(sumOfSquares(100));    // 338350
-
-// Verify with iteration
-function sumOfSquaresIter(n) {
-    let s = 0;
-    for (let i = 1; i <= n; i++) s += i * i;
-    return s;
-}
-console.log(sumOfSquares(50) === sumOfSquaresIter(50));   // true
+console.log(+standardDeviation(data).toFixed(4));         // 2 (population)
+console.log(+standardDeviation(data, true).toFixed(4));   // 2.1381 (sample)
 JS,
             ],
             [
@@ -853,8 +317,474 @@ const B = [[5, 6], [7, 8]];
 console.log(matMul(A, B));
 // [[19, 22], [43, 50]]
 
-const I = [[1, 0], [0, 1]];  // identity
-console.log(JSON.stringify(matMul(A, I)));   // same as A
+const I = [[1, 0], [0, 1]];
+console.log(JSON.stringify(matMul(A, I)));   // [[1,2],[3,4]] (identity)
+JS,
+            ],
+            [
+                'title'       => 'Mean, Median and Mode',
+                'difficulty'  => 'medium',
+                'description' => 'Compute the three measures of central tendency for an array of numbers: Mean, Median, and Mode (most frequent values).',
+                'solution_code' => <<<'JS'
+function statistics(nums) {
+    const n    = nums.length;
+    const mean = nums.reduce((s, x) => s + x, 0) / n;
+
+    const sorted = [...nums].sort((a, b) => a - b);
+    const median = n % 2 === 0
+        ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+        : sorted[Math.floor(n / 2)];
+
+    const freq = nums.reduce((map, x) => {
+        map[x] = (map[x] || 0) + 1;
+        return map;
+    }, {});
+    const maxFreq = Math.max(...Object.values(freq));
+    const mode = Object.keys(freq)
+        .filter(k => freq[k] === maxFreq)
+        .map(Number);
+
+    return { mean, median, mode };
+}
+
+const s = statistics([1, 2, 2, 3, 4, 4, 4, 5]);
+console.log("Mean:",   s.mean);      // 3.125
+console.log("Median:", s.median);    // 3.5
+console.log("Mode:",   s.mode);      // [4]
+JS,
+            ],
+            [
+                'title'       => 'Count Trailing Zeros in Factorial',
+                'difficulty'  => 'medium',
+                'description' => 'Count the number of trailing zeros in n!. Each trailing zero comes from a factor of 10 = 2×5. Since factors of 2 always exceed 5s, count multiples of 5, 25, 125, … in n.',
+                'solution_code' => <<<'JS'
+function trailingZeros(n) {
+    let count = 0;
+    while (n >= 5) {
+        n = Math.floor(n / 5);
+        count += n;
+    }
+    return count;
+}
+
+console.log(trailingZeros(5));     // 1   (5! = 120)
+console.log(trailingZeros(10));    // 2   (10! = 3628800)
+console.log(trailingZeros(25));    // 6   (25 and 5² each contribute)
+console.log(trailingZeros(100));   // 24
+JS,
+            ],
+            [
+                'title'       => 'Integer Square Root',
+                'difficulty'  => 'medium',
+                'description' => 'Find the integer square root of n (floor of √n) without using Math.sqrt. Use binary search for O(log n) time.',
+                'solution_code' => <<<'JS'
+function isqrt(n) {
+    if (n < 0) throw new Error("Negative input");
+    if (n === 0) return 0;
+    let lo = 1, hi = n, result = 0;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (mid * mid <= n) {
+            result = mid;
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    return result;
+}
+
+console.log(isqrt(0));    // 0
+console.log(isqrt(9));    // 3
+console.log(isqrt(10));   // 3  (floor of 3.162...)
+console.log(isqrt(16));   // 4
+console.log(isqrt(26));   // 5
+JS,
+            ],
+            [
+                'title'       => 'Aliquot Sum and Number Classification',
+                'difficulty'  => 'medium',
+                'description' => 'The aliquot sum of n is the sum of its proper divisors (all divisors except itself). Classify n as: perfect (aliquot = n), abundant (aliquot > n), or deficient (aliquot < n).',
+                'solution_code' => <<<'JS'
+function aliquotSum(n) {
+    if (n <= 1) return 0;
+    let sum = 1;
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) {
+            sum += i;
+            if (i !== n / i) sum += n / i;
+        }
+    }
+    return sum;
+}
+
+function classify(n) {
+    const s = aliquotSum(n);
+    if (s === n) return "perfect";
+    if (s > n)  return "abundant";
+    return "deficient";
+}
+
+console.log(aliquotSum(6));     // 6   → perfect
+console.log(aliquotSum(12));    // 16  → abundant
+console.log(aliquotSum(8));     // 7   → deficient
+
+console.log(classify(6));    // "perfect"
+console.log(classify(12));   // "abundant"
+console.log(classify(8));    // "deficient"
+JS,
+            ],
+            [
+                'title'       => 'Geometric Sequence Sum',
+                'difficulty'  => 'medium',
+                'description' => 'Compute the sum of the first n terms of a geometric sequence with first term a and common ratio r, using the closed-form formula. Handle r = 1 as a special case.',
+                'solution_code' => <<<'JS'
+function geometricSum(a, r, n) {
+    if (r === 1) return a * n;
+    return a * (1 - Math.pow(r, n)) / (1 - r);
+}
+
+function geometricTerms(a, r, n) {
+    return Array.from({ length: n }, (_, i) => a * Math.pow(r, i));
+}
+
+console.log(geometricSum(1, 2, 5));     // 31   (1+2+4+8+16)
+console.log(geometricSum(3, 3, 4));     // 120  (3+9+27+81)
+console.log(geometricSum(5, 1, 4));     // 20   (5+5+5+5)
+console.log(geometricTerms(1, 2, 5));   // [1, 2, 4, 8, 16]
+JS,
+            ],
+
+            // ─── HARD ────────────────────────────────────────────────────────────────
+
+            [
+                'title'       => 'Modular Exponentiation',
+                'difficulty'  => 'hard',
+                'description' => 'Compute (base^exp) % mod efficiently in O(log exp) time using fast exponentiation with modular reduction at each step. Essential in cryptography (RSA, Diffie-Hellman).',
+                'solution_code' => <<<'JS'
+function modPow(base, exp, mod) {
+    if (mod === 1) return 0;
+    let result = 1;
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % 2 === 1) result = (result * base) % mod;
+        exp = Math.floor(exp / 2);
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+console.log(modPow(2, 10, 1000));    // 24  (1024 % 1000)
+console.log(modPow(3, 200, 13));     // 9
+console.log(modPow(2, 31, 1000000007));  // 2147483648 % 1e9+7 = 147483641
+
+// Verify: 2^10 = 1024, 1024 % 1000 = 24
+console.log(2 ** 10 % 1000);    // 24
+JS,
+            ],
+            [
+                'title'       => 'Extended Euclidean Algorithm',
+                'difficulty'  => 'hard',
+                'description' => 'Compute the Extended GCD: find integers x, y such that a·x + b·y = GCD(a, b). Use this to compute the modular inverse: a⁻¹ mod m (exists when GCD(a, m) = 1).',
+                'solution_code' => <<<'JS'
+function extGCD(a, b) {
+    if (b === 0) return { gcd: a, x: 1, y: 0 };
+    const { gcd, x: x1, y: y1 } = extGCD(b, a % b);
+    return { gcd, x: y1, y: x1 - Math.floor(a / b) * y1 };
+}
+
+function modInverse(a, m) {
+    const { gcd, x } = extGCD(a, m);
+    if (gcd !== 1) return null;    // inverse doesn't exist
+    return ((x % m) + m) % m;
+}
+
+const r = extGCD(35, 15);
+console.log(r);   // { gcd: 5, x: 1, y: -2 }  → 35·1 + 15·(-2) = 5
+
+console.log(modInverse(3, 7));    // 5  (3·5 ≡ 1 mod 7)
+console.log(modInverse(7, 13));   // 2  (7·2 = 14 ≡ 1 mod 13)
+console.log(modInverse(4, 8));    // null (GCD(4,8) = 4 ≠ 1)
+JS,
+            ],
+            [
+                'title'       => 'Matrix Exponentiation (Fast Fibonacci)',
+                'difficulty'  => 'hard',
+                'description' => 'Compute the nth Fibonacci number in O(log n) using matrix exponentiation. The identity: [[1,1],[1,0]]^n = [[F(n+1),F(n)],[F(n),F(n-1)]].',
+                'solution_code' => <<<'JS'
+function matMul(A, B) {
+    return [
+        [A[0][0]*B[0][0] + A[0][1]*B[1][0], A[0][0]*B[0][1] + A[0][1]*B[1][1]],
+        [A[1][0]*B[0][0] + A[1][1]*B[1][0], A[1][0]*B[0][1] + A[1][1]*B[1][1]],
+    ];
+}
+
+function matPow(M, n) {
+    if (n === 1) return M;
+    if (n % 2 === 0) {
+        const half = matPow(M, n / 2);
+        return matMul(half, half);
+    }
+    return matMul(M, matPow(M, n - 1));
+}
+
+function fibonacci(n) {
+    if (n <= 1) return n;
+    const base = [[1, 1], [1, 0]];
+    return matPow(base, n)[0][1];
+}
+
+console.log(fibonacci(0));    // 0
+console.log(fibonacci(1));    // 1
+console.log(fibonacci(10));   // 55
+console.log(fibonacci(20));   // 6765
+console.log(fibonacci(45));   // 1134903170
+JS,
+            ],
+            [
+                'title'       => 'Miller-Rabin Primality Test',
+                'difficulty'  => 'hard',
+                'description' => 'Implement the Miller-Rabin probabilistic primality test. Write n−1 as 2^s·d, then test several witnesses. With witnesses {2,3,5,7,11,13,17,19,23} it is deterministic for n < 3,317,044,064,679,887,385,961,981.',
+                'solution_code' => <<<'JS'
+function modPow(base, exp, mod) {
+    let result = 1n;
+    base = base % mod;
+    while (exp > 0n) {
+        if (exp % 2n === 1n) result = result * base % mod;
+        exp >>= 1n;
+        base = base * base % mod;
+    }
+    return result;
+}
+
+function millerRabin(n) {
+    if (n < 2n) return false;
+    if (n === 2n || n === 3n) return true;
+    if (n % 2n === 0n) return false;
+
+    let s = 0n, d = n - 1n;
+    while (d % 2n === 0n) { d /= 2n; s++; }
+
+    const witnesses = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n];
+    for (const a of witnesses) {
+        if (a >= n) continue;
+        let x = modPow(a, d, n);
+        if (x === 1n || x === n - 1n) continue;
+        let composite = true;
+        for (let r = 1n; r < s; r++) {
+            x = x * x % n;
+            if (x === n - 1n) { composite = false; break; }
+        }
+        if (composite) return false;
+    }
+    return true;
+}
+
+console.log(millerRabin(2n));          // true
+console.log(millerRabin(17n));         // true
+console.log(millerRabin(97n));         // true
+console.log(millerRabin(100n));        // false
+console.log(millerRabin(104729n));     // true  (10000th prime)
+JS,
+            ],
+            [
+                'title'       => 'Integer Partition Count',
+                'difficulty'  => 'hard',
+                'description' => 'Count the number of ways to write n as an ordered sum of positive integers (partitions). E.g. p(4) = 5: {4}, {3,1}, {2,2}, {2,1,1}, {1,1,1,1}. Use dynamic programming.',
+                'solution_code' => <<<'JS'
+function countPartitions(n) {
+    const dp = new Array(n + 1).fill(0);
+    dp[0] = 1;
+    for (let i = 1; i <= n; i++) {
+        for (let j = i; j <= n; j++) {
+            dp[j] += dp[j - i];
+        }
+    }
+    return dp[n];
+}
+
+console.log(countPartitions(1));    // 1
+console.log(countPartitions(4));    // 5
+console.log(countPartitions(5));    // 7
+console.log(countPartitions(10));   // 42
+console.log(countPartitions(20));   // 627
+JS,
+            ],
+            [
+                'title'       => 'Josephus Problem',
+                'difficulty'  => 'hard',
+                'description' => 'n people stand in a circle. Starting from position 0, every kth person is eliminated. Find the position (0-indexed) of the last survivor. Solve in O(n) using the recurrence: J(1,k)=0, J(n,k)=(J(n-1,k)+k) % n.',
+                'solution_code' => <<<'JS'
+function josephus(n, k) {
+    let pos = 0;
+    for (let i = 2; i <= n; i++) {
+        pos = (pos + k) % i;
+    }
+    return pos;
+}
+
+console.log(josephus(7, 3));    // 3  (classic puzzle: 0-indexed)
+console.log(josephus(5, 2));    // 2
+console.log(josephus(1, 1));    // 0
+console.log(josephus(10, 2));   // 2
+
+// Show full elimination order for n=7, k=3
+function josephusOrder(n, k) {
+    const people = Array.from({ length: n }, (_, i) => i);
+    const order = [];
+    let idx = 0;
+    while (people.length > 0) {
+        idx = (idx + k - 1) % people.length;
+        order.push(people.splice(idx, 1)[0]);
+        if (idx >= people.length) idx = 0;
+    }
+    return order;
+}
+console.log(josephusOrder(7, 3));   // [2,5,1,6,4,0,3] → survivor: 3
+JS,
+            ],
+            [
+                'title'       => "Newton's Method (nth Root)",
+                'difficulty'  => 'hard',
+                'description' => "Use Newton's method to compute the nth root of a positive number x. The iteration is: guess = ((n-1)·guess + x/guess^(n-1)) / n, converging quadratically.",
+                'solution_code' => <<<'JS'
+function nthRoot(x, n, tolerance = 1e-10) {
+    if (x < 0 && n % 2 === 0) throw new Error("Even root of negative number");
+    let guess = x / n;
+    while (true) {
+        const next = ((n - 1) * guess + x / Math.pow(guess, n - 1)) / n;
+        if (Math.abs(next - guess) < tolerance) return next;
+        guess = next;
+    }
+}
+
+console.log(+nthRoot(8, 3).toFixed(10));      // 2.0000000000  (∛8)
+console.log(+nthRoot(16, 4).toFixed(10));     // 2.0000000000  (⁴√16)
+console.log(+nthRoot(2, 2).toFixed(6));       // 1.414214      (√2)
+console.log(+nthRoot(1000, 3).toFixed(6));    // 10.000000     (∛1000)
+JS,
+            ],
+            [
+                'title'       => 'Convex Hull (Graham Scan)',
+                'difficulty'  => 'hard',
+                'description' => "Find the convex hull of a set of 2D points using Graham's scan algorithm in O(n log n). Returns the hull vertices in counter-clockwise order.",
+                'solution_code' => <<<'JS'
+function cross(O, A, B) {
+    return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+}
+
+function convexHull(points) {
+    const n = points.length;
+    if (n < 3) return points;
+
+    points = [...points].sort((a, b) => a.x !== b.x ? a.x - b.x : a.y - b.y);
+
+    const lower = [];
+    for (const p of points) {
+        while (lower.length >= 2 && cross(lower[lower.length-2], lower[lower.length-1], p) <= 0)
+            lower.pop();
+        lower.push(p);
+    }
+
+    const upper = [];
+    for (let i = n - 1; i >= 0; i--) {
+        const p = points[i];
+        while (upper.length >= 2 && cross(upper[upper.length-2], upper[upper.length-1], p) <= 0)
+            upper.pop();
+        upper.push(p);
+    }
+
+    lower.pop();
+    upper.pop();
+    return [...lower, ...upper];
+}
+
+const pts = [
+    {x:0,y:0},{x:1,y:1},{x:2,y:2},{x:0,y:2},{x:2,y:0},{x:1,y:0}
+];
+const hull = convexHull(pts);
+console.log(hull.map(p => `(${p.x},${p.y})`).join(" → "));
+// (0,0) → (2,0) → (2,2) → (0,2)
+console.log("Hull size:", hull.length);   // 4
+JS,
+            ],
+            [
+                'title'       => 'Segmented Sieve',
+                'difficulty'  => 'hard',
+                'description' => 'Find all primes in the range [L, R] using a segmented sieve. First find small primes up to √R with a simple sieve, then use them to mark composites in each segment.',
+                'solution_code' => <<<'JS'
+function segmentedSieve(L, R) {
+    const limit = Math.floor(Math.sqrt(R));
+
+    // Simple sieve up to sqrt(R)
+    const smallPrimes = [];
+    const isSmallPrime = new Array(limit + 1).fill(true);
+    isSmallPrime[0] = isSmallPrime[1] = false;
+    for (let i = 2; i <= limit; i++) {
+        if (isSmallPrime[i]) {
+            smallPrimes.push(i);
+            for (let j = i * i; j <= limit; j += i) isSmallPrime[j] = false;
+        }
+    }
+
+    // Segment sieve
+    const size = R - L + 1;
+    const isComposite = new Array(size).fill(false);
+    if (L <= 1) isComposite[1 - L] = true;
+
+    for (const p of smallPrimes) {
+        let start = Math.max(p * p, Math.ceil(L / p) * p);
+        if (start === p) start += p;
+        for (let j = start; j <= R; j += p) isComposite[j - L] = true;
+    }
+
+    const primes = [];
+    for (let i = 0; i < size; i++) {
+        if (!isComposite[i] && L + i >= 2) primes.push(L + i);
+    }
+    return primes;
+}
+
+console.log(segmentedSieve(10, 30));
+// [11, 13, 17, 19, 23, 29]
+console.log(segmentedSieve(1, 20));
+// [2, 3, 5, 7, 11, 13, 17, 19]
+console.log(segmentedSieve(900, 1000).length);   // 14
+JS,
+            ],
+            [
+                'title'       => 'Karatsuba Multiplication',
+                'difficulty'  => 'hard',
+                'description' => 'Implement the Karatsuba algorithm for multiplying two large integers (represented as BigInts) in O(n^1.585) instead of O(n²). Uses divide-and-conquer: xy = ac·10^2m + (ad+bc)·10^m + bd where ad+bc = (a+b)(c+d)−ac−bd.',
+                'solution_code' => <<<'JS'
+function karatsuba(x, y) {
+    if (x < 100n || y < 100n) return x * y;
+
+    const xStr = x.toString();
+    const m = Math.floor(xStr.length / 2);
+    const m2 = BigInt(10 ** m);
+
+    const a = x / m2;
+    const b = x % m2;
+    const c = y / m2;
+    const d = y % m2;
+
+    const ac   = karatsuba(a, c);
+    const bd   = karatsuba(b, d);
+    const abcd = karatsuba(a + b, c + d) - ac - bd;
+
+    return ac * (m2 * m2) + abcd * m2 + bd;
+}
+
+const x = 123456789n;
+const y = 987654321n;
+console.log(karatsuba(x, y).toString());   // 121932631112635269
+console.log((x * y).toString());           // 121932631112635269 (verify)
+
+// Larger numbers
+const a = 9999999999999999n;
+const b = 8888888888888888n;
+console.log(karatsuba(a, b) === a * b);    // true
 JS,
             ],
         ];
