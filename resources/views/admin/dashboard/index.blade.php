@@ -4,15 +4,16 @@
 @section('content')
 
 {{-- Stat cards --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
     @php
         $cards = [
             ['label' => 'Total Documents', 'value' => number_format($stats['total_documents']), 'color' => 'blue',   'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
             ['label' => 'Active Users',    'value' => number_format($stats['total_users']),     'color' => 'green',  'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
             ['label' => 'Downloads Today', 'value' => number_format($stats['downloads_today']), 'color' => 'purple', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'],
             ['label' => 'Storage Used',    'value' => number_format($stats['storage_bytes'] / 1048576, 1) . ' MB', 'color' => 'yellow', 'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4'],
+            ['label' => 'Failed Jobs',     'value' => number_format($stats['failed_jobs']),     'color' => $stats['failed_jobs'] > 0 ? 'red' : 'gray', 'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
         ];
-        $colors = ['blue' => 'bg-blue-50 text-blue-700', 'green' => 'bg-green-50 text-green-700', 'purple' => 'bg-purple-50 text-purple-700', 'yellow' => 'bg-yellow-50 text-yellow-700'];
+        $colors = ['blue' => 'bg-blue-50 text-blue-700', 'green' => 'bg-green-50 text-green-700', 'purple' => 'bg-purple-50 text-purple-700', 'yellow' => 'bg-yellow-50 text-yellow-700', 'red' => 'bg-red-50 text-red-700', 'gray' => 'bg-gray-50 text-gray-500'];
     @endphp
 
     @foreach($cards as $card)
@@ -113,8 +114,8 @@
 {{-- Top downloaded --}}
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
     <h3 class="text-sm font-semibold text-gray-700 mb-3">Top Downloaded Documents</h3>
-    @forelse($topDownloaded as $doc)
     @php $maxDlDoc = $topDownloaded->max('download_count') ?: 1; @endphp
+    @forelse($topDownloaded as $doc)
     <div class="flex items-center gap-3 py-1.5 border-b border-gray-50 last:border-0">
         <div class="flex-1 min-w-0">
             <a href="{{ route('admin.documents.edit', $doc) }}" class="text-sm text-blue-600 hover:underline truncate block">{{ $doc->title }}</a>
@@ -158,7 +159,7 @@
                         <td class="px-6 py-3 text-gray-500">{{ $doc->uploader?->name ?? '—' }}</td>
                         <td class="px-6 py-3">
                             @php
-                                $badge = ['draft' => 'bg-gray-100 text-gray-600', 'pending_review' => 'bg-yellow-100 text-yellow-700', 'published' => 'bg-green-100 text-green-700', 'rejected' => 'bg-red-100 text-red-700'];
+                                $badge = ['draft' => 'bg-gray-100 text-gray-600', 'pending_review' => 'bg-yellow-100 text-yellow-700', 'published' => 'bg-green-100 text-green-700', 'rejected' => 'bg-red-100 text-red-700', 'archived' => 'bg-gray-100 text-gray-500'];
                             @endphp
                             <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $badge[$doc->status] ?? '' }}">
                                 {{ ucfirst(str_replace('_', ' ', $doc->status)) }}
