@@ -1,77 +1,124 @@
-# 📚 Document Management System (PHP + Laravel + XAMPP + MySQL)
+# DocManager — Document Management System
 
-A **secure, scalable, enterprise-ready document management system** built with **Laravel** running on **XAMPP (Apache + MySQL)**. It supports advanced search (keyword + AI semantic search), version control, secure file handling, preview system, analytics, and extensible AI-powered document intelligence.
+A **secure, full-featured document management system** built with **Laravel 12** (PHP 8.2+). Supports dual-mode search (keyword + offline TF-IDF semantic), document versioning, lock/unlock enforcement, role-based access control, a REST API, and a complete offline documentation hub — no cloud dependency.
 
-The system ships as **two separate web applications** sharing a single Laravel backend and database:
+The system ships as **two web applications** sharing one Laravel backend and database:
 
-| App | URL Prefix | Audience |
+| App | URL prefix | Who uses it |
 |---|---|---|
 | **Admin Panel** | `/admin` | Admins and Editors — full document and user management |
 | **Client Web App** | `/` | All authenticated users — browse, search, preview, download |
 
-All files are stored locally on the server machine (no cloud dependency).
+---
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Quick Setup](#quick-setup)
+3. [Environment Variables](#environment-variables)
+4. [Starting the Dev Stack](#starting-the-dev-stack)
+5. [Offline / Production Mode](#offline--production-mode)
+6. [Folder Structure](#folder-structure)
+7. [Application Architecture](#application-architecture)
+8. [Database Schema](#database-schema)
+9. [Features — Admin Panel](#features--admin-panel)
+10. [Features — Client Web App](#features--client-web-app)
+11. [Search System](#search-system)
+12. [File Upload & Storage](#file-upload--storage)
+13. [Content Extraction](#content-extraction)
+14. [Document Preview](#document-preview)
+15. [Background Jobs & Queue](#background-jobs--queue)
+16. [Artisan Commands Reference](#artisan-commands-reference)
+17. [Offline Documentation Hub](#offline-documentation-hub)
+18. [REST API](#rest-api)
+19. [Security Architecture](#security-architecture)
+20. [Role Permissions Matrix](#role-permissions-matrix)
+21. [Tech Stack](#tech-stack)
+22. [System Architecture Diagram](#system-architecture-diagram)
 
 ---
 
-# ⚙️ Prerequisites
+## Prerequisites
 
-| Requirement | Version |
-|---|---|
-| PHP | 8.2+ |
-| MySQL | 8.0+ |
-| Composer | 2.x |
-| Node.js / npm | 18+ |
-| PHP Extensions | `pdo_mysql`, `fileinfo`, `mbstring`, `openssl`, `zip` |
-| LibreOffice | Optional — required only for DOCX → PDF full-fidelity preview |
+| Requirement | Version | Notes |
+|---|---|---|
+| PHP | 8.2+ | Required extensions: `pdo_mysql`, `fileinfo`, `mbstring`, `openssl`, `zip`, `gd` |
+| MySQL | 8.0+ | FULLTEXT search requires MySQL 8 (SQLite for local dev is fine) |
+| Composer | 2.x | PHP dependency manager |
+| Node.js / npm | 18+ | Required for building frontend assets only |
 
 ### Enable required PHP extensions
 
-Open your `php.ini` (run `php --ini` to find the path) and uncomment these lines:
+Locate your `php.ini` (`php --ini`) and uncomment:
 
 ```ini
 extension=fileinfo
 extension=pdo_mysql
+extension=zip
+extension=gd
 ```
 
-Then verify they loaded:
+Verify they loaded:
 
 ```bash
-php -r "echo extension_loaded('fileinfo') && extension_loaded('pdo_mysql') ? 'OK' : 'Missing';"
+php -r "var_dump(extension_loaded('fileinfo'), extension_loaded('pdo_mysql'), extension_loaded('zip'));"
 ```
 
 ---
 
-# 🚀 Local Development Setup
+## Quick Setup
 
-### Step 1 — Clone the repository
+### One-command setup (recommended)
 
 ```bash
-git clone <repo-url>
-cd docmanager
+composer run setup
 ```
 
-### Step 2 — Install PHP dependencies
+This single script: installs PHP dependencies, copies `.env.example → .env`, generates the app key, runs all migrations, installs npm packages, and builds frontend assets.
+
+### Manual step-by-step
 
 ```bash
+# 1. Install PHP dependencies
 composer install
-```
 
-### Step 3 — Install JS dependencies
-
-```bash
-npm install
-```
-
-### Step 4 — Configure environment
-
-```bash
+# 2. Copy environment file and generate app key
 cp .env.example .env
 php artisan key:generate
+
+# 3. Configure database in .env (see Environment Variables section)
+
+# 4. Run migrations
+php artisan migrate
+
+# 5. Install and build frontend
+npm install
+npm run build
+
+# 6. Create the storage symlink (for public avatars)
+php artisan storage:link
+
+# 7. Create your first admin account
+php artisan tinker
+>>> App\Models\User::create([
+    'name' => 'Admin',
+    'username' => 'admin',
+    'password' => bcrypt('your-password'),
+    'role' => 'admin',
+    'status' => 'active',
+]);
 ```
 
-Edit `.env` and set your MySQL credentials:
+---
+
+## Environment Variables
+
+Edit `.env` after copying from `.env.example`.
+
+### Database
 
 ```env
+DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=docmanager
@@ -79,1006 +126,815 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### Step 5 — Run database migrations
+> For local development with SQLite: `DB_CONNECTION=sqlite` (no other DB vars needed)
+
+### Application
+
+| Variable | Default | Description |
+|---|---|---|
+| `APP_NAME` | `DocManager` | Shown in the browser tab and nav |
+| `APP_ENV` | `local` | `production` disables debug mode |
+| `APP_DEBUG` | `true` | Set `false` in production |
+| `APP_KEY` | _(generated)_ | 32-char encryption key — never share |
+| `APP_URL` | `http://localhost` | Full base URL |
+
+### Queue & Cache
+
+| Variable | Default | Production recommendation |
+|---|---|---|
+| `QUEUE_CONNECTION` | `database` | `redis` |
+| `CACHE_STORE` | `file` | `redis` |
+| `SESSION_DRIVER` | `file` | `database` or `redis` |
+
+### Application-specific
+
+| Variable | Default | Description |
+|---|---|---|
+| `SHARE_LINK_EXPIRY_HOURS` | `24` | Default share link lifetime |
+| `TRASH_RETENTION_DAYS` | `30` | Days before soft-deleted documents are permanently purged |
+| `ACCOUNT_LOCKOUT_ATTEMPTS` | `5` | Failed logins before account lock |
+| `ACCOUNT_LOCKOUT_MINUTES` | `15` | Duration of account lockout |
+| `MAX_UPLOAD_SIZE_MB` | `50` | Per-file upload size limit |
+
+---
+
+## Starting the Dev Stack
+
+### Full dev mode (four processes via `concurrently`)
 
 ```bash
-php artisan migrate
+composer run dev
 ```
 
-### Step 6 — Fix Vite IPv6/IPv4 mismatch (Windows)
+| Process | Command | Purpose |
+|---|---|---|
+| `server` | `php artisan serve` | Laravel on port 8000 |
+| `queue` | `php artisan queue:listen --tries=1` | Processes content extraction and TF-IDF indexing jobs |
+| `logs` | `php artisan pail` | Real-time log streaming in the terminal |
+| `vite` | `npm run dev` | Tailwind CSS + Alpine.js with HMR |
 
-On Windows, Vite defaults to IPv6 (`[::1]`) which breaks CSS loading. Add `host` to `vite.config.js`:
+App available at **http://127.0.0.1:8000**
+
+### Windows: fix Vite IPv6 mismatch
+
+On Windows, Vite defaults to `[::1]` (IPv6) which breaks asset loading. Add `host` to `vite.config.js`:
 
 ```js
-export default defineConfig({
-    server: {
-        host: '127.0.0.1',
-    },
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true,
-        }),
-    ],
-});
+server: {
+    host: '127.0.0.1',
+},
 ```
-
-### Step 7 — Start both dev servers (two terminals)
-
-```bash
-# Terminal 1 — Laravel backend
-php artisan serve --host=127.0.0.1 --port=8000
-
-# Terminal 2 — Vite (CSS + JS + HMR)
-npm run dev
-```
-
-The app will be available at **http://127.0.0.1:8000**
-
-### Step 8 — Start the queue worker
-
-Required for file content extraction, TF-IDF indexing, and bulk ZIP downloads:
-
-```bash
-php artisan queue:work --queue=default
-```
-
-### Step 9 — (Optional) Build the AI search index
-
-Once the queue worker has processed all documents, build the TF-IDF semantic search index:
-
-```bash
-php artisan search:build-tfidf
-```
-
-This runs a two-pass scan over all published documents, computes TF-IDF vectors, and stores them in the database. After this, the **✦ AI Semantic** search mode is available on the search page.
-
-> Re-run this command after uploading a large batch of new documents to keep AI search rankings accurate. Individual new documents are indexed automatically via the queue worker.
 
 ---
 
-# 🔌 Offline Mode
+## Offline / Production Mode
 
-Run the project with **no internet connection and no Vite dev server** — assets are served directly from pre-built files.
-
-### Step 1 — Build frontend assets (do this once, while online)
+Run with no Vite dev server — assets served from pre-built files.
 
 ```bash
+# 1. Build and compile all CSS/JS (do once, while online)
 npm run build
-```
 
-This compiles all CSS/JS into `public/build/`. You won't need to run this again unless the frontend code changes.
+# 2. Remove the hot file (if present) so Laravel uses public/build/
+Remove-Item public\hot -ErrorAction SilentlyContinue   # PowerShell
+rm -f public/hot                                        # bash
 
-### Step 2 — Remove the `public/hot` file
-
-```powershell
-Remove-Item public\hot -ErrorAction SilentlyContinue
-```
-
-If this file exists, Laravel tries to load assets from the Vite dev server (`http://127.0.0.1:5173`), which won't be running offline. Deleting it tells Laravel to use `public/build/` instead.
-
-### Step 3 — Build the AI search index (first time only)
-
-```bash
-# Extract text from all existing documents
-php artisan queue:work --queue=default --stop-when-empty
-
-# Build TF-IDF vectors from the extracted content
-php artisan search:build-tfidf
-```
-
-Skip this step if documents have no extractable text, or if you don't need AI semantic search.
-
-### Step 4 — Start Laravel only (no npm)
-
-```bash
+# 3. Start Laravel only
 php artisan serve --host=127.0.0.1 --port=8000
 ```
-
-Open **http://127.0.0.1:8000** — fully offline, no Vite, no internet.
-
----
-
-### Dev mode vs Offline mode
 
 | | Dev mode | Offline mode |
 |---|---|---|
-| Assets served from | Vite dev server (`http://127.0.0.1:5173`) | `public/build/` (local files) |
-| Servers required | Laravel + Vite (`npm run dev`) | Laravel only |
+| Assets from | Vite dev server (`:5173`) | `public/build/` |
+| Servers needed | Laravel + Vite | Laravel only |
 | `public/hot` file | present | deleted |
-| Reflects code changes | instantly (HMR) | only after `npm run build` |
-| AI search | requires queue worker + `search:build-tfidf` | same — index stored in DB |
-
----
+| HMR | yes | no (rebuild manually) |
 
 ### Make the repo permanently offline-ready
 
-Remove these two lines from `.gitignore` and commit both folders:
+Remove from `.gitignore` and commit both folders:
 
 ```
 /vendor
 /public/build
 ```
 
-With `vendor/` and `public/build/` committed, no internet connection, Composer, or npm is required to run the project on any machine.
+With `vendor/` and `public/build/` committed, no internet, Composer, or npm is needed on any machine.
 
 ---
 
-# 🎨 Frontend Stack
-
-Both the **Admin Panel** and **Client Web App** are built with **Tailwind CSS + Alpine.js + Flowbite**, compiled and bundled locally — no CDN required, fully offline-capable.
-
-| Library | Role |
-|---|---|
-| **Tailwind CSS** | Utility-first CSS — compiled to a single static file via `npm run build` |
-| **Alpine.js** | Lightweight JS for interactivity (modals, dropdowns, upload progress, search filters) |
-| **Flowbite** | Pre-built Tailwind components (tables, sidebars, stat cards, dashboards, modals) |
-
-### Shared layout approach
-
-* `resources/views/layouts/admin.blade.php` — Admin Panel shell (sidebar nav, topbar)
-* `resources/views/layouts/app.blade.php` — Client Web App shell (header, category sidebar)
-* All Blade views extend one of these two layouts
-* XSS protection via Blade's `{{ }}` auto-escaping on all output
-
-### Install frontend dependencies
-
-```bash
-npm install tailwindcss @tailwindcss/forms flowbite alpinejs
-npm run build
-```
-
-All output is written to `public/build/` — served entirely from the local machine.
-
----
-
-# ⚙️ Environment Variables
-
-Key `.env` settings:
-
-| Variable | Description |
-|---|---|
-| `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | MySQL connection |
-| `QUEUE_CONNECTION` | `database` or `redis` |
-| `CACHE_DRIVER` | `redis` or `file` |
-| `SESSION_LIFETIME` | Session timeout in minutes (default: `120`) |
-| `MAX_UPLOAD_SIZE_MB` | Maximum file upload size in MB (default: `50`) |
-| `SHARE_LINK_EXPIRY_HOURS` | Default signed share link expiry (default: `24`) |
-| `LOCK_TIMEOUT_MINUTES` | Document lock auto-release timeout (default: `30`) |
-| `TRASH_RETENTION_DAYS` | Days before soft-deleted documents are auto-purged (default: `30`) |
-| `ACCOUNT_LOCKOUT_ATTEMPTS` | Failed login attempts before lockout (default: `5`) |
-| `ACCOUNT_LOCKOUT_MINUTES` | Lockout duration in minutes (default: `15`) |
-
----
-
-# 🏗️ Application Structure
-
-## 🛠️ Admin Panel (`/admin`)
-
-A full back-office interface for Admins and Editors.
-
-### Pages & Modules
-
-| Module | Path | Description |
-|---|---|---|
-| Dashboard | `/admin` | Stat cards + charts: uploads, downloads, storage, active users, search trends |
-| Documents | `/admin/documents` | List, upload, edit, delete, bulk ops, versioning, document locking |
-| Trash | `/admin/documents/trash` | Restore or permanently delete soft-deleted documents |
-| Categories | `/admin/categories` | Manage hierarchical category tree |
-| Tags | `/admin/tags` | Create and manage tags |
-| Users | `/admin/users` | Create staff accounts; view, activate/deactivate, assign roles |
-| Pending Accounts | `/admin/users/pending` | Review, activate, or reject (with reason) self-registered accounts; badge count shown in sidebar nav |
-| Roles | `/admin/roles` | View and configure role permissions |
-| Audit Logs | `/admin/audit-logs` | Full action log with IP, user, resource, timestamp — exportable to CSV |
-| Activity Logs | `/admin/activity-logs` | Session events — login, logout, failed access, account lockouts |
-| Jobs | `/admin/jobs` | Monitor queue — pending, processing, and failed jobs |
-| Storage | `/admin/storage` | Storage usage per user, global quota management |
-| Notifications | `/admin/notifications` | Manage and broadcast system notifications |
-| Search Index | `/admin/search` | Build AI index, re-index content, view search analytics |
-| Settings | `/admin/settings` | Upload limits, session timeout, share link expiry |
-
----
-
-## 🌐 Client Web App (`/`)
-
-A clean document portal for all authenticated users.
-
-### Pages & Modules
-
-| Module | Path | Description |
-|---|---|---|
-| Register | `/register` | Self-registration form — username + password only; account created as Pending |
-| Login | `/login` | Login form; Pending accounts are blocked with a "awaiting activation" message |
-| Home / Browse | `/` | Document grid/list with collapsible category tree sidebar, sort controls, dynamic content loading |
-| Search | `/search` | Hybrid search — Keyword mode (MySQL FULLTEXT) and AI Semantic mode (TF-IDF) — with filters, sort, highlighted results, match-score badges, search history |
-| Document Detail | `/documents/{id}` | Metadata, breadcrumb, preview, download, version history (read-only), related documents |
-| Preview | `/documents/{id}/preview` | PDF.js / image / text preview |
-| Categories | `/categories/{slug}` | Browse documents by category with breadcrumb navigation |
-| Tags | `/tags/{slug}` | Browse documents by tag |
-| Favorites | `/favorites` | Bookmarked documents |
-| Recently Viewed | `/history` | Documents the user has opened, most recent first |
-| Download History | `/downloads` | User's own file download log |
-| Saved Searches | `/saved-searches` | Manage saved search queries |
-| Reading Lists | `/reading-lists` | Create and manage named document collections (e.g. "Linux study pack") |
-| Notifications | `/notifications` | Inbox — mark as read, dismiss, manage notification preferences |
-| Profile | `/profile` | Edit name, password, avatar, notification preferences |
-
----
-
-# 🚀 Core Features
-
-## 👤 Authentication & Authorization
-
-* Clients self-register via the Client Web App using **username + password only** (no email or phone required)
-* New accounts start as **Pending** — must be activated by Admin before the user can log in
-* Pending users see an "awaiting activation" message on login; enforced via auth middleware
-* Admin and Editor accounts are created directly by Admin (no self-registration for staff roles)
-* Password reset done by Admin directly — no email-based reset flow
-* Remember me / persistent session (configurable)
-* Account lockout after N consecutive failed login attempts — configurable via `ACCOUNT_LOCKOUT_ATTEMPTS` / `ACCOUNT_LOCKOUT_MINUTES`
-* Session-based authentication (Laravel Breeze)
-* Role-based + Permission-based access control (RBAC)
-
-  * Admin
-  * Editor
-  * Viewer (default role for self-registered clients)
-
-### Username Rules (registration)
-
-* Length: 3–30 characters
-* Allowed characters: letters, numbers, underscores, hyphens
-* Must be unique (validated on submit)
-* Cannot be changed after registration (contact Admin to update)
-
-### Role Permissions
-
-| Permission | Admin | Editor | Viewer |
-|---|---|---|---|
-| Upload documents | ✔ | ✔ | ✗ |
-| Edit / delete documents | ✔ | ✔ | ✗ |
-| Download documents | ✔ | ✔ | ✔ |
-| View / preview documents | ✔ | ✔ | ✔ |
-| Search | ✔ | ✔ | ✔ |
-| Favorites & bookmarks | ✔ | ✔ | ✔ |
-| Manage tags & categories | ✔ | ✔ | ✗ |
-| Manage document versions | ✔ | ✔ | ✗ |
-| Lock / unlock documents | ✔ | ✔ | ✗ |
-| View analytics | ✔ | ✔ | ✗ |
-| Export logs (CSV) | ✔ | ✗ | ✗ |
-| Manage users & roles | ✔ | ✗ | ✗ |
-| View audit logs | ✔ | ✗ | ✗ |
-| Manage jobs / queue | ✔ | ✗ | ✗ |
-| Manage storage quotas | ✔ | ✗ | ✗ |
-| Re-index search | ✔ | ✗ | ✗ |
-| System settings | ✔ | ✗ | ✗ |
-
----
-
-# 🛠️ Admin Panel Features
-
-### Document Management
-* Upload documents with real-time progress indicator (Alpine.js)
-* Chunked upload support for files over 50 MB
-* Edit metadata and update / delete documents
-* Soft delete documents (moved to Trash, restorable)
-* Bulk upload / bulk delete / bulk download (ZIP via `ZipArchive`)
-* Bulk tag and category assignment
-* Document locking — prevent concurrent edits (lock owned by editor, auto-release after timeout)
-* Document approval workflow — Draft → Pending Review → Published states
-* Document expiry / archival — auto-archive documents after a configurable period
-
-### Version & Integrity
-* Upload new version, restore any previous version, view full version history
-* SHA256 hash per version for integrity verification
-* Per-document access log — who viewed or downloaded each document and when
-
-### User & Role Management
-* Create staff accounts directly (Admin / Editor roles)
-* Review self-registered client accounts — activate (Pending → Active) or reject with a written reason
-* Bulk activate or bulk reject pending accounts
-* Admin notified via dashboard badge when new registrations are pending
-* Account activation and rejection logged in `audit_logs`
-* Edit username (Admin can change any username on behalf of a user)
-* Activate / deactivate accounts
-* Reset user passwords directly (no email required)
-* Assign and change roles (Admin / Editor / Viewer)
-* Role management page — configure which permissions each role carries
-* Storage quota per user (configurable, enforced on upload)
-* Process client account deletion requests
-
-### Analytics & Logs
-* Dashboard stat cards: total documents, storage used, downloads today, active users
-* Charts: upload trends (7d / 30d), top downloaded files, popular search terms
-* Audit logs with IP, user, action, resource, timestamp — exportable to CSV
-* Activity logs: login, logout, failed access, lockouts — exportable to CSV
-* Queue monitor: pending, processing, and failed background jobs
-
-### Other Admin Features
-* Re-index search engine (metadata, fulltext, embeddings)
-* Manage categories (hierarchical tree CRUD)
-* Manage tags (create, rename, merge, delete)
-* Broadcast system notifications
-* System settings: upload size limit, session timeout, share link expiry
-
----
-
-# 🌐 Client Web App Features
-
-### Browse & Discover
-* Document grid / list view (toggle) with **collapsible category tree sidebar** — parent/child categories expand inline; clicking a category loads docs dynamically without a page reload
-* Sort by: name, upload date, file size, file type, most downloaded
-* Pagination on all document lists and search results
-* Breadcrumb navigation for category drill-down
-* Related documents panel on Document Detail page
-
-### Search
-* **Keyword mode** — MySQL FULLTEXT boolean search across title, description, and extracted document content
-* **AI Semantic mode** — TF-IDF cosine similarity; understands meaning, not just exact keywords; results show a "% match" score badge
-* Mode toggle on the search page — switch between Keyword and ✦ AI Semantic per query
-* Search filters: file type, date range, category — combinable with both modes
-* Highlighted keyword matches in title, description, and preview text (keyword mode)
-* Saved searches — name and save a search query for quick re-use
-* Sort search results by: relevance (default), date, name, size
-
-### Document Actions
-* Preview files in-browser: PDF (PDF.js), images, DOCX text
-* Secure download (controller-gated, permission-checked)
-* View version history (read-only)
-* Generate and copy signed share link
-* Rate document (1–5 stars) — average rating shown on document detail and search results
-* Save in-document page bookmark — remember a specific page number inside a PDF for later resumption
-
-### Personal Features
-* Favorites / Bookmarks — save documents for quick access
-* Recently Viewed — auto-tracked list of opened documents
-* Download History — user's own download log
-* Reading Lists — create named collections of documents (e.g. "Linux study pack", "Project X references"); add/remove documents, reorder, make private or share with other users
-* In-document Page Bookmarks — save a specific page number within a PDF; resume reading from where you left off; multiple bookmarks per document with optional label
-* Document Ratings — rate any document 1–5 stars; average rating visible on document cards and detail pages; used as a search ranking signal
-* Notification inbox — mark as read, dismiss, manage notification preferences per event type
-* Profile page — edit display name, avatar, change password, set notification preferences
-* Username change request — submit a request to Admin (username cannot be changed directly by the user)
-* Account deletion request — submit a deletion request; Admin reviews and processes it
-
----
-
-# 📁 File Storage (Local XAMPP)
-
-All files are stored locally:
+## Folder Structure
 
 ```
-storage/app/resources/
+docmanager/
+├── app/
+│   ├── Console/Commands/       # 8 custom Artisan commands
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Admin/          # 14 admin panel controllers
+│   │   │   ├── Api/            # 3 REST API controllers (Sanctum)
+│   │   │   ├── Auth/           # 4 auth flow controllers (Breeze)
+│   │   │   └── Client/         # 15 user-facing controllers
+│   │   ├── Middleware/         # RequireRole, RequireActiveAccount, SecurityHeaders
+│   │   ├── Requests/           # Form request validators
+│   │   └── Resources/          # API resource transformers (JSON)
+│   ├── Jobs/                   # ExtractDocumentContent, IndexDocumentTfidf
+│   ├── Models/                 # 24 Eloquent models
+│   ├── Providers/              # AppServiceProvider
+│   ├── Services/               # ContentExtractorService, TfidfService
+│   └── View/Components/        # AppLayout, GuestLayout
+├── bootstrap/
+│   ├── app.php                 # Application instance, middleware aliases
+│   ├── providers.php           # Auto-discovered providers
+│   └── cache/                  # Cached packages and service bindings
+├── config/                     # app, auth, database, filesystems, queue, cache, etc.
+├── database/
+│   ├── migrations/             # 31 migration files
+│   ├── factories/              # Faker model factories
+│   └── seeders/
+├── documentation/              # Offline HTML reference docs (self-contained)
+│   ├── index.html              # Hub — links to all doc sets
+│   ├── project/index.html      # This project's full documentation
+│   ├── laravel/index.html      # Laravel 12.x — all 103 pages offline (4 MB)
+│   ├── tailwindcss/index.html  # Tailwind CSS v3
+│   ├── alpinejs/index.html     # Alpine.js v3
+│   ├── flowbite/index.html     # Flowbite v2
+│   └── vite/index.html         # Vite v7
+├── public/                     # Web root — only this folder is exposed by the server
+│   ├── index.php               # Laravel front controller
+│   ├── storage/                # Symlink → storage/app/public/ (php artisan storage:link)
+│   ├── vendor/pdfjs/           # PDF.js worker (bundled locally, no CDN)
+│   └── build/                  # Vite compiled assets (CSS + JS)
+├── resources/
+│   ├── css/app.css             # Tailwind directives
+│   ├── js/app.js               # Alpine.js bootstrap
+│   └── views/                  # 54 Blade templates
+│       ├── layouts/            # app.blade.php, admin.blade.php, guest.blade.php
+│       ├── admin/              # 16 admin panel views
+│       ├── documents/          # show.blade.php, preview.blade.php
+│       ├── home/               # index.blade.php (doc grid + category drawer)
+│       ├── search/             # index.blade.php (search + filter drawer)
+│       └── ...                 # auth, profile, favorites, reading-lists, etc.
+├── routes/
+│   ├── web.php                 # Browser routes (session auth, CSRF)
+│   ├── auth.php                # Login / register / password routes
+│   ├── api.php                 # REST API (/api prefix, Sanctum token auth)
+│   └── console.php             # Scheduled Artisan task definitions
+├── storage/
+│   ├── app/
+│   │   ├── chunks/             # Temporary chunks for in-progress large file uploads
+│   │   ├── private/
+│   │   │   ├── resources/      # Uploaded documents (UUID-named, never publicly accessible)
+│   │   │   ├── documents/      # Offline doc markdown files (laravel-docs/12.x/)
+│   │   │   └── search/
+│   │   │       └── tfidf_idf.json  # TF-IDF IDF dictionary (rebuilt by search:build-tfidf)
+│   │   ├── public/
+│   │   │   └── avatars/        # User profile pictures (accessible via /storage symlink)
+│   │   └── temp/               # Bulk ZIP downloads, chunk assembly workspace
+│   ├── framework/              # Compiled Blade views, sessions, file cache
+│   └── logs/laravel.log
+├── tests/                      # PHPUnit test suites
+├── vendor/                     # Composer packages (generated — never edit)
+├── .env                        # Local environment (never commit)
+├── .env.example                # Environment template
+├── artisan                     # Laravel CLI
+├── composer.json               # PHP dependencies
+├── package.json                # Node dependencies
+├── tailwind.config.js
+├── vite.config.js
+└── document_management_schema.sql  # Reference DB schema
 ```
 
-* No cloud dependency
-* Secure controller-based access
-* No direct public file exposure
-
-### Supported File Types & Limits
-
-| Category | Formats | Max Size |
-|---|---|---|
-| Documents | PDF, DOCX, TXT, XLSX, PPTX | 50 MB (default, configurable) |
-| Images | JPG, PNG, GIF, WEBP | 20 MB |
-| Archives | ZIP (metadata only, no content extraction) | 100 MB |
+> **Storage disk root:** The `local` disk in Laravel 11+ resolves to `storage/app/private/`. When using `Storage::disk('local')->put('resources/file.pdf', …)` the physical path is `storage/app/private/resources/file.pdf`. Never prefix paths with `private/` when using the `local` disk driver.
 
 ---
 
-# 🔐 Security Architecture
+## Application Architecture
 
-## File Access Protection
-
-* No direct `/storage` access
-* Download via controller with role/permission check
-* Signed / validated download requests
-
-## Password & Session Security
-
-* bcrypt / argon2 password hashing
-* Password reset done by Admin directly — no email-based reset flow required
-* Session timeout configurable via `SESSION_LIFETIME` (default: 120 minutes)
-* Account lockout after N failed logins — configurable via `ACCOUNT_LOCKOUT_ATTEMPTS` / `ACCOUNT_LOCKOUT_MINUTES`, logged to `activity_logs`
-* Remember me tokens rotated on each use
-
-## System Security
-
-* CSRF protection (Laravel default)
-* Input validation on all form fields
-* SQL injection protection (Eloquent ORM)
-* XSS protection via Blade's `{{ }}` auto-escaping on all output
-* File type + size validation (MIME check + extension whitelist)
-* Rate limiting: 60 requests/min on API endpoints, 10 downloads/min per user
-* HTTPS / SSL recommended for all production deployments
-
-## Audit & IP Logging
-
-* All admin actions logged with user ID, action, resource, and **IP address**
-* Failed access attempts and lockouts logged to `activity_logs` with IP and user agent
+```
+Browser
+   │
+   ├── GET /admin/*  ─────────────────────────────────────────────────────────────────┐
+   │                                                                                   │
+   └── GET /*, /api/*  ──────────────────────────────────────────────────────────┐    │
+                                                                                  │    │
+                                                              Client Web App      │    Admin Panel
+                                                              (Blade + Tailwind)  │    (Blade + Tailwind)
+                                                                                  │    │
+                                                           ┌──────────────────────┘    │
+                                                           │         Laravel 12        │
+                                                           │  ─────────────────────────┘
+                                                           │
+                                                           ├── Middleware: auth, active, role:admin,editor
+                                                           ├── Router (routes/web.php + api.php)
+                                                           ├── Controllers
+                                                           ├── Eloquent ORM (24 models)
+                                                           ├── Services: ContentExtractorService, TfidfService
+                                                           ├── Queue jobs: ExtractDocumentContent, IndexDocumentTfidf
+                                                           └── Scheduler: prune trash/shares/tokens, archive expired
+                                                                          │
+                                                               ─────────────────────────────────
+                                                               MySQL / SQLite  │  Local storage
+                                                               (31 tables)     │  storage/app/private/
+```
 
 ---
 
-## File Integrity
+## Database Schema
 
-* SHA256 file hashing on upload
-* SHA256 hash stored per version in `document_versions`
-* Duplicate detection (same hash → reject or link to existing)
-* Optional virus scan hook
+Full MySQL schema is in **[document_management_schema.sql](document_management_schema.sql)**.
 
----
-
-# 🗄️ Database Schema
-
-The full MySQL schema (all `CREATE TABLE` statements with indexes, foreign keys, and constraints) is in:
-
-📄 **[document_management_schema.sql](document_management_schema.sql)**
-
-### Tables
+### Tables reference
 
 | Table | Purpose |
 |---|---|
-| `users` | Accounts, roles, `status` ENUM (`pending`/`active`/`inactive`), session tokens |
+| `users` | Accounts — role (`admin`/`editor`/`viewer`), status (`pending`/`active`/`inactive`), storage_quota_mb, failed_login_attempts, locked_until |
 | `personal_access_tokens` | Sanctum API tokens |
-| `resources` | Document metadata, file paths, extracted content |
-| `document_versions` | Version history per document |
-| `document_access_logs` | Per-document record of who viewed or downloaded each version and when |
-| `categories` | Hierarchical category tree |
-| `tags` | Tag definitions |
+| `resources` | Documents — title, file_path, file_type (MIME), content (extracted text), status, locked_by, locked_at, expires_at; soft-deletable |
+| `document_versions` | Version history per document with file_path and SHA256 hash |
+| `document_access_logs` | Per-document log of who viewed / downloaded each version and when |
+| `categories` | Hierarchical category tree (parent_id self-join, slug) |
+| `tags` | Tag definitions (name, slug) |
 | `resource_tags` | Many-to-many pivot: resources ↔ tags |
-| `favorites` | Per-user bookmarked documents |
-| `recently_viewed` | Auto-tracked per-user document view history (last 50 per user) |
-| `saved_searches` | Named saved search queries per user |
-| `shares` | Signed share links with expiry and revocation |
-| `audit_logs` | Admin/system-level actions with IP |
-| `activity_logs` | User session events with IP and user agent |
-| `search_logs` | Every search query with type and result count |
-| `download_logs` | Per-file download records |
-| `resource_embeddings` | AI vector chunks per document for semantic search |
-| `notifications` | Per-user notifications with read/unread state |
-| `user_preferences` | Per-user settings (notification opt-ins, view mode, etc.) |
-| `reading_lists` | User-created named document collections |
-| `reading_list_items` | Many-to-many pivot: reading lists ↔ documents, with sort order |
-| `bookmarks` | Per-user in-document page bookmarks (page number + optional label per PDF) |
-| `document_ratings` | Per-user 1–5 star rating per document; average rating computed for display and search ranking |
+| `favorites` | Per-user saved documents |
+| `recently_viewed` | Auto-tracked per-user view history (updated_at timestamp) |
+| `saved_searches` | Named saved search query + filter JSON per user |
+| `reading_lists` | User-created named document collections (public/private flag) |
+| `reading_list_items` | Pivot: reading list ↔ document with sort order |
+| `bookmarks` | In-document page bookmarks (page number + optional label) |
+| `document_ratings` | 1–5 star ratings + optional text review, one per user per document |
+| `shares` | Signed time-limited share tokens (token, expires_at, revoked_at) |
+| `notifications` | Per-user in-app notifications (type, title, message, is_read) |
+| `user_preferences` | View mode, items per page, notification opt-in toggles per user |
+| `account_requests` | Username-change and account-deletion requests with admin approval flow |
+| `settings` | Global application config key-value store (cached) |
+| `audit_logs` | Admin action trail — who did what to which resource, with IP |
+| `activity_logs` | User session events — login, logout, failed access, lockouts, with IP + user agent |
+| `search_logs` | Every search query — text, type (keyword/ai), results_count, user |
+| `download_logs` | Per-file download records — user, resource, IP, timestamp |
+| `resource_embeddings` | TF-IDF sparse vectors per document (chunk_index, embedding JSON, model=tfidf-v1) |
+| `jobs` | Laravel queue jobs table |
+| `cache` | Laravel file/database cache entries |
 
 ---
 
-# 📂 Folder & Category System
+## Features — Admin Panel
 
-Documents can be organized into a **hierarchical category tree**:
+### Document Management
 
-```
-Root
-├── Finance
-│   ├── Invoices
-│   └── Reports
-├── Legal
-│   └── Contracts
-└── HR
-    └── Policies
-```
+- Upload documents with real-time progress (Alpine.js + `XMLHttpRequest`)
+- **Chunked upload** for large files over 50 MB (avoids PHP `upload_max_filesize` limits) — browser splits file into chunks, server assembles and validates hash
+- Edit title, description, category, tags
+- **Soft delete** — moves to Trash (`deleted_at` timestamp); restorable
+- **Force delete** — permanently removes DB record and file from disk
+- **Bulk operations**: approve, trash, reject, assign category, download as ZIP (`ZipArchive`)
+- **Document locking** — lock a document to block all downloads and previews until unlocked; locked_by and locked_at recorded; admins can force-unlock any document
+- **Approval workflow** — Draft → Pending Review → Published → Archived; rejection returns to Draft; only Published documents are visible to Viewers
+- **Document expiry** — set an `expires_at` date; the `dms:archive-expired` scheduler automatically moves the document to Archived status
+- **Restore from Trash** — `PATCH /admin/documents/{id}/restore` (uses `->withTrashed()` route binding)
+- Access log per document — full history of who viewed or downloaded each version
 
-* Admins and Editors manage the category tree
-* Documents belong to one category
-* Breadcrumb navigation reflects the category path
-* Category-based filtering available in search
+### Version Control
 
----
+- Upload a new version of any document
+- Roll back to any previous version
+- Full version history with uploader, timestamp, and change notes
+- SHA256 hash per version for integrity verification
 
-# 🔎 Advanced Search System
+### User Management _(admin only)_
 
-The system uses a **multi-layer hybrid search engine**.
+- Create admin and editor accounts directly (no self-registration for staff)
+- Review self-registered client accounts in the Pending queue — activate or reject with a written reason
+- Bulk activate / bulk reject pending registrations
+- Dashboard badge shows count of new pending registrations
+- Edit any user's profile (name, role, status)
+- Reset any user's password directly (no email required)
+- Activate / deactivate accounts
+- Per-user storage quota (enforced on upload via `User::wouldExceedQuota()`)
+- Process account deletion requests and username-change requests
 
-## 1. Metadata Search (Fast)
+### Analytics & Logs
 
-Search by: file name, title, description.
+- **Dashboard**: stat cards (total docs, storage used, downloads today, active users, failed jobs); upload trends; top downloaded files; popular search terms
+- **Audit logs** — full admin action trail with IP, user, resource, timestamp — filterable, exportable to CSV
+- **Activity logs** — session events (login, logout, failed access, lockouts) with IP and user agent — exportable to CSV
+- **Queue monitor** — view pending and failed background jobs, retry individual or all failed jobs
 
-## 2. Full-Text Search (MySQL)
+### Other Admin Features
 
-Full-text index on `resources(title, description, content)` — defined in schema.
-
-## 3. File Content Search
-
-Text extracted from PDF, DOCX, and TXT files and stored in `resources.content (LONGTEXT)`.
-
-## 4. AI Semantic Search (TF-IDF, fully offline)
-
-No external API, no vector database, no internet required.
-
-### How it works:
-
-```
-Document uploaded
-   ↓
-Content extracted (ExtractDocumentContent job)
-   ↓
-Tokenize + compute TF-IDF vector (IndexDocumentTfidf job)
-   ↓
-Store sparse vector in resource_embeddings (model = tfidf-v1)
-
-─────────────────────────────────────────────────
-
-User types a query → clicks "✦ AI Semantic"
-   ↓
-Tokenize query → compute TF-IDF query vector (using stored IDF)
-   ↓
-Cosine similarity against all indexed document vectors (in PHP)
-   ↓
-Sort by score → paginate → return results with "% match" badge
-```
-
-### Features:
-
-* Finds conceptually related documents, not just exact keyword matches
-* Works completely offline — no API calls, no external service
-* Results ranked by cosine similarity score (0–100% match badge shown per result)
-* Filters (category, file type, date) apply before similarity computation
-* Index rebuilds automatically as new documents are uploaded (per-doc job)
-
-### Build the index (one-time setup):
-
-```bash
-# Step 1 — extract text from all existing documents
-php artisan search:reindex
-
-# Step 2 — run the queue worker to process extraction jobs
-php artisan queue:work
-
-# Step 3 — build TF-IDF vectors from extracted content
-php artisan search:build-tfidf
-```
-
-Or click **"✦ Build AI Index"** in the Admin Panel → Search Analytics page.
-
-Rebuild after uploading a large batch of new documents to keep rankings accurate.
-
-## 5. Hybrid Search Engine
-
-```
-Keyword Search (MySQL FULLTEXT)
-+ Content Search (extracted text)
-+ AI Semantic Search (TF-IDF cosine similarity)
-→ User-selected mode → Ranked Results
-```
+- Hierarchical category CRUD (parent/child tree)
+- Tag CRUD + **tag merge** (moves all document associations from source tag to target, deletes source)
+- Broadcast system notifications to all active users at once
+- Search index management — trigger `search:reindex` (re-extract text), `search:build-tfidf` (rebuild TF-IDF index)
+- Storage usage breakdown by user and by file type
+- Global settings page (upload limits, session timeout, share link expiry)
 
 ---
 
-## 🔍 Search Ranking System
+## Features — Client Web App
 
-Scoring model:
+### Authentication
 
-* Title match → +5
-* Filename match → +4
-* Content match → +2
-* Vector similarity → 0–1 score
-* Recent files boost → +1
-* Average rating boost → 0–1 (normalised from 1–5 star average)
+- Self-registration with **username + password only** (no email required)
+- New accounts start as **Pending** — cannot log in until an admin activates them
+- Pending users see an "awaiting activation" message
+- Account lockout after N failed logins (configurable)
+- Session-based auth (Laravel Breeze); remember-me tokens rotated on each use
+- Username change and account deletion go through an **admin-approval request** flow (users cannot change username directly)
 
----
+### Browse & Discover
 
-## 🔎 Search Filters
+- Document grid with collapsible **category tree sidebar** (desktop) + slide-in **category drawer** (mobile)
+- Sort by: name, upload date, file size, file type, most downloaded
+- Pagination on all document lists
+- Breadcrumb navigation for category drill-down
+- Related documents panel on Document Detail page
 
-Filters are combinable with any search type:
+### Search _(see [Search System](#search-system))_
 
-| Filter | Values |
-|---|---|
-| File type | `pdf`, `docx`, `xlsx`, `jpg`, `png`, `txt` |
-| Upload date | date range (from / to) |
-| Uploader | user ID or name |
-| Tags | one or more tag slugs |
-| Category | category ID or slug |
-| File size | min / max in bytes |
+- **Keyword mode** (MySQL FULLTEXT) and **AI Semantic mode** (TF-IDF) — togglable per query
+- Filters: file type, date range, category
+- Saved searches, sort options, match-score badges on AI results
 
----
+### Document Actions
 
-## 🔃 Sort Options
+- **Preview** PDF (inline via `<iframe>`) and images (inline via `<img>`) — blocked when document is locked
+- **Download** — controller-gated, permission-checked, lock-checked
+- **Streaming** — `GET /documents/{id}/stream` serves file inline (`Content-Disposition: inline`) for the preview iframe
+- Generate and copy a signed share link
+- Rate document 1–5 stars + optional text review
+- Save in-document page bookmark with optional label
 
-Available on document lists and search results:
+### Personal Features
 
-| Sort | Direction |
-|---|---|
-| Relevance score | desc (search only) |
-| Upload date | asc / desc |
-| File name | asc / desc |
-| File size | asc / desc |
-| Download count | desc |
-
----
-
-## 🔎 Search Highlighting & History
-
-* Highlights matched keywords in: title, description, preview text
-* Last 10 search queries shown as recent history (clearable per user)
-* Saved searches — name, save, and re-run any query with one click
-* Basic autocomplete on metadata fields (title, filename) without Elasticsearch
+| Feature | URL | Storage |
+|---|---|---|
+| Favorites | `/favorites` | `favorites` table |
+| Recently Viewed | `/history` | `recently_viewed` table |
+| Download History | `/downloads` | `download_logs` table |
+| Saved Searches | `/saved-searches` | `saved_searches` table |
+| Reading Lists | `/reading-lists` | `reading_lists` + `reading_list_items` |
+| Notifications | `/notifications` | `notifications` table |
+| Profile | `/profile` | `users` + `user_preferences` |
 
 ---
 
-# 📄 File Content Extraction
+## Search System
 
-Supported formats:
+### 1. Keyword Search (MySQL FULLTEXT)
 
-* PDF → `smalot/pdfparser`
-* DOCX → `phpoffice/phpword` (also used for DOCX → text preview)
-* TXT → native PHP
+- `MATCH(title, description, content) AGAINST(? IN BOOLEAN MODE)`
+- Supports boolean operators: `+required -excluded "exact phrase"`
+- Results sorted by MySQL relevance score
+- Fast, exact — best for known terminology
 
-### Install libraries:
-
-```bash
-composer require smalot/pdfparser
-composer require phpoffice/phpword
-```
-
----
-
-# 👁️ File Preview System
-
-* PDF preview via **PDF.js** (browser-based, bundled locally — no CDN)
-* Image preview (JPG, PNG, GIF, WEBP)
-* DOCX text preview (extracted via phpoffice/phpword)
-* DOCX → PDF conversion for full-fidelity preview (optional, requires LibreOffice on server)
-
-```
-<iframe src="/documents/{id}/preview"></iframe>
-```
-
----
-
-# 📤 File Upload
-
-* Real-time upload progress indicator (Alpine.js + `XMLHttpRequest`)
-* Chunked upload for files over 50 MB (avoids PHP `upload_max_filesize` limits)
-* File type validation: MIME type check + extension whitelist
-* File size validation: per-category limits enforced server-side
-* SHA256 hash computed on server after upload
-
----
-
-# 🔄 Document Version Control
-
-## Features:
-
-* Maintain multiple file versions per document
-* Restore previous versions
-* Track version history with uploader and timestamp
-* SHA256 hash per version for integrity verification
-* Per-document access log — who viewed or downloaded each version and when
-
-## Flow:
-
-```
-Upload new version
-   ↓
-Store file + compute SHA256
-   ↓
-Create version entry (document_versions)
-   ↓
-Keep all previous versions accessible
-```
-
----
-
-# 🔒 Document Locking
-
-Prevents concurrent edits to the same document:
-
-* Locking owned by the editing user, shown to others as "locked by [user]"
-* Auto-released after configurable timeout (default: 30 minutes)
-* Admins can force-unlock any document
-* Lock state stored in `resources` table (`locked_by`, `locked_at`)
-
----
-
-# 📋 Document Approval Workflow
-
-Optional publishing states for controlled document release:
-
-```
-Draft → Pending Review → Published
-              ↓
-           Rejected (back to Draft)
-```
-
-* Editors submit documents for review
-* Admins approve or reject with a comment
-* Only Published documents are visible to Viewers
-* State transitions logged in `audit_logs`
-
----
-
-# 📤 Bulk Operations
-
-Available to Admin and Editor roles:
-
-* Bulk upload (multiple files in one request, with per-file progress)
-* Bulk soft delete (move to Trash)
-* Bulk download (served as ZIP archive via PHP `ZipArchive`)
-* Bulk tag / category assignment
-
----
-
-# 🗑️ Soft Delete & Trash
-
-* Deleted documents move to **Trash** (`deleted_at` timestamp — Laravel soft deletes)
-* Admins can restore or permanently delete from Trash
-* Configurable auto-purge retention period (default: 30 days)
-* Trash accessible only to Admins at `/admin/documents/trash`
-
----
-
-# 🔗 Document Sharing
-
-* Generate a **signed, time-limited share link** for any document
-* Share link records stored in `shares` table (token, expiry, resource, created by)
-* Accessible by unauthenticated users (read-only preview + download)
-* Configurable expiry: 1 hour / 24 hours / 7 days
-* Links can be revoked before expiry
-* Share link generation and revocation logged in `audit_logs`
-
----
-
-# ⭐ Favorites & Personal History
-
-* **Favorites** — bookmark any document; accessible at `/favorites`; stored in `favorites` table
-* **Recently Viewed** — auto-tracked on document open; accessible at `/history`; stores last 50 entries per user in `recently_viewed` table
-* **Download History** — user's own download log at `/downloads`; sourced from `download_logs`
-* **Saved Searches** — save a named search query for quick re-use at `/saved-searches`; stored in `saved_searches` table
-* Display preferences (grid/list view, items per page) stored in `user_preferences`
-
----
-
-# ⚙️ Background Processing (Queues)
-
-Used for:
-
-* File content extraction (text from PDF, DOCX, TXT)
-* TF-IDF indexing (auto-dispatched after content extraction)
-* Bulk TF-IDF index rebuild (`search:build-tfidf` command)
-* Bulk ZIP download generation
-
-```
-Upload → Queue Job → Process → Store index
-```
-
-Laravel Queues:
-
-* `database` (default, no extra setup)
-* `redis` (recommended for production)
-
-Start the worker:
-
-```bash
-php artisan queue:work --queue=default
-```
-
-Monitor failed jobs at `/admin/jobs`.
-
----
-
-# 🧠 AI Semantic Search (Offline TF-IDF)
+### 2. TF-IDF Semantic Search ("AI Search")
 
 Pure PHP implementation — no external API, no vector database, no internet required.
 
-### Files:
+**Build phase** (`search:build-tfidf` command):
 
-| File | Purpose |
+```
+Pass 1 — scan all documents, count document frequency (DF) for every unique term
+       → build IDF dictionary: log((N+1)/(df+1)) + 1  (smooth IDF)
+       → save to storage/app/private/search/tfidf_idf.json
+
+Pass 2 — compute TF-IDF vector for each document
+       → L2-normalize each vector
+       → store in resource_embeddings (model=tfidf-v1, chunk_index=0)
+```
+
+**Query phase** (user submits "AI Search"):
+
+```
+Tokenize query text
+→ vectorize using stored IDF dictionary
+→ cosine similarity against every stored embedding (dot product of L2-normalised vectors)
+→ sort by score, paginate, return results with "% match" badge
+```
+
+**Indexed text**: `title + description + content` (content = text extracted from the file)
+
+**Algorithm details**:
+
+| Step | Detail |
 |---|---|
-| `app/Services/TfidfService.php` | Tokenize, build IDF, compute TF-IDF vectors, cosine similarity |
-| `app/Jobs/IndexDocumentTfidf.php` | Queue job — index one document using existing IDF |
-| `app/Console/Commands/BuildTfidfIndex.php` | Artisan command — full corpus rebuild (two-pass, memory-efficient) |
-| `storage/app/search/tfidf_idf.json` | Persisted IDF dictionary (rebuilt by `search:build-tfidf`) |
-| `resource_embeddings` table | Stores sparse TF-IDF vector per document (`model = tfidf-v1`) |
+| Tokenize | lowercase → strip punctuation → remove 50+ English stop words → filter tokens < 3 chars |
+| TF | term count ÷ total tokens per document |
+| IDF | `log((N+1) / (df+1)) + 1` (smooth — avoids zero-division, handles unseen terms) |
+| TF-IDF | TF × IDF, then L2-normalized |
+| Cosine similarity | dot product over query vector terms only (sparse, efficient) |
 
-### Commands:
+### Search filters
 
-| Command | Purpose |
+| Filter | Values |
 |---|---|
-| `php artisan search:build-tfidf` | Full corpus reindex — builds IDF dictionary + all document vectors |
-| `php artisan search:build-tfidf --chunk=500` | Same, but processes 500 documents per batch (default: 200) |
-| `php artisan search:reindex` | Re-extract text from all documents (queue jobs — run worker after) |
-| `php artisan queue:work --queue=default` | Run the queue worker to process extraction + indexing jobs |
-| `php artisan queue:work --stop-when-empty` | Process all queued jobs then exit (useful for one-off runs) |
+| File type | `application/pdf`, `image/png`, `application/vnd.openxmlformats…`, etc. |
+| Upload date range | from / to |
+| Category | slug or ID |
 
-### Algorithm:
+### Sort options
 
-* **Tokenize** — lowercase, strip punctuation, remove 50+ English stop words, filter tokens < 3 chars
-* **TF** — term count / total tokens per document
-* **IDF** — smooth: `log((N+1) / (df+1)) + 1`  where N = corpus size, df = docs containing term
-* **TF-IDF** — TF × IDF, then L2-normalized so cosine similarity = dot product
-* **Cosine similarity** — dot product over the smaller (query) vector's terms only (sparse, efficient)
-
----
-
-# 📊 Admin Analytics Dashboard
-
-### Stat Cards
-* Total documents / storage used
-* Downloads today / this week
-* Active users (last 30 days)
-* Failed jobs count
-
-### Charts
-* Upload trends (7-day and 30-day bar chart)
-* Top 10 most downloaded files
-* Popular search terms (word cloud / table)
-* Storage usage by file type (pie chart)
-
----
-
-# 🏷️ Tags System
-
-* Admins and Editors create and assign tags (e.g. `finance`, `legal`, `invoice`, `report`)
-* Multiple tags per document via `resource_tags` pivot
-* Tag merge — combine duplicate tags without losing document associations
-* Tag-based filtering in search
-
----
-
-# 🔔 Notification System
-
-| Event | In-App |
+| Sort key | Available in |
 |---|---|
-| File uploaded | ✔ |
-| Version updated | ✔ |
-| Access denied | ✔ (admin) |
-| Account locked | ✔ |
-| New pending registration | ✔ (admin) |
-| Account activated / rejected | ✔ (user) |
-| Document approved / rejected | ✔ (editor) |
-| Username / deletion request received | ✔ (admin) |
-
-**Delivery:**
-
-* In-app notifications stored in `notifications` table with `is_read` flag
-
-**User preferences:**
-
-* Per-user opt-in/out for each notification event type
-* Managed at `/profile` and stored in `user_preferences`
+| Relevance | keyword + AI modes |
+| Upload date (asc/desc) | all modes |
+| File name (asc/desc) | all modes |
+| File size (asc/desc) | all modes |
+| Download count (desc) | all modes |
 
 ---
 
-# 📱 API Layer
+## File Upload & Storage
 
-Authentication: **Laravel Sanctum** (Bearer token)
+### Standard upload
 
-| Endpoint | Method | Description |
+1. Validate (file required, MIME type allowlist, max size)
+2. Generate UUID filename — stored at `storage/app/private/resources/{uuid}.ext`
+3. Create `Resource` record with MD5 `file_hash` for deduplication detection
+4. Dispatch `ExtractDocumentContent` job to queue
+
+### Chunked upload (large files)
+
+1. Browser splits file into N slices
+2. `POST /admin/documents/upload/chunk` — each slice stored in `storage/app/chunks/{upload_id}/`
+3. `POST /admin/documents/upload/assemble` — concatenates slices in order, verifies hash, moves to `resources/{uuid}.ext`, creates Resource, dispatches extraction job
+
+### Supported types
+
+| Format | MIME type | Content extraction |
 |---|---|---|
-| `/api/auth/login` | POST | Obtain API token |
-| `/api/auth/logout` | POST | Revoke API token |
-| `/api/resources` | GET | List documents (paginated) |
-| `/api/resources/{id}` | GET | Get document metadata |
-| `/api/resources` | POST | Upload a document |
-| `/api/resources/{id}` | PUT | Update document metadata |
-| `/api/resources/{id}` | DELETE | Soft delete a document |
-| `/api/resources/{id}/download` | GET | Download a file |
-| `/api/resources/{id}/share` | POST | Generate a signed share link |
-| `/api/search` | GET | Search documents (all types + filters + sort) |
+| PDF | `application/pdf` | ✔ smalot/pdfparser |
+| DOCX | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | ✔ phpoffice/phpword |
+| XLSX / XLS | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | ✔ phpoffice/phpspreadsheet |
+| PPTX | `application/vnd.openxmlformats-officedocument.presentationml.presentation` | ✔ phpoffice/phppresentation |
+| TXT / MD | `text/plain` | ✔ native PHP |
+| Images (JPG, PNG, GIF, WEBP) | `image/*` | ✗ (indexed by title + description) |
+| ZIP, other | various | ✗ (indexed by title + description) |
+
+> **File type storage note:** `resources.file_type` stores the full MIME type (e.g. `application/pdf`), not a short extension. All type checks in the codebase use MIME types, not extensions.
 
 ---
 
-# 🧊 Caching Layer
+## Content Extraction
 
-* **Driver**: Redis (recommended) or file cache
-* Search results cached by query hash (configurable TTL)
-* Embeddings cached to avoid re-generation
-* Analytics aggregates cached to reduce DB load
-* Cache invalidated on document upload, edit, or delete
+Handled by `app/Services/ContentExtractorService.php`:
 
----
+| Method | Library | Handles |
+|---|---|---|
+| `extractPdf()` | smalot/pdfparser | Text layer of PDF files |
+| `extractDocx()` | phpoffice/phpword | Body text of Word documents |
+| `extractXlsx()` | phpoffice/phpspreadsheet | All sheets, all rows, all cells |
+| `extractPptx()` | phpoffice/phppresentation | All slides, all shapes, all paragraph runs |
+| `extractText()` | PHP built-in | Plain text files (.txt, .md) |
+| `clean()` | — | Normalise whitespace, strip control characters, truncate at 5 MB |
 
-# 🧬 OCR (Optional Upgrade)
-
-For scanned PDFs:
-
-* Extract text from images inside PDFs
-* Enables full search support for scanned documents
-* Library: `thiagoalessio/tesseract_ocr` or `spatie/pdf-to-text`
+Extracted text is stored in `resources.content (LONGTEXT)`.
 
 ---
 
-# ⚡ Elasticsearch Integration (Optional)
+## Document Preview
 
-For large-scale deployments:
+The preview system uses an in-process streaming route — no third-party preview service needed.
 
-* Fast indexing
-* Advanced ranking
-* Auto-suggestions (replaces basic autocomplete)
-* Replaces MySQL FULLTEXT in production
-
----
-
-# 🧱 Tech Stack
-
-| Layer | Technology |
+| File type | Preview method |
 |---|---|
-| Backend | Laravel (PHP 10+ / 11+) |
-| Server | Apache (XAMPP) |
-| Database | MySQL 8 |
-| Templating | Laravel Blade (XSS-safe via `{{ }}`) |
-| CSS Framework | Tailwind CSS (compiled, offline-ready) |
-| JS Interactivity | Alpine.js (modals, dropdowns, upload progress) |
-| UI Components | Flowbite (Tailwind component library, bundled locally) |
-| PDF Preview | PDF.js (bundled locally) |
-| Queue / Cache | Redis |
-| Full-text Search | MySQL FULLTEXT |
-| AI Semantic Search | TF-IDF cosine similarity (pure PHP, fully offline) |
-| Storage | Local Disk (`storage/app/resources/`) |
-| PHP Libraries | smalot/pdfparser, phpoffice/phpword, ZipArchive |
-| Auth | Laravel Breeze + Sanctum (API) |
+| `application/pdf` | `<iframe src="/documents/{id}/stream">` — stream route serves file inline |
+| `image/*` | `<img src="/documents/{id}/stream">` — stream route serves file inline |
+| All other types | No preview — download only |
+
+### Stream route
+
+`GET /documents/{id}/stream` → `DocumentController@stream`
+
+- Checks `isPublished()` → 404 if not published
+- Checks `isLocked()` → 403 if locked
+- Validates MIME type is PDF or image → 404 otherwise
+- Checks file exists on disk → 404 if missing
+- Returns `response()->file()` with `Content-Type` header (inline, not attachment)
+
+### Lock enforcement
+
+When `isLocked()` is true:
+
+| Point | Behaviour |
+|---|---|
+| Download button | Replaced with grey "Locked" badge (no link) |
+| "Open Preview" button | Hidden |
+| `download` route | Redirects back with error flash |
+| `stream` route | Returns HTTP 403 |
+| `preview` route | Returns HTTP 403 |
+| Document detail page | Shows yellow "Document locked by [name]" banner |
 
 ---
 
-# ⚙️ System Architecture
+## Background Jobs & Queue
+
+Start the queue worker (required for uploads to become searchable):
+
+```bash
+# Development — re-starts on failure
+php artisan queue:listen --tries=1
+
+# Production — daemonise with Supervisor
+php artisan queue:work --daemon
+```
+
+### ExtractDocumentContent
+
+| Property | Value |
+|---|---|
+| Triggered by | Document upload / `search:reindex` command |
+| Retries | 3 |
+| Timeout | 120 seconds |
+| What it does | Calls `ContentExtractorService::extract()`, stores result in `resources.content`, dispatches `IndexDocumentTfidf` |
+
+### IndexDocumentTfidf
+
+| Property | Value |
+|---|---|
+| Triggered by | After `ExtractDocumentContent` completes; also by `search:build-tfidf` |
+| Retries | 3 |
+| Timeout | 60 seconds |
+| What it does | Combines title+description+content, computes TF-IDF vector via `TfidfService`, stores in `resource_embeddings` |
+| Guard | Silently skips if IDF dictionary hasn't been built yet |
+
+Monitor failed jobs at `/admin/jobs`. Retry all failed jobs with one click.
+
+---
+
+## Artisan Commands Reference
+
+### Search commands
+
+| Command | Options | Description |
+|---|---|---|
+| `php artisan search:reindex` | `--chunk=50` | Queue `ExtractDocumentContent` for every non-deleted document. Run after adding new file type support. |
+| `php artisan search:build-tfidf` | `--chunk=200` | 2-pass in-process rebuild: compute IDF dictionary (Pass 1) → compute and store TF-IDF vectors for all documents (Pass 2). Runs synchronously (no queue). |
+
+### Maintenance commands
+
+| Command | Options | Schedule | Description |
+|---|---|---|---|
+| `php artisan dms:prune-trash` | `--dry-run` | Daily 02:00 | Permanently deletes documents soft-deleted longer than `TRASH_RETENTION_DAYS`. Removes DB record and file from disk. |
+| `php artisan dms:prune-shares` | `--dry-run` | Daily 02:15 | Deletes share tokens expired more than 7 days ago. |
+| `php artisan dms:prune-tokens` | — | Daily 02:30 | Deletes expired Sanctum personal access tokens. |
+| `php artisan dms:archive-expired` | `--dry-run` | Hourly | Sets status → `archived` for documents whose `expires_at` has passed. Writes AuditLog entry. |
+
+### Documentation commands
+
+| Command | Options | Description |
+|---|---|---|
+| `php artisan docs:import-laravel` | `--branch=12.x` `--force` | Downloads the Laravel documentation ZIP from GitHub, extracts 103 markdown files, creates Resource records in the database (category "Laravel 12.x Documentation"), and rebuilds the TF-IDF index. |
+| `php artisan docs:build-laravel-offline` | `--branch=12.x` | Reads markdown from `storage/app/private/documents/laravel-docs/12.x/`, converts to HTML with a custom parser, and writes a single self-contained offline HTML file to `documentation/laravel/index.html`. |
+
+### Scheduler setup (production)
+
+Add to cron (`crontab -e`):
+
+```cron
+* * * * * cd /var/www/docmanager && php artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
+## Offline Documentation Hub
+
+All project dependencies are available offline as self-contained HTML files:
 
 ```
-┌─────────────────────────┐   ┌─────────────────────────────┐
-│   Admin Panel (/admin)  │   │   Client Web App (/)        │
-│   Blade + Tailwind CSS  │   │   Blade + Tailwind CSS      │
-│   Alpine.js + Flowbite  │   │   Alpine.js + Flowbite      │
-│   Admin/Editor only     │   │   All authenticated users   │
-└────────────┬────────────┘   └──────────────┬──────────────┘
-             │                               │
-             └──────────────┬────────────────┘
-                            ↓
-                    Laravel Backend
-                            ↓
-          ─────────────────────────────────────────
-          │ Auth (Breeze)     │ RBAC │ API (Sanctum)│
-          │ File Manager      │ Search Engine        │
-          │ AI Module         │ Queue (Redis)         │
-          │ Cache (Redis)     │ Notifications         │
-          │ Approval Workflow │ Document Locking      │
-          ─────────────────────────────────────────
-                            ↓
-          MySQL + Local Storage + TF-IDF Index (storage/app/search/)
+Open: documentation/index.html
+```
+
+| Doc set | File | Contents |
+|---|---|---|
+| **Project Docs** | `documentation/project/index.html` | Full DocManager reference — folder structure, models, controllers, routes, all features |
+| **Laravel 12.x** | `documentation/laravel/index.html` | All 103 official docs pages (4,151 KB, single file) |
+| **Tailwind CSS v3** | `documentation/tailwindcss/index.html` | Full utility class reference |
+| **Alpine.js v3** | `documentation/alpinejs/index.html` | Directives, magic properties, plugins |
+| **Flowbite v2** | `documentation/flowbite/index.html` | 56+ component recipes |
+| **Vite v7** | `documentation/vite/index.html` | Config reference, plugins, HMR |
+
+### Rebuild the Laravel offline doc
+
+```bash
+# Import latest docs from GitHub (downloads ~840 KB ZIP)
+php artisan docs:import-laravel --branch=12.x --force
+
+# Regenerate the single-file offline HTML
+php artisan docs:build-laravel-offline --branch=12.x
 ```
 
 ---
 
-# 🔮 Future Enhancements
+## REST API
 
-* AI document summarization
-* Chat with documents (RAG system)
-* OCR scanning for all PDFs
-* Real-time collaboration
-* Elasticsearch production scaling
-* Multi-tenant SaaS version
-* Push notifications (browser)
-* Mobile app (via API layer)
+Authentication: **Laravel Sanctum** (Bearer token).
 
----
+### Obtain a token
 
-# 🎯 Summary
+```http
+POST /api/auth/login
+Content-Type: application/json
 
-This system is a **complete enterprise-grade document management platform** featuring:
+{ "email": "user@example.com", "password": "secret" }
+```
 
-✔ Dual-app architecture — Admin Panel (`/admin`) + Client Web App (`/`)
-✔ Offline-capable UI (Tailwind CSS + Alpine.js + Flowbite, no CDN)
-✔ AI Semantic search works offline — TF-IDF vectors stored locally, no external API required
-✔ Local file storage (XAMPP)
-✔ Secure role-based authentication (RBAC) with account lockout
-✔ Client self-registration (username + password) with mandatory Admin activation before first login
-✔ Hybrid search engine — Keyword (MySQL FULLTEXT) + AI Semantic (TF-IDF, pure PHP, fully offline)
-✔ Combinable search filters + sort options
-✔ Search history, saved searches, and basic autocomplete
-✔ File preview system (PDF.js, bundled locally)
-✔ Document version control with SHA256 integrity per version + per-document access log
-✔ Document locking and approval workflow (Draft → Review → Published)
-✔ Folder / category hierarchy with breadcrumbs
-✔ Bulk operations (upload, delete, download ZIP, tag assignment)
-✔ Soft delete with restorable Trash and auto-purge
-✔ Document sharing with signed time-limited links + revocation
-✔ Favorites, recently viewed, download history, saved searches
-✔ Reading lists — user-created named document collections
-✔ In-document page bookmarks — resume reading from a saved page in any PDF
-✔ Document ratings (1–5 stars) — community quality signal, used in search ranking
-✔ Background job processing (queues) with queue monitor
-✔ Advanced analytics dashboard (stat cards + charts)
-✔ In-app notification system with per-user preferences
-✔ REST API layer (Laravel Sanctum)
-✔ Redis caching layer
-✔ Storage quota management per user
+Response: `{ "token": "1|abc…", "user": { … } }`
+
+Use token in subsequent requests: `Authorization: Bearer 1|abc…`
+
+### Endpoints
+
+| Method | URI | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/auth/login` | none | Issue Sanctum token (rate-limited: 5/min per IP) |
+| `POST` | `/api/auth/logout` | token | Revoke current token |
+| `GET` | `/api/auth/me` | token | Current user info |
+| `GET` | `/api/resources` | token | List published documents (paginated) |
+| `GET` | `/api/resources/{id}` | token | Single document detail |
+| `POST` | `/api/resources` | token | Upload a document |
+| `PUT` | `/api/resources/{id}` | token | Update document metadata |
+| `DELETE` | `/api/resources/{id}` | token | Soft-delete a document |
+| `GET` | `/api/resources/{id}/download` | token | Download file (rate-limited: 10/min per user) |
+| `POST` | `/api/resources/{id}/share` | token | Generate a signed share link |
+| `GET` | `/api/search` | token | Keyword search — logs query to `search_logs` |
+
+### Response format
+
+All document responses use `DocumentResource` / `DocumentResource::collection()` transformers:
+
+- **Included**: `id`, `title`, `description`, `file_type`, `file_size`, `status`, `download_count`, `category`, `tags`, `created_at`
+- **Excluded**: `file_path`, `file_hash` (internal fields never exposed via API)
+- **Collections** wrapped in `{ data: [...], meta: { current_page, last_page, total, per_page }, links: { first, last, prev, next } }`
 
 ---
 
-🚀 This project is now architected as a **full SaaS-level document intelligence platform**, not just a file manager.
+## Security Architecture
+
+### File access
+
+- Private uploaded files live in `storage/app/private/resources/` — never in `public/`
+- All file serving goes through controller methods that check: published status, lock status, role, and file existence
+- `stream` and `download` routes are completely separate — stream uses `response()->file()` (inline), download uses `Storage::download()` (attachment)
+
+### Authentication & sessions
+
+- Passwords hashed with bcrypt
+- Session timeout configurable (`SESSION_LIFETIME`, default 120 min)
+- Account lockout after N failed logins — tracked in `users.failed_login_attempts`, stored in `users.locked_until`
+- Lockouts logged to `activity_logs` with IP and user agent
+- Remember-me tokens rotated on each use
+
+### Input & output protection
+
+- CSRF protection on all web forms (Laravel default)
+- All SQL via Eloquent ORM (parameterized queries — no SQL injection)
+- All Blade output via `{{ }}` (auto-escaped — no XSS)
+- MIME type + file extension validation on upload
+- `SecurityHeaders` middleware adds `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` headers on every response
+
+### Rate limiting
+
+| Limiter | Route | Limit |
+|---|---|---|
+| `api-login` | `POST /api/auth/login` | 5 requests/min per IP |
+| `api-download` | `GET /api/resources/{id}/download` | 10 requests/min per user |
+
+### Audit trail
+
+- Every admin action logged in `audit_logs` with user ID, action type, resource ID, IP address, and timestamp
+- Failed login attempts and lockouts logged in `activity_logs` with user agent
+- Share link creation and revocation logged
+
+---
+
+## Role Permissions Matrix
+
+| Permission | Admin | Editor | Viewer |
+|---|---|---|---|
+| Browse / view published documents | ✔ | ✔ | ✔ |
+| Download documents | ✔ | ✔ | ✔ |
+| Preview documents (PDF / image) | ✔ | ✔ | ✔ |
+| Search (keyword + AI semantic) | ✔ | ✔ | ✔ |
+| Favorites, bookmarks, reading lists | ✔ | ✔ | ✔ |
+| Ratings and reviews | ✔ | ✔ | ✔ |
+| Share link generation | ✔ | ✔ | ✔ |
+| Upload new documents | ✔ | ✔ | ✗ |
+| Edit / delete documents | ✔ | ✔ | ✗ |
+| Lock / unlock documents | ✔ | ✔ | ✗ |
+| Approve / reject documents | ✔ | ✔ | ✗ |
+| Manage categories and tags | ✔ | ✔ | ✗ |
+| Document version management | ✔ | ✔ | ✗ |
+| View analytics / access logs | ✔ | ✔ | ✗ |
+| Trigger search reindex | ✔ | ✔ | ✗ |
+| Export audit / activity logs (CSV) | ✔ | ✗ | ✗ |
+| Manage users and roles | ✔ | ✗ | ✗ |
+| View audit logs | ✔ | ✗ | ✗ |
+| Manage queue / failed jobs | ✔ | ✗ | ✗ |
+| Manage storage quotas | ✔ | ✗ | ✗ |
+| System settings | ✔ | ✗ | ✗ |
+| Broadcast notifications | ✔ | ✗ | ✗ |
+| Approve account requests | ✔ | ✗ | ✗ |
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Version |
+|---|---|---|
+| Backend framework | Laravel | 12.x |
+| Language | PHP | 8.2+ |
+| Database | MySQL | 8.0+ (SQLite for dev) |
+| Templating | Laravel Blade | — |
+| CSS framework | Tailwind CSS | 3.x |
+| JS interactivity | Alpine.js | 3.x |
+| UI components | Flowbite | 2.x |
+| Asset bundler | Vite | 7.x |
+| PDF preview | PDF.js | bundled locally |
+| API auth | Laravel Sanctum | 4.x |
+| Auth scaffolding | Laravel Breeze | 2.x |
+| PDF text extraction | smalot/pdfparser | 2.x |
+| DOCX text extraction | phpoffice/phpword | 1.x |
+| XLSX text extraction | phpoffice/phpspreadsheet | 3.x |
+| PPTX text extraction | phpoffice/phppresentation | 1.x |
+| Queue / cache | Database (dev), Redis (prod) | — |
+| Full-text search | MySQL FULLTEXT | — |
+| Semantic search | TF-IDF cosine similarity (pure PHP) | — |
+| File storage | Local disk (`storage/app/private/`) | — |
+
+---
+
+## System Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Browser / API client                           │
+└──────────────┬──────────────────────────────────────────┬───────────────────┘
+               │  /admin/*                                │  /*  and  /api/*
+               ▼                                          ▼
+    ┌──────────────────────┐                  ┌──────────────────────────┐
+    │    Admin Panel       │                  │    Client Web App        │
+    │  Blade + Tailwind    │                  │  Blade + Tailwind        │
+    │  Alpine.js+Flowbite  │                  │  Alpine.js + Flowbite    │
+    │  role: admin/editor  │                  │  role: all authenticated │
+    └──────────┬───────────┘                  └────────────┬─────────────┘
+               │                                           │
+               └─────────────────┬─────────────────────────┘
+                                  ▼
+              ┌──────────────────────────────────────────────────┐
+              │                  Laravel 12                      │
+              │  ┌────────────┐  ┌──────────────┐  ┌─────────┐ │
+              │  │ Middleware  │  │   Router     │  │  Auth   │ │
+              │  │ auth,active │  │  web+api     │  │ Breeze+ │ │
+              │  │ role:…     │  │  +console    │  │ Sanctum │ │
+              │  └────────────┘  └──────────────┘  └─────────┘ │
+              │  ┌──────────────────────────────────────────┐   │
+              │  │             Controllers (40)             │   │
+              │  │  Client (15) │ Admin (14) │ API (3)      │   │
+              │  └──────────────────────────────────────────┘   │
+              │  ┌──────────────────────────────────────────┐   │
+              │  │          Eloquent ORM (24 models)        │   │
+              │  └──────────────────────────────────────────┘   │
+              │  ┌──────────────┐  ┌─────────────────────────┐  │
+              │  │   Services   │  │     Queue Jobs (2)       │  │
+              │  │ ContentExtr. │  │ ExtractDocumentContent   │  │
+              │  │ TfidfService │  │ IndexDocumentTfidf       │  │
+              │  └──────────────┘  └─────────────────────────┘  │
+              │  ┌──────────────────────────────────────────┐   │
+              │  │          Artisan Commands (8+2)          │   │
+              │  │  search:reindex  search:build-tfidf      │   │
+              │  │  dms:prune-*     dms:archive-expired     │   │
+              │  │  docs:import-laravel   docs:build-*      │   │
+              │  └──────────────────────────────────────────┘   │
+              │  ┌──────────────────────────────────────────┐   │
+              │  │    Scheduler (cron every minute)         │   │
+              │  │  prune trash/shares/tokens  │  archive   │   │
+              │  └──────────────────────────────────────────┘   │
+              └────────────────────────┬─────────────────────────┘
+                                       ▼
+              ┌──────────────────────────────────────────────────┐
+              │                 Data Layer                       │
+              │  MySQL 31 tables  │  storage/app/private/        │
+              │                   │  ├── resources/{uuid}.ext   │
+              │  resource_emb.    │  ├── search/tfidf_idf.json  │
+              │  (TF-IDF vectors) │  └── documents/laravel-docs/│
+              └──────────────────────────────────────────────────┘
+```
+
+---
+
+## Future Enhancements
+
+- OCR scanning for scanned/image-only PDFs (`tesseract_ocr` / `spatie/pdf-to-text`)
+- AI document summarization
+- Chat with documents (RAG pipeline)
+- Elasticsearch integration for large-scale deployments
+- Real-time collaboration (document co-editing)
+- Push notifications (browser Web Push API)
+- Mobile app (via the existing REST API layer)
+- Multi-tenant / SaaS mode
+
+---
+
+*Built with Laravel 12 · Tailwind CSS · Alpine.js · Vite · TF-IDF offline semantic search*
