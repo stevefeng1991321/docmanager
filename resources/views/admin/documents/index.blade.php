@@ -18,8 +18,11 @@
         </select>
         <select name="category" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">All Categories</option>
-            @foreach($categories as $cat)
-                <option value="{{ $cat->id }}" @selected(request('category') == $cat->id)>{{ $cat->name }}</option>
+            @foreach($categories as $parent)
+                <option value="{{ $parent->id }}" @selected(request('category') == $parent->id)>{{ $parent->name }}</option>
+                @foreach($parent->children as $child)
+                    <option value="{{ $child->id }}" @selected(request('category') == $child->id)>&nbsp;&nbsp;└ {{ $child->name }}</option>
+                @endforeach
             @endforeach
         </select>
         <select name="sort" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">

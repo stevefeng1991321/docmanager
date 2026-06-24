@@ -28,10 +28,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
                         <select name="category_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                            <option value="">— None —</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" @selected($document->category_id == $cat->id)>{{ $cat->name }}</option>
-                            @endforeach
+                            @include('admin.partials.category_options', ['selected' => $document->category_id])
                         </select>
                     </div>
                     <div>

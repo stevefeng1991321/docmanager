@@ -39,14 +39,14 @@ class DocumentController extends Controller
 
         $perPage    = in_array((int) $request->input('per_page'), [10, 20, 30, 40]) ? (int) $request->input('per_page') : 20;
         $documents  = $query->paginate($perPage)->withQueryString();
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
 
         return view('admin.documents.index', compact('documents', 'categories', 'sort'));
     }
 
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
         $tags       = Tag::orderBy('name')->get();
         return view('admin.documents.create', compact('categories', 'tags'));
     }
@@ -122,7 +122,7 @@ class DocumentController extends Controller
     public function edit(Resource $document)
     {
         $document->load('tags', 'category', 'versions.uploader');
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
         $tags       = Tag::orderBy('name')->get();
         return view('admin.documents.edit', compact('document', 'categories', 'tags'));
     }

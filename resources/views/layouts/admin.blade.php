@@ -122,10 +122,17 @@
 
         {{-- Flash messages --}}
         @if(session('message'))
-            <div class="mx-4 sm:mx-6 mt-4">
-                <div class="p-4 rounded-lg text-sm
+            <div x-data="{ show: true }"
+                 x-show="show"
+                 x-init="setTimeout(() => show = false, 4000)"
+                 x-transition:leave="transition ease-in duration-300"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-1"
+                 class="mx-4 sm:mx-6 mt-4">
+                <div class="flex items-center justify-between gap-3 p-4 rounded-lg text-sm
                     {{ session('status') === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200' }}">
-                    {{ session('message') }}
+                    <span>{{ session('message') }}</span>
+                    <button @click="show = false" class="shrink-0 opacity-50 hover:opacity-100 transition-opacity text-base leading-none">&times;</button>
                 </div>
             </div>
         @endif
