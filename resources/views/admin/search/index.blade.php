@@ -28,22 +28,25 @@
         </h3>
         <div class="flex items-center gap-6 text-sm">
             <div class="flex items-center gap-2">
-                @if($tfidfReady)
-                <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                <span class="text-green-700 font-medium">Index ready</span>
+                @if($tfidfReady && $tfidfIndexed > 0)
+                    <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                    <span class="text-green-700 font-medium">Index ready</span>
+                @elseif($tfidfReady && $tfidfIndexed === 0)
+                    <span class="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span>
+                    <span class="text-yellow-600 font-medium">Index empty</span>
                 @else
-                <span class="w-2 h-2 rounded-full bg-gray-300 inline-block"></span>
-                <span class="text-gray-500">Not built yet</span>
+                    <span class="w-2 h-2 rounded-full bg-gray-300 inline-block"></span>
+                    <span class="text-gray-500">Not built yet</span>
                 @endif
             </div>
             <div class="text-gray-600">
                 <strong>{{ number_format($tfidfIndexed) }}</strong> document{{ $tfidfIndexed !== 1 ? 's' : '' }} indexed
             </div>
         </div>
-        @if(!$tfidfReady)
+        @if(!$tfidfReady || $tfidfIndexed === 0)
         <p class="text-xs text-gray-400 mt-2">
-            Click "Build AI Index" to generate TF-IDF vectors for all documents,
-            or run <code class="bg-gray-100 px-1 rounded font-mono">php artisan search:build-tfidf</code> from the terminal.
+            Click "Build AI Index" to generate TF-IDF vectors for all documents.
+            Make sure documents have content extracted first ("Re-index All Documents"), then build the AI index.
         </p>
         @else
         <p class="text-xs text-gray-400 mt-2">

@@ -46,7 +46,8 @@ class SearchIndexController extends Controller
 
     public function buildTfidf()
     {
-        Artisan::queue('search:build-tfidf');
-        return back()->with('message', 'TF-IDF index build queued. Run the queue worker to process.');
+        Artisan::call('search:build-tfidf');
+        $indexed = ResourceEmbedding::where('model', 'tfidf-v1')->count();
+        return back()->with('message', "TF-IDF index built. {$indexed} document(s) indexed.");
     }
 }
