@@ -37,7 +37,8 @@ class DocumentController extends Controller
             default     => $query->orderByDesc('created_at'),
         };
 
-        $documents  = $query->paginate(20)->withQueryString();
+        $perPage    = in_array((int) $request->input('per_page'), [10, 20, 30, 40]) ? (int) $request->input('per_page') : 20;
+        $documents  = $query->paginate($perPage)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         return view('admin.documents.index', compact('documents', 'categories', 'sort'));

@@ -163,9 +163,25 @@
             </tbody>
         </table>
     </div>
-    @if($documents->hasPages())
-        <div class="px-6 py-4 border-t border-gray-100">{{ $documents->links() }}</div>
-    @endif
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between gap-4">
+        <form method="GET" class="flex items-center gap-2">
+            @foreach(request()->except(['per_page', 'page']) as $key => $val)
+                <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+            @endforeach
+            <label class="text-xs text-gray-500 whitespace-nowrap">Rows per page</label>
+            <select name="per_page" onchange="this.form.submit()"
+                    class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
+                @foreach([10, 20, 30, 40] as $n)
+                    <option value="{{ $n }}" @selected((int) request('per_page', 20) === $n)>{{ $n }}</option>
+                @endforeach
+            </select>
+        </form>
+        <div>
+            @if($documents->hasPages())
+                {{ $documents->links() }}
+            @endif
+        </div>
+    </div>
 </div>
 
 {{-- Reject modal --}}
