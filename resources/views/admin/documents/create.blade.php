@@ -23,6 +23,28 @@
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
+        {{-- Storage quota --}}
+        @if($quota['quota_bytes'] !== null)
+        <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 space-y-1.5">
+            <div class="flex justify-between text-xs text-gray-500">
+                <span>Storage quota</span>
+                <span>{{ $quota['used_human'] }} / {{ $quota['quota_human'] }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                <div class="h-1.5 rounded-full transition-all"
+                     style="width: {{ $quota['percent'] }}%"
+                     :class="{
+                         'bg-green-500': {{ $quota['percent'] }} < 75,
+                         'bg-yellow-400': {{ $quota['percent'] }} >= 75 && {{ $quota['percent'] }} < 90,
+                         'bg-red-500': {{ $quota['percent'] }} >= 90
+                     }"></div>
+            </div>
+            <p class="text-xs text-gray-400">
+                {{ number_format($quota['remaining_bytes'] / 1024 / 1024, 1) }} MB remaining
+            </p>
+        </div>
+        @endif
+
         {{-- File picker --}}
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">File <span class="text-red-500">*</span></label>
@@ -126,7 +148,8 @@ function chunkedUpload() {
         statusMsg: '',
         errors: {},
 
-        CHUNK_SIZE: 2 * 1024 * 1024, // 2 MB per chunk
+        CHUNK_SIZE: 2 * 1024 * 1024,
+        remainingQuota: {{ $quota['remaining_bytes'] ?? 'null' }},
 
         init() {},
 
@@ -154,6 +177,9 @@ function chunkedUpload() {
             this.errors = {};
             if (!this.title.trim()) this.errors.title = 'Title is required.';
             if (!this.file)         this.errors.file  = 'Please select a file.';
+            if (this.file && this.remainingQuota !== null && this.file.size > this.remainingQuota) {
+                this.errors.file = `File is too large (${this.fmtBytes(this.file.size)}). You only have ${this.fmtBytes(this.remainingQuota)} remaining in your quota.`;
+            }
             return Object.keys(this.errors).length === 0;
         },
 
@@ -182,6 +208,7 @@ function chunkedUpload() {
                 fd.append('file_id',      fileId);
                 fd.append('chunk_index',  i);
                 fd.append('total_chunks', totalChunks);
+                fd.append('file_size',    this.file.size);
                 fd.append('chunk',        blob, this.file.name);
 
                 this.statusMsg = `Uploading part ${i + 1} of ${totalChunks}…`;

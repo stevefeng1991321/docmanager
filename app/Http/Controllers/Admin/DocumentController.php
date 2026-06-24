@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreDocumentRequest;
+use App\Http\Requests\Admin\UpdateDocumentRequest;
 use App\Jobs\ExtractDocumentContent;
 use App\Models\AuditLog;
 use App\Models\Category;
@@ -40,20 +42,32 @@ class DocumentController extends Controller
     {
         $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
         $tags       = Tag::orderBy('name')->get();
-        return view('admin.documents.create', compact('categories', 'tags'));
+        $quota      = $this->quotaData(auth()->user());
+        return view('admin.documents.create', compact('categories', 'tags', 'quota'));
     }
 
-    public function store(Request $request)
+    private function quotaData(\App\Models\User $user): array
     {
-        $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'file'        => ['required', 'file', 'max:' . (config('app.max_upload_size_mb', 50) * 1024)],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'tags'        => ['nullable', 'array'],
-            'tags.*'      => ['exists:tags,id'],
-            'status'      => ['required', 'in:draft,pending_review,published'],
-        ]);
+        $used  = $user->storageUsedBytes();
+        $limit = $user->storageQuotaBytes();
+        $fmt   = function (int $b): string {
+            if ($b >= 1_073_741_824) return number_format($b / 1_073_741_824, 1) . ' GB';
+            if ($b >= 1_048_576)     return number_format($b / 1_048_576, 1) . ' MB';
+            if ($b >= 1_024)         return number_format($b / 1_024, 1) . ' KB';
+            return $b . ' B';
+        };
+        return [
+            'used_bytes'      => $used,
+            'quota_bytes'     => $limit,
+            'remaining_bytes' => $limit !== null ? max(0, $limit - $used) : null,
+            'used_human'      => $fmt($used),
+            'quota_human'     => $limit !== null ? $fmt($limit) : null,
+            'percent'         => $limit > 0 ? min(100, (int) round($used / $limit * 100)) : 0,
+        ];
+    }
+
+    public function store(StoreDocumentRequest $request)
+    {
 
         $file            = $request->file('file');
 
@@ -119,15 +133,8 @@ class DocumentController extends Controller
         return view('admin.documents.edit', compact('document', 'categories', 'tags'));
     }
 
-    public function update(Request $request, Resource $document)
+    public function update(UpdateDocumentRequest $request, Resource $document)
     {
-        $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'tags'        => ['nullable', 'array'],
-            'tags.*'      => ['exists:tags,id'],
-        ]);
 
         $document->update($request->only('title', 'description', 'category_id'));
         $document->tags()->sync($request->tags ?? []);

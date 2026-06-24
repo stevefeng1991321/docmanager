@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\MergeTagsRequest;
+use App\Http\Requests\Admin\StoreTagRequest;
+use App\Http\Requests\Admin\UpdateTagRequest;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,16 +18,14 @@ class TagController extends Controller
         return view('admin.tags.index', compact('tags'));
     }
 
-    public function store(Request $request)
+    public function store(StoreTagRequest $request)
     {
-        $request->validate(['name' => ['required', 'string', 'max:100', 'unique:tags']]);
         Tag::create(['name' => $request->name, 'slug' => Str::slug($request->name)]);
         return back()->with('message', "Tag \"{$request->name}\" created.");
     }
 
-    public function update(Request $request, Tag $tag)
+    public function update(UpdateTagRequest $request, Tag $tag)
     {
-        $request->validate(['name' => ['required', 'string', 'max:100', 'unique:tags,name,' . $tag->id]]);
         $tag->update(['name' => $request->name, 'slug' => Str::slug($request->name)]);
         return back()->with('message', 'Tag updated.');
     }
@@ -35,12 +36,8 @@ class TagController extends Controller
         return back()->with('message', 'Tag deleted.');
     }
 
-    public function merge(Request $request)
+    public function merge(MergeTagsRequest $request)
     {
-        $request->validate([
-            'source_id' => ['required', 'exists:tags,id'],
-            'target_id' => ['required', 'exists:tags,id', 'different:source_id'],
-        ]);
 
         $source = Tag::findOrFail($request->source_id);
         $target = Tag::findOrFail($request->target_id);

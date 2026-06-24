@@ -1,6 +1,10 @@
 {
+  "node_modules/pdfjs-dist/build/pdf.worker.min.js": {
+    "file": "assets/pdf.worker.min-DKQKFyKK.js",
+    "src": "node_modules/pdfjs-dist/build/pdf.worker.min.js"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-B5OVFpcX.css",
+    "file": "assets/app-DlVfa15K.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,9 +13,12 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-OJUOZ98G.js",
+    "file": "assets/app-CxLmN8sg.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "assets": [
+      "assets/pdf.worker.min-DKQKFyKK.js"
+    ]
   }
 }

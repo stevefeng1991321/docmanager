@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\AuditLog;
 use App\Models\Notification;
 use App\Models\User;
@@ -34,14 +36,8 @@ class UserController extends Controller
         return view('admin.users.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'username' => ['required', 'string', 'min:3', 'max:50', 'unique:users', 'regex:/^[a-zA-Z0-9_-]+$/'],
-            'name'     => ['required', 'string', 'max:255'],
-            'password' => ['required', 'string', 'min:8'],
-            'role'     => ['required', 'in:admin,editor,viewer'],
-        ]);
 
         $user = User::create([
             'username' => $request->username,
@@ -61,15 +57,8 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $request->validate([
-            'username'         => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:users,username,' . $user->id],
-            'name'             => ['required', 'string', 'max:255'],
-            'role'             => ['required', 'in:admin,editor,viewer'],
-            'status'           => ['required', 'in:active,inactive'],
-            'storage_quota_mb' => ['nullable', 'integer', 'min:0', 'max:102400'],
-        ]);
 
         $user->update($request->only('username', 'name', 'role', 'status', 'storage_quota_mb'));
         AuditLog::record('user.updated', null, ['user_id' => $user->id]);

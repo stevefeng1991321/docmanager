@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreCategoryRequest;
+use App\Http\Requests\Admin\UpdateCategoryRequest;
 use App\Models\AuditLog;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -21,12 +23,8 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $request->validate([
-            'name'      => ['required', 'string', 'max:100'],
-            'parent_id' => ['nullable', 'exists:categories,id'],
-        ]);
 
         $category = Category::create([
             'name'      => $request->name,
@@ -40,12 +38,8 @@ class CategoryController extends Controller
         return back()->with('message', "Category \"{$category->name}\" created.");
     }
 
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $request->validate([
-            'name'      => ['required', 'string', 'max:100'],
-            'parent_id' => ['nullable', 'exists:categories,id'],
-        ]);
 
         $parentId = $request->parent_id ?: null;
 

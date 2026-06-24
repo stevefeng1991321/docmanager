@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreResourceRequest;
+use App\Http\Requests\Api\UpdateResourceRequest;
 use App\Http\Resources\DocumentResource;
 use App\Jobs\ExtractDocumentContent;
 use App\Models\AuditLog;
@@ -61,19 +63,9 @@ class ResourceController extends Controller
         return new DocumentResource($resource);
     }
 
-    public function store(Request $request)
+    public function store(StoreResourceRequest $request)
     {
         $this->requireEditorOrAdmin();
-
-        $request->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'file'        => ['required', 'file', 'max:' . (config('app.max_upload_size_mb', 50) * 1024)],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'tags'        => ['nullable', 'array'],
-            'tags.*'      => ['exists:tags,id'],
-            'status'      => ['nullable', 'in:draft,pending_review,published'],
-        ]);
 
         $file        = $request->file('file');
 
@@ -123,18 +115,9 @@ class ResourceController extends Controller
             ->response()->setStatusCode(201);
     }
 
-    public function update(Request $request, Resource $resource)
+    public function update(UpdateResourceRequest $request, Resource $resource)
     {
         $this->requireEditorOrAdmin();
-
-        $request->validate([
-            'title'       => ['sometimes', 'required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'tags'        => ['nullable', 'array'],
-            'tags.*'      => ['exists:tags,id'],
-            'status'      => ['nullable', 'in:draft,pending_review,published,rejected'],
-        ]);
 
         $resource->update($request->only('title', 'description', 'category_id', 'status'));
 

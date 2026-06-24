@@ -59,6 +59,25 @@ class SearchController extends Controller
         ));
     }
 
+    // ── Autocomplete suggestions ─────────────────────────────────────────────
+
+    public function suggest(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Resource::published()
+            ->where('title', 'like', '%' . $q . '%')
+            ->orderByDesc('download_count')
+            ->limit(8)
+            ->pluck('title');
+
+        return response()->json($results);
+    }
+
     // ── Keyword search (existing MySQL FULLTEXT logic) ────────────────────────
 
     private function keywordSearch(Request $request, string $query, ?string $type, ?string $categoryId, ?string $dateFrom, ?string $dateTo, string $sort): array

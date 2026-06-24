@@ -24,6 +24,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     // Search
     Route::get('/search', [Client\SearchController::class, 'index'])->name('search');
+    Route::get('/search/suggest', [Client\SearchController::class, 'suggest'])->name('search.suggest');
 
     // Personal library
     Route::get('/favorites',     [Client\FavoriteController::class, 'index'])->name('favorites.index');
@@ -113,6 +114,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         Route::patch('users/{user}/deactivate',     [Admin\UserController::class, 'deactivate'])->name('users.deactivate');
         Route::patch('users/{user}/reset-password', [Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
     });
+
+    // Document comparison
+    Route::get('compare',          [Admin\CompareController::class, 'index'])->name('compare.index');
+    Route::get('compare/{a}/{b}',  [Admin\CompareController::class, 'show'])->name('compare.show');
 
     // Logs & Analytics
     Route::get('audit-logs',        [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');

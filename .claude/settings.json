@@ -24,7 +24,9 @@
       "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\EasyProblemSeeder.php\" -Force)",
       "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\AIProblemSeeder.php\" -Force)",
       "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\MathProblemSeeder.php\" -Force)",
-      "Bash(Write-Output \"Deleted old seeders\")"
+      "Bash(Write-Output \"Deleted old seeders\")",
+      "Bash(php -l app/Http/Controllers/Admin/CompareController.php)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/pdfjs-dist/package.json'\\).version\\)\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"

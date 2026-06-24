@@ -25,25 +25,59 @@
     </div>
 
     {{-- Viewer --}}
-    <div class="bg-gray-800 rounded-xl overflow-hidden" style="min-height: 75vh;">
-        @if($ft === 'application/pdf')
-        <iframe src="{{ route('documents.stream', $resource) }}"
-                class="w-full block"
-                style="height: 80vh; border: none;"
-                title="{{ $resource->title }}">
-        </iframe>
-        @elseif(str_starts_with($ft, 'image/'))
-        <div class="flex items-center justify-center p-4" style="min-height: 75vh;">
-            <img src="{{ route('documents.stream', $resource) }}"
-                 alt="{{ $resource->title }}"
-                 class="max-w-full max-h-screen object-contain shadow-2xl rounded">
+    @if($ft === 'application/pdf')
+    <div x-data="pdfViewer('{{ route('documents.stream', $resource) }}')" x-init="init()">
+
+        {{-- PDF toolbar --}}
+        <div class="flex items-center justify-between bg-gray-700 rounded-t-xl px-4 py-2 gap-3 flex-wrap text-white text-sm">
+            <div class="flex items-center gap-2">
+                <button @click="prev()" :disabled="currentPage <= 1"
+                        class="px-2 py-1 rounded bg-gray-600 hover:bg-gray-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-xs font-medium">
+                    &lsaquo; Prev
+                </button>
+                <span class="text-gray-300 text-xs">
+                    Page <span x-text="currentPage"></span> of <span x-text="totalPages"></span>
+                </span>
+                <button @click="next()" :disabled="currentPage >= totalPages"
+                        class="px-2 py-1 rounded bg-gray-600 hover:bg-gray-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-xs font-medium">
+                    Next &rsaquo;
+                </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button @click="zoomOut()" class="px-2 py-1 rounded bg-gray-600 hover:bg-gray-500 transition text-xs font-medium">&#8722;</button>
+                <span class="text-gray-300 text-xs w-12 text-center" x-text="scalePercent()"></span>
+                <button @click="zoomIn()"  class="px-2 py-1 rounded bg-gray-600 hover:bg-gray-500 transition text-xs font-medium">&#43;</button>
+            </div>
         </div>
-        @else
-        <div class="flex items-center justify-center text-gray-300" style="min-height: 75vh;">
-            <p>Preview not available for this file type.</p>
+
+        {{-- Canvas --}}
+        <div class="bg-gray-800 rounded-b-xl overflow-auto" style="min-height: 75vh; max-height: 82vh;">
+            <div x-show="loading" class="flex items-center justify-center text-gray-400" style="min-height: 75vh;">
+                <svg class="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                </svg>
+            </div>
+            <div x-show="error" x-cloak class="flex items-center justify-center text-red-400 p-8" style="min-height: 75vh;">
+                <p x-text="error"></p>
+            </div>
+            <div x-show="!loading && !error" class="flex justify-center p-4">
+                <canvas x-ref="canvas" class="shadow-2xl"></canvas>
+            </div>
         </div>
-        @endif
     </div>
+
+    @elseif(str_starts_with($ft, 'image/'))
+    <div class="bg-gray-800 rounded-xl flex items-center justify-center p-4" style="min-height: 75vh;">
+        <img src="{{ route('documents.stream', $resource) }}"
+             alt="{{ $resource->title }}"
+             class="max-w-full max-h-screen object-contain shadow-2xl rounded">
+    </div>
+    @else
+    <div class="bg-gray-800 rounded-xl flex items-center justify-center text-gray-300" style="min-height: 75vh;">
+        <p>Preview not available for this file type.</p>
+    </div>
+    @endif
 
     {{-- Bookmark modal --}}
     @if($ft === 'application/pdf')
@@ -69,7 +103,12 @@
     @push('scripts')
     <script>
     function saveBookmark() {
-        const note = document.querySelector('[x-model="bookmarkNote"]')?.value ?? '';
+        // Read current page from pdfViewer Alpine component if present
+        const viewer   = document.querySelector('[x-data^="pdfViewer"]');
+        const pageNum  = viewer?._x_dataStack?.[0]?.currentPage ?? 1;
+        const noteEl   = document.querySelector('[x-model="bookmarkNote"]');
+        const note     = noteEl ? Alpine.$data(noteEl).bookmarkNote : '';
+
         fetch('{{ route('bookmarks.store') }}', {
             method: 'POST',
             headers: {
@@ -78,10 +117,10 @@
             },
             body: JSON.stringify({
                 resource_id: {{ $resource->id }},
-                page_number: 1,
-                note: note,
+                page_number: pageNum,
+                label: note,
             }),
-        }).then(() => { location.reload(); });
+        }).then(r => r.ok && location.reload());
     }
     </script>
     @endpush

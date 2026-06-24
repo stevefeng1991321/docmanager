@@ -32,7 +32,15 @@ class ChunkedUploadController extends Controller
             'chunk_index'  => ['required', 'integer', 'min:0'],
             'total_chunks' => ['required', 'integer', 'min:1', 'max:200'],
             'chunk'        => ['required', 'file'],
+            'file_size'    => ['nullable', 'integer', 'min:0'],
         ]);
+
+        // Reject on first chunk if total file size would exceed quota
+        if ((int) $request->chunk_index === 0 && $request->filled('file_size')) {
+            if (auth()->user()->wouldExceedQuota((int) $request->file_size)) {
+                return response()->json(['error' => 'This upload would exceed your storage quota.'], 422);
+            }
+        }
 
         $dir = $this->chunkDir . '/' . $request->file_id;
         if (!is_dir($dir)) {

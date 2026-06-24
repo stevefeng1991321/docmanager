@@ -80,20 +80,48 @@
         </div>
 
         {{-- Search form --}}
-        <form method="GET" action="{{ route('search') }}" class="space-y-3">
+        <form method="GET" action="{{ route('search') }}" class="space-y-3"
+              x-data="searchAutocomplete('{{ addslashes($query) }}')"
+              @submit="open = false">
             <input type="hidden" name="type" value="{{ $type }}">
             <input type="hidden" name="category_id" value="{{ $categoryId }}">
             <input type="hidden" name="date_from" value="{{ $dateFrom }}">
             <input type="hidden" name="date_to" value="{{ $dateTo }}">
 
-            <div class="flex gap-2">
-                <input type="text" name="q" value="{{ $query }}" placeholder="Search documents…" autofocus
-                       class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none">
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">
+            <div class="flex gap-2 relative">
+                <div class="flex-1 relative">
+                    <input type="text" name="q" x-model="term" placeholder="Search documents…" autofocus
+                           @input.debounce.300ms="fetchSuggestions()"
+                           @keydown.escape="open = false"
+                           @keydown.arrow-down.prevent="focusSuggestion(1)"
+                           @keydown.arrow-up.prevent="focusSuggestion(-1)"
+                           @keydown.enter="selectFocused($event)"
+                           @focus="term.length >= 2 && suggestions.length && (open = true)"
+                           @click.outside="open = false"
+                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                           autocomplete="off">
+
+                    {{-- Autocomplete dropdown --}}
+                    <ul x-show="open && suggestions.length" x-cloak
+                        class="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                        <template x-for="(s, i) in suggestions" :key="i">
+                            <li @click="choose(s)"
+                                :class="focused === i ? 'bg-blue-50' : 'hover:bg-gray-50'"
+                                class="px-4 py-2.5 text-sm text-gray-700 cursor-pointer flex items-center gap-2">
+                                <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <span x-text="s" class="truncate"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex-shrink-0">
                     Search
                 </button>
                 @if($query)
-                <a href="{{ route('search') }}" class="px-4 py-2.5 border border-gray-300 text-gray-500 hover:bg-gray-50 text-sm rounded-xl transition">
+                <a href="{{ route('search') }}" class="px-4 py-2.5 border border-gray-300 text-gray-500 hover:bg-gray-50 text-sm rounded-xl transition flex-shrink-0">
                     Clear
                 </a>
                 @endif
@@ -265,6 +293,47 @@
 
     </div>
 </div>
+
+@push('scripts')
+<script>
+function searchAutocomplete(initialTerm) {
+    return {
+        term: initialTerm,
+        suggestions: [],
+        open: false,
+        focused: -1,
+        _timer: null,
+
+        async fetchSuggestions() {
+            this.focused = -1;
+            if (this.term.length < 2) { this.suggestions = []; this.open = false; return; }
+            const res = await fetch('{{ route('search.suggest') }}?q=' + encodeURIComponent(this.term));
+            if (!res.ok) return;
+            this.suggestions = await res.json();
+            this.open = this.suggestions.length > 0;
+        },
+
+        focusSuggestion(dir) {
+            if (!this.open) return;
+            this.focused = Math.max(-1, Math.min(this.suggestions.length - 1, this.focused + dir));
+        },
+
+        selectFocused(e) {
+            if (this.focused >= 0 && this.open) {
+                e.preventDefault();
+                this.choose(this.suggestions[this.focused]);
+            }
+        },
+
+        choose(s) {
+            this.term = s;
+            this.open = false;
+            this.$nextTick(() => this.$el.submit());
+        },
+    };
+}
+</script>
+@endpush
 
 {{-- Mobile filter drawer --}}
 <div x-show="filtersOpen" x-cloak @click="filtersOpen = false"
