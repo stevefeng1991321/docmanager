@@ -31,16 +31,44 @@ Enable PHP extensions: `pdo_mysql`, `fileinfo`, `mbstring`, `zip`
 composer run setup
 ```
 
-Then create an admin account:
+---
+
+## Database
+
+### Migrate
 
 ```bash
-php artisan tinker
->>> App\Models\User::create([
-    'name' => 'Admin', 'username' => 'admin',
-    'password' => bcrypt('secret'),
-    'role' => 'admin', 'status' => 'active',
-]);
+# Run all pending migrations
+php artisan migrate
+
+# Fresh install — drop all tables and re-run from scratch
+php artisan migrate:fresh
+
+# Check migration status
+php artisan migrate:status
 ```
+
+> **Warning:** `migrate:fresh` drops all data. Dev only.
+
+### Seed
+
+```bash
+# Seed starter data (admin account + default categories)
+php artisan db:seed
+
+# Fresh migration + seed in one step
+php artisan migrate:fresh --seed
+```
+
+The seeder creates:
+
+| | Value |
+|---|---|
+| Username | `admin` |
+| Password | `Admin@1234` |
+| Categories | Engineering, Science, Mathematics, Computer Science, Standards & Codes, Manuals, Reports |
+
+> Change the admin password after first login.
 
 ---
 
