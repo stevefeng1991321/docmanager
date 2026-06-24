@@ -21,12 +21,6 @@
         </form>
     </div>
 
-    @if(session('message'))
-    <div class="bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-xl">
-        {{ session('message') }}
-    </div>
-    @endif
-
     {{-- AI Index status --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
         <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">

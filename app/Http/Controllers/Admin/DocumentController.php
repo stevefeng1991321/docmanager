@@ -203,7 +203,7 @@ class DocumentController extends Controller
         $request->validate(['ids' => ['required', 'array'], 'ids.*' => ['integer']]);
 
         $count = Resource::whereIn('id', $request->ids)
-            ->where('status', 'pending_review')
+            ->whereNotIn('status', ['published'])
             ->update(['status' => 'published']);
 
         AuditLog::record('document.bulk_approved', null, ['count' => $count, 'ids' => $request->ids]);

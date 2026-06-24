@@ -18,8 +18,8 @@ class HomeController extends Controller
         session(['doc_view' => $view]);
 
         $categories = Cache::remember('home.categories.tree', 3600, function () {
-            return Category::with(['children' => fn ($q) => $q->withCount('resources')->orderBy('sort_order')])
-                ->withCount('resources')
+            return Category::with(['children' => fn ($q) => $q->withCount(['resources' => fn ($q) => $q->where('status', 'published')])->orderBy('sort_order')])
+                ->withCount(['resources' => fn ($q) => $q->where('status', 'published')])
                 ->whereNull('parent_id')
                 ->orderBy('sort_order')
                 ->get();
