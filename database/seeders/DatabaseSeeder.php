@@ -23,7 +23,17 @@ class DatabaseSeeder extends Seeder
                 'status'   => 'active',
             ]
         );
-
+        // First User account
+        User::firstOrCreate(
+            ['username' => 'user'],
+            [
+                'name'     => 'User',
+                'email'    => null,
+                'password' => Hash::make('123456'),
+                'role'     => 'viewer',
+                'status'   => 'active',
+            ]
+        );
         // Starter categories
         $categories = [
             ['name' => 'Engineering',       'slug' => 'engineering'],
