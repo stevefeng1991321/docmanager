@@ -46,7 +46,7 @@ php artisan tinker
 
 ## Start
 
-### Dev mode (all four processes)
+### Dev mode (three processes)
 
 ```bash
 composer run dev

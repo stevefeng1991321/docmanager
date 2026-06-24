@@ -85,6 +85,7 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     // Chunked upload
     Route::post('documents/upload/chunk',    [Admin\ChunkedUploadController::class, 'chunk'])->name('documents.upload.chunk');
     Route::post('documents/upload/assemble', [Admin\ChunkedUploadController::class, 'assemble'])->name('documents.upload.assemble');
+    Route::post('documents/{resource}/upload/version', [Admin\ChunkedUploadController::class, 'assembleVersion'])->name('documents.upload.version');
 
     // Versions
     Route::post('documents/{resource}/versions',              [Admin\VersionController::class, 'store'])->name('versions.store');

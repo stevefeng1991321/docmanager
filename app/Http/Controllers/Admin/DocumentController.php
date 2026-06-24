@@ -331,8 +331,7 @@ class DocumentController extends Controller
         Cache::forget('dashboard.stats');
         Cache::forget('dashboard.upload_trend');
         Cache::forget('dashboard.download_trend');
-        Cache::forget('home.categories');
-        Cache::forget('home.featured');
+        Cache::forget('home.categories.tree');
     }
 
     public function approve(Request $request, Resource $document)

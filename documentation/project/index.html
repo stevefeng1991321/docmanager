@@ -823,23 +823,23 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr>
       <td><strong>HomeController</strong></td>
       <td><code>index()</code>, <code>browse()</code></td>
-      <td><code>index</code>: renders the home page with latest/featured documents, category tree, and recently viewed.<br><code>browse</code>: category-filtered document listing.</td>
+      <td><code>index</code>: renders the home page with all documents, category tree (cached 1 h as <code>home.categories.tree</code>), sort and grid/list toggle.<br><code>browse</code>: AJAX-capable category-filtered document listing — responds with the <code>home._docs</code> partial for both initial page load and fetch calls.</td>
     </tr>
     <tr>
       <td><strong>DocumentController</strong></td>
       <td><code>show()</code>, <code>preview()</code>, <code>stream()</code>, <code>download()</code>, <code>share()</code></td>
       <td>
-        <code>show</code>: document detail page — loads category, tags, versions, ratings, related docs.<br>
+        <code>show</code>: document detail page — loads category, tags, versions, ratings, related docs. Includes a "← Back" button (<code>history.back()</code>) at the top of the page.<br>
         <code>preview</code>: renders the preview page (PDF iframe or image).<br>
         <code>stream</code>: serves file inline (<code>response()-&gt;file()</code>) for the iframe — lock-checked, MIME-validated.<br>
-        <code>download</code>: sends file as attachment — lock-checked, increments download count.<br>
+        <code>download</code>: sends file as attachment — lock-checked, increments <code>download_count</code>, writes a row to <code>download_logs</code>.<br>
         <code>share</code>: creates a Share record with random token.
       </td>
     </tr>
     <tr>
       <td><strong>SearchController</strong></td>
       <td><code>index()</code></td>
-      <td>Handles the search page. Runs keyword (MySQL FULLTEXT) or TF-IDF semantic search based on the <code>type</code> parameter. Logs every query to <code>search_logs</code>.</td>
+      <td>Handles the search page. Runs keyword (MySQL FULLTEXT) or TF-IDF semantic search based on the <code>mode</code> parameter. Logs every non-empty query to <code>search_logs</code> with the correct <code>search_type</code> — <code>keyword</code> for keyword mode, <code>semantic</code> for AI mode.</td>
     </tr>
     <tr>
       <td><strong>CategoryController</strong></td>
@@ -913,11 +913,13 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr><th>Controller</th><th>Key actions</th></tr>
     <tr>
       <td><strong>DashboardController</strong></td>
-      <td>Aggregates stats (total docs/users/downloads), recent documents, search trends, top-searched terms for the admin home page.</td>
+      <td>Aggregates a 5-card stat grid (total docs, active users, downloads today, storage used, failed jobs — failed jobs card turns red when &gt; 0), upload/download trend bar charts (last 7 days), top search terms (last 30 days), top-downloaded documents, and recent documents table with full status-badge coverage including <code>archived</code>. Stats cached 300 s, trends 600 s, searches 900 s. Flash messages across the admin layout auto-dismiss after 4 s and include a close button.</td>
     </tr>
     <tr>
       <td><strong>DocumentController</strong></td>
-      <td>Full document lifecycle: list, create, edit, soft-delete, restore, force-delete, lock/unlock, approve/reject, access log. Bulk: approve, trash, reject, assign-category, download as ZIP. Chunked upload: receive chunk, assemble.</td>
+      <td>Full document lifecycle: list, create, edit, soft-delete, restore, force-delete, lock/unlock, approve/reject, access log. Bulk: approve, trash, reject, assign-category, download as ZIP. Chunked upload: receive chunk, assemble.<br>
+      <strong>List enhancements:</strong> Sort-by dropdown (newest/oldest/title A–Z/title Z–A/largest/most downloaded), configurable page size (10/20/30/40) persisted via query string, compact sliding-window pagination, tree-structured category filter (parent → indented children), <code>archived</code> included in status filter.<br>
+      <strong>Create/Edit forms:</strong> Category dropdown renders as a tree using the shared partial <code>admin/partials/category_options.blade.php</code>.</td>
     </tr>
     <tr>
       <td><strong>UserController</strong></td>
@@ -925,7 +927,11 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     </tr>
     <tr>
       <td><strong>CategoryController</strong></td>
-      <td>CRUD for document categories. Supports hierarchical (parent/child) nesting via <code>parent_id</code>.</td>
+      <td>CRUD for document categories. Supports hierarchical (parent/child) nesting via <code>parent_id</code>.<br>
+      <strong>Edit:</strong> inline modal (name + parent) with circular-reference guard — blocks setting a category as its own parent or as a descendant of itself.<br>
+      <strong>Delete protection:</strong> <code>destroy()</code> blocks deletion if any documents are assigned (<code>resources()->count()</code>) or subcategories exist; returns a descriptive error message via the standard flash layout.<br>
+      <strong>List display:</strong> ordered as parent rows followed immediately by their children (indented with └), matching the client sidebar tree.<br>
+      <strong>Cache:</strong> every create/update/delete calls <code>Cache::forget('home.categories.tree')</code> so the client sidebar reflects changes immediately.</td>
     </tr>
     <tr>
       <td><strong>TagController</strong></td>

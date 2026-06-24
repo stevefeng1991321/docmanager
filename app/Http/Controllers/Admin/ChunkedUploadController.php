@@ -161,13 +161,90 @@ class ChunkedUploadController extends Controller
         Cache::forget('dashboard.stats');
         Cache::forget('dashboard.upload_trend');
         Cache::forget('dashboard.download_trend');
-        Cache::forget('home.categories');
-        Cache::forget('home.featured');
+        Cache::forget('home.categories.tree');
 
         return response()->json([
             'message'     => "Document \"{$resource->title}\" uploaded.",
             'resource_id' => $resource->id,
             'redirect'    => route('admin.documents.index'),
+        ]);
+    }
+
+    /**
+     * Assemble chunks into a new document version.
+     */
+    public function assembleVersion(Request $request, Resource $resource)
+    {
+        $request->validate([
+            'file_id'       => ['required', 'string', 'regex:/^[a-zA-Z0-9_-]{8,64}$/'],
+            'total_chunks'  => ['required', 'integer', 'min:1', 'max:200'],
+            'original_name' => ['required', 'string', 'max:255'],
+            'change_note'   => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $dir         = $this->chunkDir . '/' . $request->file_id;
+        $totalChunks = (int) $request->total_chunks;
+
+        for ($i = 0; $i < $totalChunks; $i++) {
+            if (!file_exists($dir . '/chunk_' . $i)) {
+                return response()->json(['error' => "Missing chunk {$i}."], 422);
+            }
+        }
+
+        $ext     = pathinfo($request->original_name, PATHINFO_EXTENSION);
+        $tmpName = Str::uuid() . ($ext ? '.' . $ext : '');
+        $tmpPath = storage_path('app/temp/' . $tmpName);
+
+        if (!is_dir(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $out = fopen($tmpPath, 'wb');
+        for ($i = 0; $i < $totalChunks; $i++) {
+            $in = fopen($dir . '/chunk_' . $i, 'rb');
+            stream_copy_to_stream($in, $out);
+            fclose($in);
+        }
+        fclose($out);
+
+        $fileSize   = filesize($tmpPath);
+        $hash       = hash_file('sha256', $tmpPath);
+        $storedName = $tmpName;
+        $finalPath  = 'resources/' . $storedName;
+
+        Storage::disk('local')->put($finalPath, file_get_contents($tmpPath));
+        @unlink($tmpPath);
+        $this->cleanChunkDir($dir);
+
+        $nextVersion = ($resource->versions()->max('version_number') ?? 0) + 1;
+
+        DocumentVersion::create([
+            'resource_id'     => $resource->id,
+            'version_number'  => $nextVersion,
+            'file_path'       => $finalPath,
+            'stored_filename' => $storedName,
+            'file_size'       => $fileSize,
+            'file_hash'       => $hash,
+            'change_note'     => $request->change_note,
+            'uploaded_by'     => auth()->id(),
+            'created_at'      => now(),
+        ]);
+
+        $resource->update([
+            'stored_filename'   => $storedName,
+            'file_path'         => $finalPath,
+            'file_size'         => $fileSize,
+            'file_hash'         => $hash,
+            'original_filename' => $request->original_name,
+            'file_type'         => mime_content_type(Storage::disk('local')->path($finalPath)) ?: 'application/octet-stream',
+        ]);
+
+        AuditLog::record('document.version_uploaded', $resource->id, ['version' => $nextVersion]);
+        ExtractDocumentContent::dispatch($resource);
+
+        return response()->json([
+            'message'  => "Version {$nextVersion} uploaded successfully.",
+            'redirect' => route('admin.documents.edit', $resource),
         ]);
     }
 

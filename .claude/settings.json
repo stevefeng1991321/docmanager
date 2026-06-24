@@ -13,7 +13,9 @@
       "Bash(php -r \"echo 'GD: '.\\(extension_loaded\\('gd'\\)?'yes':'no'\\).PHP_EOL; echo 'Imagick: '.\\(extension_loaded\\('imagick'\\)?'yes':'no'\\).PHP_EOL; echo 'Exif: '.\\(extension_loaded\\('exif'\\)?'yes':'no'\\).PHP_EOL;\")",
       "Bash(where tesseract *)",
       "Bash(composer require *)",
-      "Bash(php -r \"echo 'gd: '.\\(extension_loaded\\('gd'\\)?'OK':'missing'\\).', zip: '.\\(extension_loaded\\('zip'\\)?'OK':'missing'\\);\")"
+      "Bash(php -r \"echo 'gd: '.\\(extension_loaded\\('gd'\\)?'OK':'missing'\\).', zip: '.\\(extension_loaded\\('zip'\\)?'OK':'missing'\\);\")",
+      "Bash(powershell -Command \"Get-Content 'd:\\\\Github\\\\docmanager\\\\storage\\\\logs\\\\laravel.log' -Tail 80\")",
+      "Bash(powershell -Command \"Select-String -Path 'd:\\\\Github\\\\docmanager\\\\app\\\\Http\\\\Controllers\\\\Admin\\\\DocumentController.php' -Pattern 'public function edit|public function store' -Context 0,30 | Select-Object -First 60\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"
