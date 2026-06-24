@@ -12,7 +12,6 @@ use App\Models\Notification;
 use App\Models\Resource;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -28,14 +27,7 @@ class DocumentController extends Controller
             ->when($request->category, fn($q, $c) => $q->where('category_id', $c))
             ->when($request->type,     fn($q, $t) => $q->where('file_type', 'like', "%{$t}%"));
 
-        $query = match($sort) {
-            'name_asc'  => $query->orderBy('title'),
-            'name_desc' => $query->orderByDesc('title'),
-            'size_desc' => $query->orderByDesc('file_size'),
-            'downloads' => $query->orderByDesc('download_count'),
-            'date_asc'  => $query->orderBy('created_at'),
-            default     => $query->orderByDesc('created_at'),
-        };
+        $query = $query->sorted($sort);
 
         $perPage    = in_array((int) $request->input('per_page'), [10, 20, 30, 40]) ? (int) $request->input('per_page') : 20;
         $documents  = $query->paginate($perPage)->withQueryString();
@@ -113,7 +105,7 @@ class DocumentController extends Controller
         AuditLog::record('document.uploaded', $resource->id, ['title' => $resource->title]);
 
         ExtractDocumentContent::dispatch($resource);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return redirect()->route('admin.documents.index')
             ->with('message', "Document \"{$resource->title}\" uploaded. Content indexing queued.");
@@ -141,7 +133,7 @@ class DocumentController extends Controller
         $document->tags()->sync($request->tags ?? []);
 
         AuditLog::record('document.updated', $document->id, ['title' => $document->title]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return redirect()->route('admin.documents.edit', $document)
             ->with('message', 'Document updated.');
@@ -151,7 +143,7 @@ class DocumentController extends Controller
     {
         $document->delete(); // soft delete
         AuditLog::record('document.deleted', $document->id, ['title' => $document->title]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return redirect()->route('admin.documents.index')
             ->with('message', "Document moved to Trash.");
@@ -177,7 +169,7 @@ class DocumentController extends Controller
     {
         $document->restore();
         AuditLog::record('document.restored', $document->id);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
         return back()->with('message', 'Document restored.');
     }
 
@@ -186,7 +178,7 @@ class DocumentController extends Controller
         Storage::disk('local')->delete($document->file_path);
         $document->forceDelete();
         AuditLog::record('document.permanently_deleted', null, ['title' => $document->title]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
         return back()->with('message', 'Document permanently deleted.');
     }
 
@@ -215,7 +207,7 @@ class DocumentController extends Controller
             ->update(['status' => 'published']);
 
         AuditLog::record('document.bulk_approved', null, ['count' => $count, 'ids' => $request->ids]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return back()->with('message', "{$count} document(s) approved and published.");
     }
@@ -228,7 +220,7 @@ class DocumentController extends Controller
         Resource::whereIn('id', $request->ids)->delete();
 
         AuditLog::record('document.bulk_trashed', null, ['count' => $count, 'ids' => $request->ids]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return back()->with('message', "{$count} document(s) moved to Trash.");
     }
@@ -248,7 +240,7 @@ class DocumentController extends Controller
             'ids'    => $request->ids,
             'reason' => $request->reason,
         ]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return back()->with('message', "{$count} document(s) rejected.");
     }
@@ -267,7 +259,7 @@ class DocumentController extends Controller
             'count'       => $count,
             'category_id' => $request->category_id,
         ]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         return back()->with('message', "{$count} document(s) assigned to category.");
     }
@@ -326,19 +318,11 @@ class DocumentController extends Controller
             ->deleteFileAfterSend(true);
     }
 
-    private static function clearDocumentCaches(): void
-    {
-        Cache::forget('dashboard.stats');
-        Cache::forget('dashboard.upload_trend');
-        Cache::forget('dashboard.download_trend');
-        Cache::forget('home.categories.tree');
-    }
-
     public function approve(Request $request, Resource $document)
     {
         $document->update(['status' => 'published']);
         AuditLog::record('document.approved', $document->id);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_approved',
@@ -353,7 +337,7 @@ class DocumentController extends Controller
         $request->validate(['reason' => ['nullable', 'string', 'max:500']]);
         $document->update(['status' => 'rejected']);
         AuditLog::record('document.rejected', $document->id, ['reason' => $request->reason]);
-        self::clearDocumentCaches();
+        $this->clearDocumentCaches();
 
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_rejected',

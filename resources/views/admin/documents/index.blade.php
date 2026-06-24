@@ -171,6 +171,7 @@
             <span class="text-xs text-gray-500">
                 Showing {{ $documents->firstItem() ?? 0 }}–{{ $documents->lastItem() ?? 0 }} of {{ $documents->total() }}
             </span>
+            @if($documents->total() > 10)
             <form method="GET" class="flex items-center gap-2">
                 @foreach(request()->except(['per_page', 'page']) as $key => $val)
                     <input type="hidden" name="{{ $key }}" value="{{ $val }}">
@@ -183,6 +184,7 @@
                     @endforeach
                 </select>
             </form>
+            @endif
         </div>
         {{ $documents->links('vendor.pagination.admin-compact') }}
     </div>

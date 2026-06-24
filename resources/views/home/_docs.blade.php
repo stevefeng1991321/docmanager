@@ -52,6 +52,7 @@
 @endif
 
 <div class="flex items-center justify-between gap-3 mt-4 flex-wrap">
+    @if($allDocs->total() > 10)
     <select
         onchange="document.dispatchEvent(new CustomEvent('per-page-change', { detail: { perPage: parseInt(this.value) } }))"
         class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -60,6 +61,7 @@
             <option value="{{ $size }}" @selected(($perPage ?? 20) == $size)>{{ $size }} / page</option>
         @endforeach
     </select>
+    @endif
     <div data-pagination>
         {{ $allDocs->links('vendor.pagination.admin-compact') }}
     </div>

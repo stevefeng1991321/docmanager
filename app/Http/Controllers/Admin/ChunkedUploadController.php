@@ -10,7 +10,6 @@ use App\Models\DocumentVersion;
 use App\Models\Resource;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -158,10 +157,7 @@ class ChunkedUploadController extends Controller
         ]);
 
         ExtractDocumentContent::dispatch($resource);
-        Cache::forget('dashboard.stats');
-        Cache::forget('dashboard.upload_trend');
-        Cache::forget('dashboard.download_trend');
-        Cache::forget('home.categories.tree');
+        $this->clearDocumentCaches();
 
         return response()->json([
             'message'     => "Document \"{$resource->title}\" uploaded.",

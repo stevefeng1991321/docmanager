@@ -40,6 +40,19 @@ class Resource extends Model
         return $query->where('status', 'published');
     }
 
+    public function scopeSorted($query, string $sort)
+    {
+        return match($sort) {
+            'name_asc'   => $query->orderBy('title'),
+            'name_desc'  => $query->orderByDesc('title'),
+            'size_desc'  => $query->orderByDesc('file_size'),
+            'downloads'  => $query->orderByDesc('download_count'),
+            'date_asc'   => $query->orderBy('created_at'),
+            'date_desc'  => $query->orderByDesc('created_at'),
+            default      => $query->orderByDesc('created_at'),
+        };
+    }
+
     public function getCurrentVersionAttribute(): int
     {
         return $this->versions()->max('version_number') ?? 1;

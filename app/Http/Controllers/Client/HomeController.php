@@ -29,14 +29,7 @@ class HomeController extends Controller
             ->withAvg('ratings', 'rating')
             ->with(['category']);
 
-        $allDocs = match($sort) {
-            'name_asc'   => $allDocs->orderBy('title'),
-            'name_desc'  => $allDocs->orderByDesc('title'),
-            'size_desc'  => $allDocs->orderByDesc('file_size'),
-            'downloads'  => $allDocs->orderByDesc('download_count'),
-            'date_asc'   => $allDocs->orderBy('created_at'),
-            default      => $allDocs->orderByDesc('created_at'),
-        };
+        $allDocs = $allDocs->sorted($sort);
 
         $allDocs = $allDocs->paginate($perPage)->withQueryString();
 
@@ -64,14 +57,7 @@ class HomeController extends Controller
             ->with(['category'])
             ->when($categoryIds, fn ($q) => $q->whereIn('category_id', $categoryIds));
 
-        $allDocs = match($sort) {
-            'name_asc'   => $allDocs->orderBy('title'),
-            'name_desc'  => $allDocs->orderByDesc('title'),
-            'size_desc'  => $allDocs->orderByDesc('file_size'),
-            'downloads'  => $allDocs->orderByDesc('download_count'),
-            'date_asc'   => $allDocs->orderBy('created_at'),
-            default      => $allDocs->orderByDesc('created_at'),
-        };
+        $allDocs = $allDocs->sorted($sort);
 
         $allDocs = $allDocs->paginate($perPage)->withQueryString();
 

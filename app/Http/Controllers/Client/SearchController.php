@@ -84,15 +84,9 @@ class SearchController extends Controller
             ->when($dateFrom,   fn($q, $d) => $q->whereDate('created_at', '>=', $d))
             ->when($dateTo,     fn($q, $d) => $q->whereDate('created_at', '<=', $d));
 
-        $builder = match($sort) {
-            'date_desc'  => $builder->orderByDesc('created_at'),
-            'date_asc'   => $builder->orderBy('created_at'),
-            'name_asc'   => $builder->orderBy('title'),
-            'name_desc'  => $builder->orderByDesc('title'),
-            'size_desc'  => $builder->orderByDesc('file_size'),
-            'downloads'  => $builder->orderByDesc('download_count'),
-            default      => $builder->orderByDesc('download_count'),
-        };
+        $builder = $sort === 'relevance'
+            ? $builder->orderByDesc('download_count')
+            : $builder->sorted($sort);
 
         $results = $builder->paginate(self::PER_PAGE)->withQueryString();
 

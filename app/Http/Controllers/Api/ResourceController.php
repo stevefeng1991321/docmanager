@@ -13,7 +13,6 @@ use App\Models\Resource;
 use App\Models\Share;
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -46,13 +45,7 @@ class ResourceController extends Controller
                 }
             });
 
-        $builder = match($sort) {
-            'date_asc'   => $builder->orderBy('created_at'),
-            'name_asc'   => $builder->orderBy('title'),
-            'name_desc'  => $builder->orderByDesc('title'),
-            'downloads'  => $builder->orderByDesc('download_count'),
-            default      => $builder->orderByDesc('created_at'),
-        };
+        $builder = $builder->sorted($sort);
 
         $resources = $builder->paginate($perPage);
 
@@ -199,14 +192,6 @@ class ResourceController extends Controller
     }
 
     // ---------- helpers ----------
-
-    private function clearDocumentCaches(): void
-    {
-        Cache::forget('dashboard.stats');
-        Cache::forget('dashboard.upload_trend');
-        Cache::forget('dashboard.download_trend');
-        Cache::forget('home.categories.tree');
-    }
 
     private function userCanManage(): bool
     {
