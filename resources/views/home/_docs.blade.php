@@ -51,6 +51,16 @@
 </div>
 @endif
 
-<div data-pagination class="mt-4">
-    {{ $allDocs->links() }}
+<div class="flex items-center justify-between gap-3 mt-4 flex-wrap">
+    <select
+        onchange="document.dispatchEvent(new CustomEvent('per-page-change', { detail: { perPage: parseInt(this.value) } }))"
+        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+        @foreach([10, 20, 30] as $size)
+            <option value="{{ $size }}" @selected(($perPage ?? 20) == $size)>{{ $size }} / page</option>
+        @endforeach
+    </select>
+    <div data-pagination>
+        {{ $allDocs->links('vendor.pagination.admin-compact') }}
+    </div>
 </div>

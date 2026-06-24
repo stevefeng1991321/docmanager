@@ -12,8 +12,9 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $sort = $request->input('sort', 'date_desc');
-        $view = $request->input('view', session('doc_view', 'grid'));
+        $sort    = $request->input('sort', 'date_desc');
+        $view    = $request->input('view', session('doc_view', 'grid'));
+        $perPage = in_array((int) $request->input('per_page'), [10, 20, 30]) ? (int) $request->input('per_page') : 20;
         session(['doc_view' => $view]);
 
         $categories = Cache::remember('home.categories.tree', 3600, function () {
@@ -37,15 +38,16 @@ class HomeController extends Controller
             default      => $allDocs->orderByDesc('created_at'),
         };
 
-        $allDocs = $allDocs->paginate(18)->withQueryString();
+        $allDocs = $allDocs->paginate($perPage)->withQueryString();
 
-        return view('home.index', compact('categories', 'allDocs', 'sort', 'view'));
+        return view('home.index', compact('categories', 'allDocs', 'sort', 'view', 'perPage'));
     }
 
     public function browse(Request $request)
     {
-        $sort = $request->input('sort', 'date_desc');
-        $view = $request->input('view', session('doc_view', 'grid'));
+        $sort         = $request->input('sort', 'date_desc');
+        $view         = $request->input('view', session('doc_view', 'grid'));
+        $perPage      = in_array((int) $request->input('per_page'), [10, 20, 30]) ? (int) $request->input('per_page') : 20;
         $categorySlug = $request->input('category');
 
         $category = $categorySlug
@@ -71,8 +73,8 @@ class HomeController extends Controller
             default      => $allDocs->orderByDesc('created_at'),
         };
 
-        $allDocs = $allDocs->paginate(18)->withQueryString();
+        $allDocs = $allDocs->paginate($perPage)->withQueryString();
 
-        return view('home._docs', compact('allDocs', 'sort', 'view', 'category'));
+        return view('home._docs', compact('allDocs', 'sort', 'view', 'category', 'perPage'));
     }
 }

@@ -232,10 +232,15 @@ function catBrowser() {
         drawerOpen: false,
         sort: '{{ $sort }}',
         view: '{{ $view }}',
+        perPage: {{ $perPage }},
 
         init() {
             this.cats.forEach(cat => {
                 this.open[cat.id] = false;
+            });
+            document.addEventListener('per-page-change', (e) => {
+                this.perPage = e.detail.perPage;
+                this.load();
             });
         },
 
@@ -247,7 +252,7 @@ function catBrowser() {
 
         load(page) {
             this.loading = true;
-            const params = new URLSearchParams({ sort: this.sort, view: this.view });
+            const params = new URLSearchParams({ sort: this.sort, view: this.view, per_page: this.perPage });
             if (this.active) params.set('category', this.active);
             if (page) params.set('page', page);
 
