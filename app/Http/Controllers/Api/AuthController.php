@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -87,12 +88,7 @@ class AuthController extends Controller
             'token'      => $token,
             'token_type' => 'Bearer',
             'expires_in' => 30 * 24 * 60 * 60,
-            'user' => [
-                'id'       => $user->id,
-                'username' => $user->username,
-                'name'     => $user->name,
-                'role'     => $user->role,
-            ],
+            'user'       => new UserResource($user),
         ]);
     }
 
@@ -105,14 +101,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user();
-
-        return response()->json([
-            'id'         => $user->id,
-            'username'   => $user->username,
-            'name'       => $user->name,
-            'role'       => $user->role,
-            'created_at' => $user->created_at?->toIso8601String(),
-        ]);
+        return new UserResource($request->user());
     }
 }

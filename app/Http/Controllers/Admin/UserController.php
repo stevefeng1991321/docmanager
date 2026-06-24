@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Mail\AccountActivated;
+use App\Mail\AccountRejected;
+use App\Mail\AdminPasswordReset;
 use App\Models\AuditLog;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -72,6 +76,10 @@ class UserController extends Controller
         Notification::send($user->id, 'account_activated', 'Account Activated', 'Your account has been activated. You can now sign in.');
         AuditLog::record('user.activated', null, ['user_id' => $user->id, 'username' => $user->username]);
 
+        if ($user->email) {
+            Mail::to($user->email)->queue(new AccountActivated($user));
+        }
+
         return back()->with('message', "Account '{$user->username}' activated.");
     }
 
@@ -89,6 +97,10 @@ class UserController extends Controller
         $user->update(['password' => Hash::make($request->password)]);
         AuditLog::record('user.password_reset', null, ['user_id' => $user->id]);
 
+        if ($user->email) {
+            Mail::to($user->email)->queue(new AdminPasswordReset($user));
+        }
+
         return back()->with('message', "Password reset for '{$user->username}'.");
     }
 
@@ -100,6 +112,9 @@ class UserController extends Controller
         foreach ($users as $user) {
             $user->update(['status' => 'active']);
             Notification::send($user->id, 'account_activated', 'Account Activated', 'Your account has been activated. You can now sign in.');
+            if ($user->email) {
+                Mail::to($user->email)->queue(new AccountActivated($user));
+            }
         }
 
         AuditLog::record('user.bulk_activated', null, ['count' => $users->count()]);
@@ -119,6 +134,9 @@ class UserController extends Controller
 
         foreach ($users as $user) {
             Notification::send($user->id, 'account_rejected', 'Registration Not Approved', $reason);
+            if ($user->email) {
+                Mail::to($user->email)->queue(new AccountRejected($user, $reason));
+            }
             $user->delete();
         }
 

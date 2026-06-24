@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDocumentRequest;
 use App\Http\Requests\Admin\UpdateDocumentRequest;
 use App\Jobs\ExtractDocumentContent;
+use App\Mail\DocumentApproved;
+use App\Mail\DocumentRejected;
 use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\DocumentAccessLog;
@@ -13,7 +15,9 @@ use App\Models\DocumentVersion;
 use App\Models\Notification;
 use App\Models\Resource;
 use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -334,6 +338,10 @@ class DocumentController extends Controller
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_approved',
                 'Document Published', "\"{$document->title}\" has been approved and published.", $document->id);
+            $uploader = User::find($document->uploaded_by);
+            if ($uploader?->email) {
+                Mail::to($uploader->email)->queue(new DocumentApproved($uploader, $document));
+            }
         }
 
         return back()->with('message', 'Document published.');
@@ -349,6 +357,11 @@ class DocumentController extends Controller
         if ($document->uploaded_by) {
             Notification::send($document->uploaded_by, 'doc_rejected',
                 'Document Rejected', $request->reason ?? "\"{$document->title}\" was not approved.", $document->id);
+            $uploader = User::find($document->uploaded_by);
+            if ($uploader?->email) {
+                $reason = $request->reason ?? "\"{$document->title}\" was not approved.";
+                Mail::to($uploader->email)->queue(new DocumentRejected($uploader, $document, $reason));
+            }
         }
 
         return back()->with('message', 'Document rejected.');
