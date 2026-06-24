@@ -56,7 +56,6 @@ composer run dev
 |---|---|
 | `server` | `php artisan serve` on port 8000 |
 | `queue` | `php artisan queue:listen` — content extraction + TF-IDF indexing |
-| `logs` | `php artisan pail` — live log stream |
 | `vite` | `npm run dev` — Tailwind + Alpine HMR |
 
 ### Offline mode (no npm, no internet)
