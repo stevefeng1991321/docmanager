@@ -39,6 +39,41 @@
             </div>
         </div>
 
+        <div>
+            <label class="block text-xs font-medium text-gray-600 mb-2">Password Complexity</label>
+            <div class="space-y-2">
+                @foreach($passwordLevels as $key => $level)
+                @php $active = ($settings['password_complexity'] ?? 'standard') === $key; @endphp
+                <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition
+                              {{ $active ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' }}">
+                    <input type="radio" name="password_complexity" value="{{ $key }}"
+                           @checked($active) class="mt-0.5 accent-blue-600 flex-shrink-0">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-sm font-medium text-gray-800">{{ $level['label'] }}</span>
+                            <span class="text-xs px-1.5 py-0.5 rounded-full font-medium {{ $level['badge'] }}">
+                                {{ $level['min'] }}+ chars
+                            </span>
+                            @if($level['mixedCase'])
+                                <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">Aa</span>
+                            @endif
+                            @if($level['numbers'])
+                                <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">0–9</span>
+                            @endif
+                            @if($level['symbols'])
+                                <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">!@#</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ $level['description'] }}</p>
+                    </div>
+                </label>
+                @endforeach
+            </div>
+            <p class="text-xs text-gray-400 mt-1.5">
+                Applies to registration, profile password changes, and admin-managed accounts.
+            </p>
+        </div>
+
         <h3 class="font-semibold text-gray-800 pt-2">Retention</h3>
         <div>
             <label class="block text-xs font-medium text-gray-600 mb-1">Trash Retention (days)</label>

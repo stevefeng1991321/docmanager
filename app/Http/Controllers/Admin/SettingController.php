@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\PasswordPolicy;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -14,14 +15,16 @@ class SettingController extends Controller
         'lockout_attempts'        => 5,
         'lockout_minutes'         => 15,
         'trash_retention_days'    => 30,
+        'password_complexity'     => 'standard',
     ];
 
     public function index()
     {
         $saved    = Setting::allKeyed();
         $settings = array_merge($this->defaults, $saved);
+        $passwordLevels = PasswordPolicy::LEVELS;
 
-        return view('admin.settings.index', compact('settings'));
+        return view('admin.settings.index', compact('settings', 'passwordLevels'));
     }
 
     public function update(Request $request)
@@ -32,6 +35,7 @@ class SettingController extends Controller
             'lockout_attempts'        => ['required', 'integer', 'min:3', 'max:20'],
             'lockout_minutes'         => ['required', 'integer', 'min:1'],
             'trash_retention_days'    => ['required', 'integer', 'min:1'],
+            'password_complexity'     => ['required', 'in:' . implode(',', array_keys(PasswordPolicy::LEVELS))],
         ]);
 
         Setting::setMany($validated);

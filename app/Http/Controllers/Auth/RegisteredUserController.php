@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -21,7 +22,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'username' => ['required', 'string', 'min:3', 'max:50', 'unique:users', 'regex:/^[a-zA-Z0-9_-]+$/'],
             'name'     => ['required', 'string', 'max:255'],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ], [
             'username.regex' => 'Username may only contain letters, numbers, underscores, and hyphens.',
         ]);

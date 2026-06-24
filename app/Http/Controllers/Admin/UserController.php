@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -93,7 +94,7 @@ class UserController extends Controller
 
     public function resetPassword(Request $request, User $user)
     {
-        $request->validate(['password' => ['required', 'string', 'min:8']]);
+        $request->validate(['password' => ['required', Password::defaults()]]);
         $user->update(['password' => Hash::make($request->password)]);
         AuditLog::record('user.password_reset', null, ['user_id' => $user->id]);
 

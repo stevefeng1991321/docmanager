@@ -51,6 +51,7 @@
             <input id="password" type="password" name="password"
                    required autocomplete="new-password"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-400 @else border-gray-300 @enderror">
+            <p class="mt-1 text-xs text-gray-400">{{ \App\Support\PasswordPolicy::description() }}</p>
             @error('password')
                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
             @enderror
