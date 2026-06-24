@@ -46,6 +46,7 @@ class SearchController extends Controller
                 'user_id'       => auth()->id(),
                 'query'         => $query,
                 'results_count' => $total,
+                'search_type'   => $mode === 'ai' ? 'semantic' : 'keyword',
             ]);
         }
 

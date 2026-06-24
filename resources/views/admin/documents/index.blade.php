@@ -12,7 +12,7 @@
                class="w-52 border border-gray-300 rounded-lg px-3 py-2 text-sm">
         <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">All Status</option>
-            @foreach(['draft','pending_review','published','rejected'] as $s)
+            @foreach(['draft','pending_review','published','rejected','archived'] as $s)
                 <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
             @endforeach
         </select>
@@ -22,8 +22,16 @@
                 <option value="{{ $cat->id }}" @selected(request('category') == $cat->id)>{{ $cat->name }}</option>
             @endforeach
         </select>
+        <select name="sort" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="date_desc" @selected($sort === 'date_desc')>Newest First</option>
+            <option value="date_asc"  @selected($sort === 'date_asc') >Oldest First</option>
+            <option value="name_asc"  @selected($sort === 'name_asc') >Title A–Z</option>
+            <option value="name_desc" @selected($sort === 'name_desc')>Title Z–A</option>
+            <option value="size_desc" @selected($sort === 'size_desc')>Largest File</option>
+            <option value="downloads" @selected($sort === 'downloads')>Most Downloaded</option>
+        </select>
         <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Filter</button>
-        @if(request()->hasAny(['search','status','category']))
+        @if(request()->hasAny(['search','status','category','sort']))
             <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
         @endif
     </form>

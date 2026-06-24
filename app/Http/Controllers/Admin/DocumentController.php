@@ -20,18 +20,27 @@ class DocumentController extends Controller
 {
     public function index(Request $request)
     {
-        $documents = Resource::with('uploader', 'category')
+        $sort = $request->input('sort', 'date_desc');
+
+        $query = Resource::with('uploader', 'category')
             ->when($request->search,   fn($q, $s) => $q->where('title', 'like', "%{$s}%"))
             ->when($request->status,   fn($q, $s) => $q->where('status', $s))
             ->when($request->category, fn($q, $c) => $q->where('category_id', $c))
-            ->when($request->type,     fn($q, $t) => $q->where('file_type', 'like', "%{$t}%"))
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->withQueryString();
+            ->when($request->type,     fn($q, $t) => $q->where('file_type', 'like', "%{$t}%"));
 
+        $query = match($sort) {
+            'name_asc'  => $query->orderBy('title'),
+            'name_desc' => $query->orderByDesc('title'),
+            'size_desc' => $query->orderByDesc('file_size'),
+            'downloads' => $query->orderByDesc('download_count'),
+            'date_asc'  => $query->orderBy('created_at'),
+            default     => $query->orderByDesc('created_at'),
+        };
+
+        $documents  = $query->paginate(20)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return view('admin.documents.index', compact('documents', 'categories'));
+        return view('admin.documents.index', compact('documents', 'categories', 'sort'));
     }
 
     public function create()
