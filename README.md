@@ -302,7 +302,6 @@ docmanager/
 ├── package.json                # Node dependencies
 ├── tailwind.config.js
 ├── vite.config.js
-└── document_management_schema.sql  # Reference DB schema
 ```
 
 > **Storage disk root:** The `local` disk in Laravel 11+ resolves to `storage/app/private/`. When using `Storage::disk('local')->put('resources/file.pdf', …)` the physical path is `storage/app/private/resources/file.pdf`. Never prefix paths with `private/` when using the `local` disk driver.
@@ -341,8 +340,6 @@ Browser
 ---
 
 ## Database Schema
-
-Full MySQL schema is in **[document_management_schema.sql](document_management_schema.sql)**.
 
 ### Tables reference
 
