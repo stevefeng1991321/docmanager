@@ -96,6 +96,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::resource('tags', Admin\TagController::class);
     Route::post('tags/merge',  [Admin\TagController::class, 'merge'])->name('tags.merge');
 
+    // Problems & Reference Solutions
+    Route::get('problems',           [Admin\ProblemController::class, 'index'])->name('problems.index');
+    Route::get('problems/{problem}', [Admin\ProblemController::class, 'show'])->name('problems.show');
+
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');
 

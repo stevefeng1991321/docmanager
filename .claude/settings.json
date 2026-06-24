@@ -15,7 +15,16 @@
       "Bash(composer require *)",
       "Bash(php -r \"echo 'gd: '.\\(extension_loaded\\('gd'\\)?'OK':'missing'\\).', zip: '.\\(extension_loaded\\('zip'\\)?'OK':'missing'\\);\")",
       "Bash(powershell -Command \"Get-Content 'd:\\\\Github\\\\docmanager\\\\storage\\\\logs\\\\laravel.log' -Tail 80\")",
-      "Bash(powershell -Command \"Select-String -Path 'd:\\\\Github\\\\docmanager\\\\app\\\\Http\\\\Controllers\\\\Admin\\\\DocumentController.php' -Pattern 'public function edit|public function store' -Context 0,30 | Select-Object -First 60\")"
+      "Bash(powershell -Command \"Select-String -Path 'd:\\\\Github\\\\docmanager\\\\app\\\\Http\\\\Controllers\\\\Admin\\\\DocumentController.php' -Pattern 'public function edit|public function store' -Context 0,30 | Select-Object -First 60\")",
+      "Bash(xargs grep -l \"editor\\\\|codemirror\\\\|monaco\\\\|highlight\")",
+      "Bash(New-Item -ItemType Directory -Force \"d:\\\\Github\\\\docmanager\\\\resources\\\\views\\\\admin\\\\problems\")",
+      "Bash(Out-Null)",
+      "PowerShell(New-Item -ItemType Directory -Force \"d:\\\\Github\\\\docmanager\\\\resources\\\\views\\\\admin\\\\problems\")",
+      "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\ProblemSeeder.php\" -Force)",
+      "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\EasyProblemSeeder.php\" -Force)",
+      "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\AIProblemSeeder.php\" -Force)",
+      "Bash(Remove-Item \"d:\\\\Github\\\\docmanager\\\\database\\\\seeders\\\\MathProblemSeeder.php\" -Force)",
+      "Bash(Write-Output \"Deleted old seeders\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"

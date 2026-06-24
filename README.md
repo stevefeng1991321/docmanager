@@ -56,8 +56,14 @@ php artisan migrate:status
 # Seed starter data (admin account + default categories)
 php artisan db:seed
 
-# Fresh migration + seed in one step
+# Refresh database and re-run all seeders
 php artisan migrate:fresh --seed
+
+# Refresh database and run a specific seeder
+php artisan migrate:fresh --seed --seeder=JavaScriptSeeder
+php artisan migrate:fresh --seed --seeder=MathSeeder
+php artisan migrate:fresh --seed --seeder=AlgorithmsSeeder
+php artisan migrate:fresh --seed --seeder=AISeeder
 ```
 
 The seeder creates:

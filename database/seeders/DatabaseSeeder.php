@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Problem;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -40,6 +41,12 @@ class DatabaseSeeder extends Seeder
                 ['name' => $data['name'], 'sort_order' => $i + 1]
             );
         }
+
+        Problem::query()->delete();
+        $this->call(JavaScriptSeeder::class);
+        $this->call(MathSeeder::class);
+        $this->call(AlgorithmsSeeder::class);
+        $this->call(AISeeder::class);
 
         $this->command->info('Admin account: username=admin  password=Admin@1234');
         $this->command->warn('Change the admin password after first login!');
