@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Resource;
 use App\Services\ContentExtractorService;
+use App\Jobs\IndexDocumentTfidf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,5 +32,9 @@ class ExtractDocumentContent implements ShouldQueue
 
         \Log::info("Content extracted for resource #{$this->resource->id}: "
             . ($text ? strlen($text) . ' chars' : 'not extractable'));
+
+        if ($text) {
+            IndexDocumentTfidf::dispatch($this->resource->fresh());
+        }
     }
 }

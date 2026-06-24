@@ -16,10 +16,12 @@ class ContentExtractorService
 
         try {
             return match(true) {
-                $ext === 'pdf'               => $this->extractPdf($filePath),
-                in_array($ext, ['docx'])     => $this->extractDocx($filePath),
-                in_array($ext, ['txt', 'md'])=> $this->extractText($filePath),
-                default                      => null,
+                $ext === 'pdf'                   => $this->extractPdf($filePath),
+                $ext === 'docx'                  => $this->extractDocx($filePath),
+                in_array($ext, ['xlsx', 'xls'])  => $this->extractXlsx($filePath),
+                $ext === 'pptx'                  => $this->extractPptx($filePath),
+                in_array($ext, ['txt', 'md'])    => $this->extractText($filePath),
+                default                          => null,
             };
         } catch (\Throwable $e) {
             \Log::warning("Content extraction failed for {$originalFilename}: " . $e->getMessage());
@@ -54,6 +56,53 @@ class ContentExtractorService
                     foreach ($element->getElements() as $child) {
                         if (method_exists($child, 'getText')) {
                             $parts[] = $child->getText();
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->clean(implode(' ', array_filter($parts)));
+    }
+
+    private function extractXlsx(string $filePath): ?string
+    {
+        $absolutePath = Storage::disk('local')->path($filePath);
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($absolutePath);
+        $parts       = [];
+
+        foreach ($spreadsheet->getAllSheets() as $sheet) {
+            foreach ($sheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(true);
+                foreach ($cellIterator as $cell) {
+                    $value = $cell->getCalculatedValue();
+                    if ($value !== null && $value !== '') {
+                        $parts[] = (string) $value;
+                    }
+                }
+            }
+        }
+
+        return $this->clean(implode(' ', $parts));
+    }
+
+    private function extractPptx(string $filePath): ?string
+    {
+        $absolutePath = Storage::disk('local')->path($filePath);
+
+        $presentation = \PhpOffice\PhpPresentation\IOFactory::load($absolutePath);
+        $parts        = [];
+
+        foreach ($presentation->getAllSlides() as $slide) {
+            foreach ($slide->getShapeCollection() as $shape) {
+                if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
+                    foreach ($shape->getParagraphs() as $paragraph) {
+                        foreach ($paragraph->getRichTextElements() as $element) {
+                            if (method_exists($element, 'getText')) {
+                                $parts[] = $element->getText();
+                            }
                         }
                     }
                 }

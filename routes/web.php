@@ -115,8 +115,9 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::get('activity-logs/export', [Admin\ActivityLogController::class, 'export'])->name('activity-logs.export');
     Route::get('jobs',          [Admin\JobMonitorController::class, 'index'])->name('jobs.index');
     Route::get('storage',       [Admin\StorageController::class, 'index'])->name('storage.index');
-    Route::get('search',        [Admin\SearchIndexController::class, 'index'])->name('search.index');
-    Route::post('search/reindex',[Admin\SearchIndexController::class, 'reindex'])->name('search.reindex');
+    Route::get('search',              [Admin\SearchIndexController::class, 'index'])->name('search.index');
+    Route::post('search/reindex',     [Admin\SearchIndexController::class, 'reindex'])->name('search.reindex');
+    Route::post('search/build-tfidf', [Admin\SearchIndexController::class, 'buildTfidf'])->name('search.build-tfidf');
 
     // Job retry
     Route::post('jobs/{id}/retry',  [Admin\JobMonitorController::class, 'retry'])->name('jobs.retry');

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\ExtractDocumentContent;
 use App\Models\Resource;
+use App\Models\ResourceEmbedding;
 use App\Models\SearchLog;
+use App\Services\TfidfService;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 class SearchIndexController extends Controller
@@ -18,7 +21,11 @@ class SearchIndexController extends Controller
             ->take(20)
             ->get();
 
-        return view('admin.search.index', compact('topQueries'));
+        $tfidf         = app(TfidfService::class);
+        $tfidfReady    = $tfidf->hasIndex();
+        $tfidfIndexed  = ResourceEmbedding::where('model', 'tfidf-v1')->count();
+
+        return view('admin.search.index', compact('topQueries', 'tfidfReady', 'tfidfIndexed'));
     }
 
     public function reindex()
@@ -35,5 +42,11 @@ class SearchIndexController extends Controller
             });
 
         return back()->with('message', "Re-index queued for {$count} document(s). Run the queue worker to process.");
+    }
+
+    public function buildTfidf()
+    {
+        Artisan::queue('search:build-tfidf');
+        return back()->with('message', 'TF-IDF index build queued. Run the queue worker to process.');
     }
 }

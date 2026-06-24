@@ -115,13 +115,25 @@ npm run dev
 
 The app will be available at **http://127.0.0.1:8000**
 
-### Step 8 — (Optional) Start the queue worker
+### Step 8 — Start the queue worker
 
-Required for file content extraction, embedding generation, and bulk downloads:
+Required for file content extraction, TF-IDF indexing, and bulk ZIP downloads:
 
 ```bash
 php artisan queue:work --queue=default
 ```
+
+### Step 9 — (Optional) Build the AI search index
+
+Once the queue worker has processed all documents, build the TF-IDF semantic search index:
+
+```bash
+php artisan search:build-tfidf
+```
+
+This runs a two-pass scan over all published documents, computes TF-IDF vectors, and stores them in the database. After this, the **✦ AI Semantic** search mode is available on the search page.
+
+> Re-run this command after uploading a large batch of new documents to keep AI search rankings accurate. Individual new documents are indexed automatically via the queue worker.
 
 ---
 
@@ -145,7 +157,19 @@ Remove-Item public\hot -ErrorAction SilentlyContinue
 
 If this file exists, Laravel tries to load assets from the Vite dev server (`http://127.0.0.1:5173`), which won't be running offline. Deleting it tells Laravel to use `public/build/` instead.
 
-### Step 3 — Start Laravel only (no npm)
+### Step 3 — Build the AI search index (first time only)
+
+```bash
+# Extract text from all existing documents
+php artisan queue:work --queue=default --stop-when-empty
+
+# Build TF-IDF vectors from the extracted content
+php artisan search:build-tfidf
+```
+
+Skip this step if documents have no extractable text, or if you don't need AI semantic search.
+
+### Step 4 — Start Laravel only (no npm)
 
 ```bash
 php artisan serve --host=127.0.0.1 --port=8000
@@ -163,6 +187,7 @@ Open **http://127.0.0.1:8000** — fully offline, no Vite, no internet.
 | Servers required | Laravel + Vite (`npm run dev`) | Laravel only |
 | `public/hot` file | present | deleted |
 | Reflects code changes | instantly (HMR) | only after `npm run build` |
+| AI search | requires queue worker + `search:build-tfidf` | same — index stored in DB |
 
 ---
 
@@ -216,8 +241,6 @@ Key `.env` settings:
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | MySQL connection |
 | `QUEUE_CONNECTION` | `database` or `redis` |
 | `CACHE_DRIVER` | `redis` or `file` |
-| `OPENAI_API_KEY` | For OpenAI embedding model (optional) |
-| `VECTOR_DB_URL` | Qdrant / Chroma / Weaviate endpoint |
 | `SESSION_LIFETIME` | Session timeout in minutes (default: `120`) |
 | `MAX_UPLOAD_SIZE_MB` | Maximum file upload size in MB (default: `50`) |
 | `SHARE_LINK_EXPIRY_HOURS` | Default signed share link expiry (default: `24`) |
@@ -251,7 +274,7 @@ A full back-office interface for Admins and Editors.
 | Jobs | `/admin/jobs` | Monitor queue — pending, processing, and failed jobs |
 | Storage | `/admin/storage` | Storage usage per user, global quota management |
 | Notifications | `/admin/notifications` | Manage and broadcast system notifications |
-| Search Index | `/admin/search` | Re-index search engine, view search analytics |
+| Search Index | `/admin/search` | Build AI index, re-index content, view search analytics |
 | Settings | `/admin/settings` | Upload limits, session timeout, share link expiry |
 
 ---
@@ -266,8 +289,8 @@ A clean document portal for all authenticated users.
 |---|---|---|
 | Register | `/register` | Self-registration form — username + password only; account created as Pending |
 | Login | `/login` | Login form; Pending accounts are blocked with a "awaiting activation" message |
-| Home / Browse | `/` | Document grid/list with category sidebar, sort controls, pagination |
-| Search | `/search` | Hybrid search with filters, sort, highlighted results, search history |
+| Home / Browse | `/` | Document grid/list with collapsible category tree sidebar, sort controls, dynamic content loading |
+| Search | `/search` | Hybrid search — Keyword mode (MySQL FULLTEXT) and AI Semantic mode (TF-IDF) — with filters, sort, highlighted results, match-score badges, search history |
 | Document Detail | `/documents/{id}` | Metadata, breadcrumb, preview, download, version history (read-only), related documents |
 | Preview | `/documents/{id}/preview` | PDF.js / image / text preview |
 | Categories | `/categories/{slug}` | Browse documents by category with breadcrumb navigation |
@@ -382,17 +405,18 @@ A clean document portal for all authenticated users.
 # 🌐 Client Web App Features
 
 ### Browse & Discover
-* Document grid / list view (toggle) with category sidebar
+* Document grid / list view (toggle) with **collapsible category tree sidebar** — parent/child categories expand inline; clicking a category loads docs dynamically without a page reload
 * Sort by: name, upload date, file size, file type, most downloaded
 * Pagination on all document lists and search results
 * Breadcrumb navigation for category drill-down
 * Related documents panel on Document Detail page
 
 ### Search
-* Hybrid search: keyword + full-text + AI semantic + filters
-* Search filters: file type, date range, uploader, tags, category, file size
-* Highlighted keyword matches in title, description, and preview text
-* Recent search history (last 10 queries, clearable)
+* **Keyword mode** — MySQL FULLTEXT boolean search across title, description, and extracted document content
+* **AI Semantic mode** — TF-IDF cosine similarity; understands meaning, not just exact keywords; results show a "% match" score badge
+* Mode toggle on the search page — switch between Keyword and ✦ AI Semantic per query
+* Search filters: file type, date range, category — combinable with both modes
+* Highlighted keyword matches in title, description, and preview text (keyword mode)
 * Saved searches — name and save a search query for quick re-use
 * Sort search results by: relevance (default), date, name, size
 
@@ -556,37 +580,64 @@ Full-text index on `resources(title, description, content)` — defined in schem
 
 Text extracted from PDF, DOCX, and TXT files and stored in `resources.content (LONGTEXT)`.
 
-## 4. AI Semantic Search (Vector-Based)
+## 4. AI Semantic Search (TF-IDF, fully offline)
 
-### Architecture:
+No external API, no vector database, no internet required.
+
+### How it works:
 
 ```
-User Query
+Document uploaded
    ↓
-Embedding Model (OpenAI / Local LLM)
+Content extracted (ExtractDocumentContent job)
    ↓
-Vector Database (Qdrant / Chroma / Weaviate)
+Tokenize + compute TF-IDF vector (IndexDocumentTfidf job)
    ↓
-Similarity Matching
+Store sparse vector in resource_embeddings (model = tfidf-v1)
+
+─────────────────────────────────────────────────
+
+User types a query → clicks "✦ AI Semantic"
    ↓
-Ranked Results
+Tokenize query → compute TF-IDF query vector (using stored IDF)
+   ↓
+Cosine similarity against all indexed document vectors (in PHP)
+   ↓
+Sort by score → paginate → return results with "% match" badge
 ```
 
 ### Features:
 
-* Meaning-based search (not keyword-based)
-* Finds similar documents
-* Natural language queries
+* Finds conceptually related documents, not just exact keyword matches
+* Works completely offline — no API calls, no external service
+* Results ranked by cosine similarity score (0–100% match badge shown per result)
+* Filters (category, file type, date) apply before similarity computation
+* Index rebuilds automatically as new documents are uploaded (per-doc job)
+
+### Build the index (one-time setup):
+
+```bash
+# Step 1 — extract text from all existing documents
+php artisan search:reindex
+
+# Step 2 — run the queue worker to process extraction jobs
+php artisan queue:work
+
+# Step 3 — build TF-IDF vectors from extracted content
+php artisan search:build-tfidf
+```
+
+Or click **"✦ Build AI Index"** in the Admin Panel → Search Analytics page.
+
+Rebuild after uploading a large batch of new documents to keep rankings accurate.
 
 ## 5. Hybrid Search Engine
 
 ```
-Keyword Search (MySQL)
-+ Full-text Search
-+ Vector Search (AI)
-+ Content Search
-→ Ranking Engine
-→ Final Results
+Keyword Search (MySQL FULLTEXT)
++ Content Search (extracted text)
++ AI Semantic Search (TF-IDF cosine similarity)
+→ User-selected mode → Ranked Results
 ```
 
 ---
@@ -779,9 +830,9 @@ Available to Admin and Editor roles:
 
 Used for:
 
-* File content extraction
-* Embedding generation
-* Search indexing
+* File content extraction (text from PDF, DOCX, TXT)
+* TF-IDF indexing (auto-dispatched after content extraction)
+* Bulk TF-IDF index rebuild (`search:build-tfidf` command)
 * Bulk ZIP download generation
 
 ```
@@ -803,21 +854,37 @@ Monitor failed jobs at `/admin/jobs`.
 
 ---
 
-# 🧠 AI Semantic Search (RAG-Ready)
+# 🧠 AI Semantic Search (Offline TF-IDF)
 
-### Pipeline:
+Pure PHP implementation — no external API, no vector database, no internet required.
 
-* Extract text
-* Chunk documents
-* Generate embeddings (OpenAI or local model)
-* Store in vector DB + `resource_embeddings` table
-* Query using similarity search
+### Files:
 
-### Enables:
+| File | Purpose |
+|---|---|
+| `app/Services/TfidfService.php` | Tokenize, build IDF, compute TF-IDF vectors, cosine similarity |
+| `app/Jobs/IndexDocumentTfidf.php` | Queue job — index one document using existing IDF |
+| `app/Console/Commands/BuildTfidfIndex.php` | Artisan command — full corpus rebuild (two-pass, memory-efficient) |
+| `storage/app/search/tfidf_idf.json` | Persisted IDF dictionary (rebuilt by `search:build-tfidf`) |
+| `resource_embeddings` table | Stores sparse TF-IDF vector per document (`model = tfidf-v1`) |
 
-* Chat with documents
-* Semantic retrieval
-* Smart search results
+### Commands:
+
+| Command | Purpose |
+|---|---|
+| `php artisan search:build-tfidf` | Full corpus reindex — builds IDF dictionary + all document vectors |
+| `php artisan search:build-tfidf --chunk=500` | Same, but processes 500 documents per batch (default: 200) |
+| `php artisan search:reindex` | Re-extract text from all documents (queue jobs — run worker after) |
+| `php artisan queue:work --queue=default` | Run the queue worker to process extraction + indexing jobs |
+| `php artisan queue:work --stop-when-empty` | Process all queued jobs then exit (useful for one-off runs) |
+
+### Algorithm:
+
+* **Tokenize** — lowercase, strip punctuation, remove 50+ English stop words, filter tokens < 3 chars
+* **TF** — term count / total tokens per document
+* **IDF** — smooth: `log((N+1) / (df+1)) + 1`  where N = corpus size, df = docs containing term
+* **TF-IDF** — TF × IDF, then L2-normalized so cosine similarity = dot product
+* **Cosine similarity** — dot product over the smaller (query) vector's terms only (sparse, efficient)
 
 ---
 
@@ -934,8 +1001,7 @@ For large-scale deployments:
 | PDF Preview | PDF.js (bundled locally) |
 | Queue / Cache | Redis |
 | Full-text Search | MySQL FULLTEXT |
-| AI Vector Search | Qdrant / Chroma / Weaviate |
-| Ranking Engine | Custom hybrid scorer |
+| AI Semantic Search | TF-IDF cosine similarity (pure PHP, fully offline) |
 | Storage | Local Disk (`storage/app/resources/`) |
 | PHP Libraries | smalot/pdfparser, phpoffice/phpword, ZipArchive |
 | Auth | Laravel Breeze + Sanctum (API) |
@@ -964,7 +1030,7 @@ For large-scale deployments:
           │ Approval Workflow │ Document Locking      │
           ─────────────────────────────────────────
                             ↓
-          MySQL + Local Storage + Vector DB (Qdrant/Chroma)
+          MySQL + Local Storage + TF-IDF Index (storage/app/search/)
 ```
 
 ---
@@ -988,10 +1054,11 @@ This system is a **complete enterprise-grade document management platform** feat
 
 ✔ Dual-app architecture — Admin Panel (`/admin`) + Client Web App (`/`)
 ✔ Offline-capable UI (Tailwind CSS + Alpine.js + Flowbite, no CDN)
+✔ AI Semantic search works offline — TF-IDF vectors stored locally, no external API required
 ✔ Local file storage (XAMPP)
 ✔ Secure role-based authentication (RBAC) with account lockout
 ✔ Client self-registration (username + password) with mandatory Admin activation before first login
-✔ Hybrid search engine (keyword + full-text + AI vector search)
+✔ Hybrid search engine — Keyword (MySQL FULLTEXT) + AI Semantic (TF-IDF, pure PHP, fully offline)
 ✔ Combinable search filters + sort options
 ✔ Search history, saved searches, and basic autocomplete
 ✔ File preview system (PDF.js, bundled locally)
