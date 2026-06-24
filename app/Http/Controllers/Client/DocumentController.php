@@ -44,10 +44,11 @@ class DocumentController extends Controller
     public function preview(Resource $resource)
     {
         abort_if(!$resource->isPublished(), 404);
+        abort_if($resource->isLocked(), 403, 'This document is currently locked and cannot be previewed.');
 
-        // Only PDF and image files can be previewed
-        $previewable = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-        abort_if(!in_array(strtolower($resource->file_type), $previewable), 404);
+        // Only PDF and image files can be previewed (file_type stored as MIME type)
+        $ft = strtolower($resource->file_type ?? '');
+        abort_if($ft !== 'application/pdf' && !str_starts_with($ft, 'image/'), 404);
 
         return view('documents.preview', compact('resource'));
     }
@@ -55,6 +56,9 @@ class DocumentController extends Controller
     public function download(Resource $resource)
     {
         abort_if(!$resource->isPublished(), 404);
+        if ($resource->isLocked()) {
+            return back()->with('message', 'This document is currently locked and cannot be downloaded.')->with('status', 'error');
+        }
         abort_if(!Storage::exists($resource->file_path), 404);
 
         // Log download
@@ -70,6 +74,20 @@ class DocumentController extends Controller
         ]);
 
         return Storage::download($resource->file_path, $resource->original_filename);
+    }
+
+    public function stream(Resource $resource)
+    {
+        abort_if(!$resource->isPublished(), 404);
+        abort_if($resource->isLocked(), 403);
+        $ft = strtolower($resource->file_type ?? '');
+        abort_if($ft !== 'application/pdf' && !str_starts_with($ft, 'image/'), 404);
+        abort_if(!Storage::exists($resource->file_path), 404);
+
+        return response()->file(
+            Storage::disk('local')->path($resource->file_path),
+            ['Content-Type' => $resource->file_type]
+        );
     }
 
     public function share(Request $request, Resource $resource)

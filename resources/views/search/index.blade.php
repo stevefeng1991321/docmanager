@@ -2,9 +2,9 @@
 @section('title', $query ? "Search: {$query}" : 'Search')
 
 @section('content')
-<div class="flex gap-6">
+<div class="flex gap-6" x-data="{ filtersOpen: false }">
 
-    {{-- Filter sidebar --}}
+    {{-- Filter sidebar (desktop lg+) --}}
     <aside class="hidden lg:block w-52 flex-shrink-0">
         <form method="GET" action="{{ route('search') }}" id="filter-form" class="space-y-5">
             <input type="hidden" name="q" value="{{ $query }}">
@@ -64,6 +64,20 @@
 
     {{-- Main content --}}
     <div class="flex-1 min-w-0 space-y-4">
+
+        {{-- Mobile: filter toggle button (< lg) --}}
+        <div class="lg:hidden">
+            <button @click="filtersOpen = true"
+                    class="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                </svg>
+                <span>Filters</span>
+                @if($type || $categoryId || $dateFrom || $dateTo)
+                <span class="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium">Active</span>
+                @endif
+            </button>
+        </div>
 
         {{-- Search form --}}
         <form method="GET" action="{{ route('search') }}" class="space-y-3">
@@ -249,6 +263,94 @@
         @endif
         @endif
 
+    </div>
+</div>
+
+{{-- Mobile filter drawer --}}
+<div x-show="filtersOpen" x-cloak @click="filtersOpen = false"
+     class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+</div>
+
+<div x-show="filtersOpen" x-cloak
+     class="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl flex flex-col lg:hidden"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="-translate-x-full"
+     x-transition:enter-end="translate-x-0"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="translate-x-0"
+     x-transition:leave-end="-translate-x-full"
+     @click.stop>
+
+    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200 flex-shrink-0">
+        <h2 class="font-semibold text-gray-800 text-sm">Filters</h2>
+        <button @click="filtersOpen = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4">
+        <form method="GET" action="{{ route('search') }}" class="space-y-5">
+            <input type="hidden" name="q" value="{{ $query }}">
+            <input type="hidden" name="mode" value="{{ $mode }}">
+
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">File Type</h3>
+                @foreach (['pdf','docx','xlsx','pptx','txt','png','jpg'] as $ft)
+                <label class="flex items-center gap-2 py-1 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
+                    <input type="radio" name="type" value="{{ $ft }}" {{ $type === $ft ? 'checked' : '' }}
+                           onchange="this.form.submit()"
+                           class="text-blue-600">
+                    {{ strtoupper($ft) }}
+                </label>
+                @endforeach
+                @if($type)
+                <a href="{{ route('search', array_merge(request()->query(), ['type' => null])) }}"
+                   class="text-xs text-blue-500 hover:underline mt-1 block">Clear type</a>
+                @endif
+            </div>
+
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Category</h3>
+                <select name="category_id" onchange="this.form.submit()"
+                        class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
+                    <option value="">All categories</option>
+                    @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ $categoryId == $cat->id ? 'selected' : '' }}>
+                        {{ $cat->name }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Upload Date</h3>
+                <div class="space-y-1.5">
+                    <input type="date" name="date_from" value="{{ $dateFrom }}"
+                           onchange="this.form.submit()"
+                           class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                           placeholder="From">
+                    <input type="date" name="date_to" value="{{ $dateTo }}"
+                           onchange="this.form.submit()"
+                           class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs"
+                           placeholder="To">
+                </div>
+            </div>
+
+            @if($type || $categoryId || $dateFrom || $dateTo)
+            <a href="{{ route('search', ['q' => $query, 'mode' => $mode]) }}"
+               class="block text-center text-xs text-red-500 hover:underline border border-red-200 rounded-lg py-1.5">
+                Clear all filters
+            </a>
+            @endif
+        </form>
     </div>
 </div>
 @endsection

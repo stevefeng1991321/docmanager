@@ -10,11 +10,25 @@
 </head>
 <body class="h-full flex" x-data="{ sidebarOpen: false }">
 
+    {{-- Mobile sidebar backdrop --}}
+    <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+         class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
+
     {{-- Sidebar --}}
-    <aside class="w-64 bg-gray-900 text-gray-100 flex flex-col flex-shrink-0 hidden lg:flex">
+    <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 text-gray-100 flex flex-col
+                  transform transition-transform duration-200 ease-in-out
+                  lg:relative lg:translate-x-0 lg:z-auto lg:flex-shrink-0"
+           :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
-        <div class="h-16 flex items-center px-6 border-b border-gray-700">
+        <div class="h-16 flex items-center px-6 border-b border-gray-700 flex-shrink-0">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-bold text-white text-lg">
                 <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -46,13 +60,13 @@
             @foreach($nav as $item)
                 @if(Route::has($item['route']))
                 <a href="{{ route($item['route']) }}"
+                   @click="sidebarOpen = false"
                    class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
                           {{ request()->routeIs(str_replace('.index', '.*', $item['route'])) ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                     </svg>
                     {{ $item['label'] }}
-                    {{-- Badges --}}
                     @if($item['route'] === 'admin.users.index' && $pendingCount > 0)
                         <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ $pendingCount }}</span>
                     @endif
@@ -65,9 +79,9 @@
         </nav>
 
         {{-- Bottom user info --}}
-        <div class="border-t border-gray-700 p-4">
+        <div class="border-t border-gray-700 p-4 flex-shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold uppercase text-sm">
+                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold uppercase text-sm flex-shrink-0">
                     {{ substr(auth()->user()->name, 0, 1) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -90,18 +104,25 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {{-- Top bar --}}
-        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-            <div class="flex items-center gap-4">
-                <h1 class="text-lg font-semibold text-gray-800">@yield('title', 'Dashboard')</h1>
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                {{-- Hamburger (mobile/tablet) --}}
+                <button @click="sidebarOpen = !sidebarOpen"
+                        class="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                <h1 class="text-base sm:text-lg font-semibold text-gray-800 truncate">@yield('title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('home') }}" class="text-sm text-gray-500 hover:text-blue-600">← Client View</a>
+                <a href="{{ route('home') }}" class="text-xs sm:text-sm text-gray-500 hover:text-blue-600 whitespace-nowrap">← Client View</a>
             </div>
         </header>
 
         {{-- Flash messages --}}
         @if(session('message'))
-            <div class="mx-6 mt-4">
+            <div class="mx-4 sm:mx-6 mt-4">
                 <div class="p-4 rounded-lg text-sm
                     {{ session('status') === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200' }}">
                     {{ session('message') }}
@@ -110,7 +131,7 @@
         @endif
 
         {{-- Page content --}}
-        <main class="flex-1 overflow-y-auto p-6">
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6">
             @yield('content')
         </main>
     </div>

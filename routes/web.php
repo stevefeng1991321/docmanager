@@ -14,6 +14,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Documents
     Route::get('/documents/{resource}',         [Client\DocumentController::class, 'show'])->name('documents.show');
     Route::get('/documents/{resource}/preview', [Client\DocumentController::class, 'preview'])->name('documents.preview');
+    Route::get('/documents/{resource}/stream',  [Client\DocumentController::class, 'stream'])->name('documents.stream');
     Route::get('/documents/{resource}/download',[Client\DocumentController::class, 'download'])->name('documents.download');
     Route::post('/documents/{resource}/share',  [Client\DocumentController::class, 'share'])->name('documents.share');
 
@@ -67,8 +68,8 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::get('documents/trash',              [Admin\DocumentController::class, 'trash'])->name('documents.trash');
     Route::resource('documents', Admin\DocumentController::class)->except(['show']);
     Route::get('documents/{document}/access-log', [Admin\DocumentController::class, 'accessLog'])->name('documents.access-log');
-    Route::patch('documents/{document}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore');
-    Route::delete('documents/{document}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete');
+    Route::patch('documents/{document}/restore',[Admin\DocumentController::class, 'restore'])->name('documents.restore')->withTrashed();
+    Route::delete('documents/{document}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete')->withTrashed();
     Route::patch('documents/{document}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
     Route::patch('documents/{document}/unlock', [Admin\DocumentController::class, 'unlock'])->name('documents.unlock');
     Route::patch('documents/{document}/approve',[Admin\DocumentController::class, 'approve'])->name('documents.approve');

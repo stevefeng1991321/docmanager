@@ -56,7 +56,7 @@
         </div>
     </a>
     @empty
-    <p class="col-span-3 py-10 text-center text-gray-400 text-sm">No documents found.</p>
+    <p class="col-span-full py-10 text-center text-gray-400 text-sm">No documents found.</p>
     @endforelse
 </div>
 @else

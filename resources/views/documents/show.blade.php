@@ -9,8 +9,8 @@
 
         {{-- Header --}}
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <div class="flex items-start justify-between gap-4">
-                <div class="min-w-0">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
                     <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ $resource->title }}</h1>
                     <p class="text-sm text-gray-500 mt-1">
                         {{ $resource->category?->name ?? 'Uncategorised' }}
@@ -47,11 +47,18 @@
                     </form>
                     @endif
 
-                    {{-- Download --}}
+                    {{-- Download (blocked when locked) --}}
+                    @if($resource->isLocked())
+                    <span class="px-4 py-1.5 bg-gray-200 text-gray-400 text-xs font-semibold rounded-lg cursor-not-allowed flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        Locked
+                    </span>
+                    @else
                     <a href="{{ route('documents.download', $resource) }}"
                        class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
                         Download
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -60,8 +67,22 @@
             @endif
         </div>
 
+        {{-- Locked notice --}}
+        @if($resource->isLocked())
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex items-center gap-3">
+            <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <div class="text-sm text-yellow-800">
+                <strong>Document locked</strong> by {{ $resource->locker?->name ?? 'an admin' }}.
+                Downloading and previewing are disabled until it is unlocked.
+            </div>
+        </div>
+        @endif
+
         {{-- PDF Preview --}}
-        @if(in_array(strtolower($resource->file_type), ['pdf', 'png', 'jpg', 'jpeg']))
+        @php $ft = strtolower($resource->file_type ?? ''); @endphp
+        @if(!$resource->isLocked() && ($ft === 'application/pdf' || str_starts_with($ft, 'image/')))
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
             <a href="{{ route('documents.preview', $resource) }}" target="_blank"
                class="inline-flex items-center gap-2 px-4 py-2 border border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium rounded-lg transition">
@@ -141,7 +162,7 @@
     </div>
 
     {{-- Sidebar --}}
-    <aside class="hidden xl:block w-64 flex-shrink-0 space-y-4">
+    <aside class="hidden lg:block w-64 flex-shrink-0 space-y-4">
 
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-sm space-y-2">
             <h3 class="font-semibold text-gray-700 mb-2">Details</h3>

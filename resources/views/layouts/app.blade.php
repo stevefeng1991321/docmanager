@@ -11,12 +11,16 @@
 <body class="h-full flex flex-col">
 
     {{-- Navbar --}}
-    <nav class="bg-white border-b border-gray-200 shadow-sm">
+    @php
+        $navAvatar = auth()->user()->preferences?->avatar;
+        $navUnread = auth()->user()->notifications()->where('is_read', false)->count();
+    @endphp
+    <nav class="bg-white border-b border-gray-200 shadow-sm" x-data="{ mobileOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
                 {{-- Brand --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-2 text-blue-700 font-bold text-lg">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 text-blue-700 font-bold text-lg shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -24,7 +28,7 @@
                     {{ config('app.name') }}
                 </a>
 
-                {{-- Search bar --}}
+                {{-- Search bar (desktop md+) --}}
                 <form action="{{ route('search') }}" method="GET" class="hidden md:flex flex-1 max-w-xl mx-6">
                     <div class="relative w-full">
                         <input type="text" name="q" value="{{ request('q') }}"
@@ -39,7 +43,7 @@
                 </form>
 
                 {{-- Right nav --}}
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
 
                     {{-- Notifications --}}
                     <a href="{{ route('notifications.index') }}" class="relative text-gray-500 hover:text-blue-600">
@@ -47,18 +51,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        @php $unread = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
-                        @if($unread > 0)
+                        @if($navUnread > 0)
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                {{ $unread > 9 ? '9+' : $unread }}
+                                {{ $navUnread > 9 ? '9+' : $navUnread }}
                             </span>
                         @endif
                     </a>
 
-                    {{-- User menu --}}
-                    <div x-data="{ open: false }" class="relative">
+                    {{-- User dropdown (desktop md+) --}}
+                    <div x-data="{ open: false }" class="relative hidden md:block">
                         <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 font-medium">
-                            @php $navAvatar = auth()->user()->preferences?->avatar; @endphp
                             @if($navAvatar)
                                 <img src="{{ asset('storage/' . $navAvatar) }}" alt="Avatar"
                                      class="w-8 h-8 rounded-full object-cover border border-gray-200">
@@ -67,7 +69,7 @@
                                     {{ substr(auth()->user()->name, 0, 1) }}
                                 </div>
                             @endif
-                            <span class="hidden md:block">{{ auth()->user()->name }}</span>
+                            <span>{{ auth()->user()->name }}</span>
                         </button>
                         <div x-show="open" @click.outside="open = false" x-cloak
                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
@@ -87,6 +89,80 @@
                             </form>
                         </div>
                     </div>
+
+                    {{-- Hamburger (mobile only) --}}
+                    <button @click="mobileOpen = !mobileOpen"
+                            class="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                            :aria-expanded="mobileOpen">
+                        <svg x-show="!mobileOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg x-show="mobileOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Mobile menu --}}
+        <div x-show="mobileOpen" x-cloak
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="md:hidden border-t border-gray-100 bg-white shadow-lg">
+            <div class="px-4 pt-3 pb-4 space-y-3">
+
+                {{-- Mobile search --}}
+                <form action="{{ route('search') }}" method="GET">
+                    <div class="relative">
+                        <input type="text" name="q" value="{{ request('q') }}"
+                               placeholder="Search documents…"
+                               class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+                        <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                {{-- User info strip --}}
+                <div class="flex items-center gap-3 px-1 py-2 border-b border-gray-100">
+                    @if($navAvatar)
+                        <img src="{{ asset('storage/' . $navAvatar) }}" alt="Avatar"
+                             class="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0">
+                    @else
+                        <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold uppercase flex-shrink-0">
+                            {{ substr(auth()->user()->name, 0, 1) }}
+                        </div>
+                    @endif
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
+                    </div>
+                </div>
+
+                {{-- Nav links --}}
+                <nav class="space-y-0.5">
+                    <a href="{{ route('home') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Browse Documents</a>
+                    <a href="{{ route('favorites.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Favorites</a>
+                    <a href="{{ route('reading-lists.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Reading Lists</a>
+                    <a href="{{ route('history.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Recently Viewed</a>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>
+                    @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-indigo-600 font-medium hover:bg-indigo-50 transition-colors">Admin Panel</a>
+                    @endif
+                </nav>
+
+                <div class="border-t border-gray-100 pt-2">
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
+                    </form>
                 </div>
             </div>
         </div>
