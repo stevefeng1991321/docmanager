@@ -54,6 +54,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/science-tech',        [Client\ScienceTechController::class, 'index'])->name('science-tech.index');
     Route::get('/science-tech/{trend}', [Client\ScienceTechController::class, 'show'])->name('science-tech.show');
 
+    // Basic Knowledge
+    Route::get('/basic-knowledge',         [Client\BasicKnowledgeController::class, 'index'])->name('basic-knowledge.index');
+    Route::get('/basic-knowledge/{trend}', [Client\BasicKnowledgeController::class, 'show'])->name('basic-knowledge.show');
+
     Route::get('/profile',                   [Client\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',                 [Client\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile',                [Client\ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -112,6 +116,15 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::put('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'update'])->name('science-tech.update');
     Route::delete('science-tech/{trend}',           [Admin\ScienceTechTrendController::class, 'destroy'])->name('science-tech.destroy');
     Route::get('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'show'])->name('science-tech.show');
+
+    // Basic Knowledge
+    Route::get('basic-knowledge',                      [Admin\BasicKnowledgeTrendController::class, 'index'])->name('basic-knowledge.index');
+    Route::get('basic-knowledge/create',               [Admin\BasicKnowledgeTrendController::class, 'create'])->name('basic-knowledge.create');
+    Route::post('basic-knowledge',                     [Admin\BasicKnowledgeTrendController::class, 'store'])->name('basic-knowledge.store');
+    Route::get('basic-knowledge/{trend}/edit',         [Admin\BasicKnowledgeTrendController::class, 'edit'])->name('basic-knowledge.edit');
+    Route::put('basic-knowledge/{trend}',              [Admin\BasicKnowledgeTrendController::class, 'update'])->name('basic-knowledge.update');
+    Route::delete('basic-knowledge/{trend}',           [Admin\BasicKnowledgeTrendController::class, 'destroy'])->name('basic-knowledge.destroy');
+    Route::get('basic-knowledge/{trend}',              [Admin\BasicKnowledgeTrendController::class, 'show'])->name('basic-knowledge.show');
 
     // Problems & Reference Solutions — static routes before {problem} wildcard
     Route::get('problems',                    [Admin\ProblemController::class, 'index'])->name('problems.index');

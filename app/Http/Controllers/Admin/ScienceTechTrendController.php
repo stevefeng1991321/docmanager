@@ -8,13 +8,42 @@ use Illuminate\Http\Request;
 
 class ScienceTechTrendController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $byYear = ScienceTechTrend::orderByDesc('year')->orderBy('id')
-            ->get()
-            ->groupBy('year');
+        $q      = trim($request->get('q', ''));
+        $status = $request->get('status', '');
+        $year   = $request->get('year', '');
+        $sort   = $request->get('sort', 'year_desc');
 
-        return view('admin.science-tech.index', compact('byYear'));
+        $query = ScienceTechTrend::query();
+
+        if ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('title',   'like', "%{$q}%")
+                    ->orWhere('summary', 'like', "%{$q}%");
+            });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($year) {
+            $query->where('year', $year);
+        }
+
+        match ($sort) {
+            'year_asc'    => $query->orderBy('year')->orderBy('id'),
+            'title_asc'   => $query->orderBy('title'),
+            'title_desc'  => $query->orderByDesc('title'),
+            'newest'      => $query->orderByDesc('created_at'),
+            default       => $query->orderByDesc('year')->orderBy('id'),
+        };
+
+        $trends = $query->paginate(20)->withQueryString();
+        $years  = ScienceTechTrend::distinct()->orderByDesc('year')->pluck('year');
+
+        return view('admin.science-tech.index', compact('trends', 'q', 'status', 'year', 'sort', 'years'));
     }
 
     public function create()

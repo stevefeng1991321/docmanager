@@ -1,19 +1,21 @@
 @extends('layouts.admin')
-@section('title', 'Science & Technology')
+@section('title', 'Basic Knowledge')
 
 @section('content')
 <div class="space-y-5">
 
     {{-- Top bar: filters + new button --}}
     <div class="flex items-center justify-between flex-wrap gap-3">
-        <form method="GET" action="{{ route('admin.science-tech.index') }}" class="flex flex-wrap gap-2">
+        <form method="GET" action="{{ route('admin.basic-knowledge.index') }}" class="flex flex-wrap gap-2">
             <input type="text" name="q" value="{{ $q }}" placeholder="Search title…"
                    class="w-52 border border-gray-300 rounded-lg px-3 py-2 text-sm">
 
-            <select name="year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All Years</option>
-                @foreach($years as $y)
-                    <option value="{{ $y }}" {{ (string)$year === (string)$y ? 'selected' : '' }}>{{ $y }}</option>
+            <select name="category_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">All Categories</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ (string)$category_id === (string)$cat->id ? 'selected' : '' }}>
+                        {{ $cat->name }}
+                    </option>
                 @endforeach
             </select>
 
@@ -25,11 +27,10 @@
             </select>
 
             <select name="sort" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="year_desc"  {{ $sort === 'year_desc'  ? 'selected' : '' }}>Newest Year First</option>
-                <option value="year_asc"   {{ $sort === 'year_asc'   ? 'selected' : '' }}>Oldest Year First</option>
+                <option value="newest"     {{ $sort === 'newest'     ? 'selected' : '' }}>Recently Added</option>
+                <option value="oldest"     {{ $sort === 'oldest'     ? 'selected' : '' }}>Oldest First</option>
                 <option value="title_asc"  {{ $sort === 'title_asc'  ? 'selected' : '' }}>Title A–Z</option>
                 <option value="title_desc" {{ $sort === 'title_desc' ? 'selected' : '' }}>Title Z–A</option>
-                <option value="newest"     {{ $sort === 'newest'     ? 'selected' : '' }}>Recently Added</option>
             </select>
 
             <button type="submit"
@@ -37,15 +38,15 @@
                 Filter
             </button>
 
-            @if($q || $status || $year || $sort !== 'year_desc')
-                <a href="{{ route('admin.science-tech.index') }}"
+            @if($q || $status || $category_id || $sort !== 'newest')
+                <a href="{{ route('admin.basic-knowledge.index') }}"
                    class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
             @endif
         </form>
 
-        <a href="{{ route('admin.science-tech.create') }}"
+        <a href="{{ route('admin.basic-knowledge.create') }}"
            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            + New Trend
+            + New Entry
         </a>
     </div>
 
@@ -54,10 +55,10 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
             <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
-            <p class="text-gray-400 text-sm">No trends match your filters.</p>
-            <a href="{{ route('admin.science-tech.index') }}" class="mt-3 inline-block text-sm text-blue-600 hover:underline">Clear filters</a>
+            <p class="text-gray-400 text-sm">No entries match your filters.</p>
+            <a href="{{ route('admin.basic-knowledge.index') }}" class="mt-3 inline-block text-sm text-blue-600 hover:underline">Clear filters</a>
         </div>
     @else
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -66,7 +67,7 @@
                     <thead>
                         <tr class="border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wide">
                             <th class="px-5 py-3 text-left font-medium">Title</th>
-                            <th class="px-4 py-3 text-left font-medium w-20">Year</th>
+                            <th class="px-4 py-3 text-left font-medium w-40">Category</th>
                             <th class="px-4 py-3 text-left font-medium w-28">Status</th>
                             <th class="px-4 py-3 text-left font-medium w-28">Added</th>
                             <th class="px-4 py-3 text-right font-medium w-36">Actions</th>
@@ -76,7 +77,7 @@
                         @foreach($trends as $trend)
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-5 py-3">
-                                <a href="{{ route('admin.science-tech.show', $trend) }}"
+                                <a href="{{ route('admin.basic-knowledge.show', $trend) }}"
                                    class="font-medium text-gray-800 hover:text-blue-600 transition line-clamp-1">
                                     {{ $trend->title }}
                                 </a>
@@ -85,8 +86,8 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
-                                    {{ $trend->year }}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
+                                    {{ $trend->category->name }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
@@ -106,12 +107,12 @@
                             </td>
                             <td class="px-4 py-3 text-right text-xs">
                                 <div class="flex items-center justify-end gap-3">
-                                    <a href="{{ route('admin.science-tech.show', $trend) }}"
+                                    <a href="{{ route('admin.basic-knowledge.show', $trend) }}"
                                        class="text-blue-600 hover:underline">View</a>
-                                    <a href="{{ route('admin.science-tech.edit', $trend) }}"
+                                    <a href="{{ route('admin.basic-knowledge.edit', $trend) }}"
                                        class="text-blue-600 hover:underline">Edit</a>
-                                    <form method="POST" action="{{ route('admin.science-tech.destroy', $trend) }}"
-                                          onsubmit="return confirm('Delete this trend?')">
+                                    <form method="POST" action="{{ route('admin.basic-knowledge.destroy', $trend) }}"
+                                          onsubmit="return confirm('Delete this entry?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="text-red-500 hover:underline">Delete</button>
                                     </form>
