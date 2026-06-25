@@ -16,7 +16,7 @@ class JavaScriptSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($this->problems()) . ' JavaScript problems (1–30).');
+        $this->command->info('Seeded ' . count($this->problems()) . ' JavaScript problems (1–31).');
     }
 
     private function problems(): array
@@ -734,6 +734,186 @@ console.log(flattenDeep([1, [2, [3, [4]]]], 2));
 
 console.log(flattenDeep([[1, 2], [3, [4, 5]]]));
 // [1, 2, 3, 4, 5]
+JS,
+            ],
+            [
+                'title'       => 'Expression Calculator (Tokenizer + Shunting-Yard + Evaluator)',
+                'difficulty'  => 'hard',
+                'description' => 'Build a scientific, expression-based calculator that evaluates a math string like "sqrt(16) + 2 * pi" or "2 ^ 3 ^ 2". Architecture: (1) a tokenizer/lexer that turns the raw string into tokens, (2) a shunting-yard parser that converts infix tokens to postfix (RPN) while respecting operator precedence, associativity (right-assoc for ^), unary minus, parentheses, and function calls, (3) a stack-based evaluator that walks the RPN and computes the result. Operators and functions are defined in lookup tables so new ones can be added without touching the parser.',
+                'solution_code' => <<<'JS'
+class CalculatorError extends Error {}
+
+// ─── Extensible lookup tables (add new ops/functions here, nowhere else) ───
+
+const OPERATORS = {
+    "+": { precedence: 2, assoc: "left",  fn: (a, b) => a + b },
+    "-": { precedence: 2, assoc: "left",  fn: (a, b) => a - b },
+    "*": { precedence: 3, assoc: "left",  fn: (a, b) => a * b },
+    "/": { precedence: 3, assoc: "left",  fn: (a, b) => a / b },
+    "%": { precedence: 3, assoc: "left",  fn: (a, b) => a % b },
+    "^": { precedence: 4, assoc: "right", fn: (a, b) => Math.pow(a, b) },
+};
+
+const FUNCTIONS = {
+    sin:  { arity: 1, fn: Math.sin },
+    cos:  { arity: 1, fn: Math.cos },
+    sqrt: { arity: 1, fn: Math.sqrt },
+    abs:  { arity: 1, fn: Math.abs },
+    ln:   { arity: 1, fn: Math.log },
+    log:  { arity: 1, fn: Math.log10 },
+    pow:  { arity: 2, fn: Math.pow },
+    max:  { arity: 2, fn: Math.max },
+    min:  { arity: 2, fn: Math.min },
+};
+
+const CONSTANTS = { pi: Math.PI, e: Math.E };
+
+const UNARY = { precedence: 5, assoc: "right" };
+
+// ─── 1. Lexer: string -> tokens ───────────────────────────────────────────
+
+function tokenize(expr) {
+    const tokens = [];
+    let i = 0;
+    while (i < expr.length) {
+        const ch = expr[i];
+        if (/\s/.test(ch)) { i++; continue; }
+
+        if (/[0-9.]/.test(ch)) {
+            let num = "";
+            while (i < expr.length && /[0-9.]/.test(expr[i])) num += expr[i++];
+            tokens.push({ type: "number", value: parseFloat(num) });
+            continue;
+        }
+        if (/[a-zA-Z]/.test(ch)) {
+            let name = "";
+            while (i < expr.length && /[a-zA-Z]/.test(expr[i])) name += expr[i++];
+            tokens.push({ type: "identifier", value: name });
+            continue;
+        }
+        if ("+-*/^%".includes(ch)) { tokens.push({ type: "operator", value: ch }); i++; continue; }
+        if (ch === "(") { tokens.push({ type: "lparen" }); i++; continue; }
+        if (ch === ")") { tokens.push({ type: "rparen" }); i++; continue; }
+        if (ch === ",") { tokens.push({ type: "comma" }); i++; continue; }
+
+        throw new CalculatorError(`Unexpected character: ${ch}`);
+    }
+    return tokens;
+}
+
+// ─── 2. Disambiguate unary +/- from binary +/- ────────────────────────────
+
+function markUnary(tokens) {
+    return tokens.map((tok, idx) => {
+        if (tok.type === "operator" && (tok.value === "-" || tok.value === "+")) {
+            const prev = tokens[idx - 1];
+            const isUnary = !prev || ["operator", "lparen", "comma"].includes(prev.type);
+            if (isUnary) return { ...tok, unary: true };
+        }
+        return tok;
+    });
+}
+
+function opInfo(tok) {
+    return tok.unary ? UNARY : OPERATORS[tok.value];
+}
+
+// ─── 3. Shunting-yard: infix tokens -> postfix (RPN) ──────────────────────
+
+function toRPN(tokens) {
+    const output = [];
+    const stack = [];
+
+    tokens.forEach((tok, idx) => {
+        if (tok.type === "number") {
+            output.push(tok);
+        } else if (tok.type === "identifier") {
+            const isCall = tokens[idx + 1] && tokens[idx + 1].type === "lparen";
+            if (isCall) {
+                if (!(tok.value in FUNCTIONS)) throw new CalculatorError(`Unknown function: ${tok.value}`);
+                stack.push({ type: "function", value: tok.value });
+            } else if (tok.value in CONSTANTS) {
+                output.push({ type: "number", value: CONSTANTS[tok.value] });
+            } else {
+                throw new CalculatorError(`Unknown identifier: ${tok.value}`);
+            }
+        } else if (tok.type === "operator") {
+            const o1 = opInfo(tok);
+            while (
+                stack.length &&
+                stack[stack.length - 1].type === "operator" &&
+                (opInfo(stack[stack.length - 1]).precedence > o1.precedence ||
+                 (opInfo(stack[stack.length - 1]).precedence === o1.precedence && o1.assoc === "left"))
+            ) {
+                output.push(stack.pop());
+            }
+            stack.push(tok);
+        } else if (tok.type === "lparen") {
+            stack.push(tok);
+        } else if (tok.type === "rparen") {
+            while (stack.length && stack[stack.length - 1].type !== "lparen") {
+                output.push(stack.pop());
+            }
+            if (!stack.length) throw new CalculatorError("Mismatched parentheses");
+            stack.pop(); // discard "("
+            if (stack.length && stack[stack.length - 1].type === "function") {
+                output.push(stack.pop());
+            }
+        } else if (tok.type === "comma") {
+            while (stack.length && stack[stack.length - 1].type !== "lparen") {
+                output.push(stack.pop());
+            }
+        }
+    });
+
+    while (stack.length) {
+        if (stack[stack.length - 1].type === "lparen") throw new CalculatorError("Mismatched parentheses");
+        output.push(stack.pop());
+    }
+    return output;
+}
+
+// ─── 4. Stack-based evaluator: postfix -> number ──────────────────────────
+
+function evalRPN(rpn) {
+    const stack = [];
+    for (const tok of rpn) {
+        if (tok.type === "number") {
+            stack.push(tok.value);
+        } else if (tok.type === "operator") {
+            if (tok.unary) {
+                const a = stack.pop();
+                stack.push(tok.value === "-" ? -a : a);
+            } else {
+                const b = stack.pop(), a = stack.pop();
+                stack.push(OPERATORS[tok.value].fn(a, b));
+            }
+        } else if (tok.type === "function") {
+            const { arity, fn } = FUNCTIONS[tok.value];
+            const args = [];
+            for (let k = 0; k < arity; k++) args.unshift(stack.pop());
+            stack.push(fn(...args));
+        }
+    }
+    return stack.pop();
+}
+
+// ─── 5. Public entry point ─────────────────────────────────────────────────
+
+function calculate(expression) {
+    const tokens = markUnary(tokenize(expression));
+    return evalRPN(toRPN(tokens));
+}
+
+console.log(calculate("3 + 4 * 2"));          // 11   (precedence)
+console.log(calculate("(3 + 4) * 2"));        // 14   (parentheses)
+console.log(calculate("2 ^ 3 ^ 2"));          // 512  (right-assoc: 2^(3^2))
+console.log(calculate("-5 + 3"));             // -2   (unary minus)
+console.log(calculate("sqrt(16) + 2"));       // 6    (function call)
+console.log(calculate("sin(0) + cos(0)"));    // 1    (trig)
+console.log(calculate("2 * pi"));             // 6.283185307179586 (constant)
+console.log(calculate("10 % 3"));             // 1    (modulo)
+console.log(calculate("pow(2, 3) + max(4, 9)")); // 17 (multi-arg functions)
 JS,
             ],
         ];
