@@ -108,12 +108,15 @@ class AccountRequestController extends Controller
 
         $accountRequest->update(['status' => 'rejected', 'admin_note' => $request->admin_note]);
 
-        if ($accountRequest->user) {
-            $message = $accountRequest->type === 'username_change'
-                ? 'Your username change request was not approved.'
-                : 'Your account deletion request was not approved.';
+        $user = $accountRequest->user;
+        if ($user) {
+            $message = match($accountRequest->type) {
+                'username_change'  => 'Your username change request was not approved.',
+                'password_reset'   => 'Your password reset request was not approved.',
+                default            => 'Your account deletion request was not approved.',
+            };
 
-            Notification::send($accountRequest->user->id, 'account_activated',
+            Notification::send($user->id, 'account_activated',
                 'Request Not Approved',
                 $request->admin_note ?? $message);
         }

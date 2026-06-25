@@ -21,11 +21,18 @@ class SearchIndexController extends Controller
             ->take(20)
             ->get();
 
+        $zeroResultQueries = SearchLog::selectRaw('query, COUNT(*) as count')
+            ->where('results_count', 0)
+            ->groupBy('query')
+            ->orderByDesc('count')
+            ->take(20)
+            ->get();
+
         $tfidf         = app(TfidfService::class);
         $tfidfReady    = $tfidf->hasIndex();
         $tfidfIndexed  = ResourceEmbedding::where('model', 'tfidf-v1')->count();
 
-        return view('admin.search.index', compact('topQueries', 'tfidfReady', 'tfidfIndexed'));
+        return view('admin.search.index', compact('topQueries', 'zeroResultQueries', 'tfidfReady', 'tfidfIndexed'));
     }
 
     public function reindex()
