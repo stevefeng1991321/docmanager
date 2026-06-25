@@ -3,7 +3,15 @@
 
 @section('content')
 <div class="space-y-4">
-    <h1 class="text-xl font-bold text-gray-800">Notifications</h1>
+    <div class="flex items-center justify-between gap-4">
+        <h1 class="text-xl font-bold text-gray-800">Notifications</h1>
+        @if($notifications->contains('is_read', false))
+        <form method="POST" action="{{ route('notifications.read-all') }}">
+            @csrf @method('PATCH')
+            <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">Mark all as read</button>
+        </form>
+        @endif
+    </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
         @forelse($notifications as $notif)
         <div class="flex items-start gap-4 px-5 py-4 {{ $notif->is_read ? '' : 'bg-blue-50/40' }}">

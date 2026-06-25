@@ -24,6 +24,16 @@ class NotificationController extends Controller
         return back();
     }
 
+    public function markAllRead()
+    {
+        auth()->user()
+            ->notifications()
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return back()->with('message', 'All notifications marked as read.');
+    }
+
     public function destroy(Notification $notification)
     {
         abort_if($notification->user_id !== auth()->id(), 403);

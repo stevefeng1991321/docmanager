@@ -45,9 +45,10 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::post('/ratings/{resource}',  [Client\RatingController::class, 'store'])->name('ratings.store');
 
-    Route::get('/notifications',        [Client\NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{notification}/read', [Client\NotificationController::class, 'markRead'])->name('notifications.read');
-    Route::delete('/notifications/{notification}',     [Client\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::get('/notifications',                      [Client\NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/read-all',           [Client\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/read',[Client\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::delete('/notifications/{notification}',    [Client\NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::get('/profile',                   [Client\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',                 [Client\ProfileController::class, 'update'])->name('profile.update');
@@ -73,8 +74,10 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::delete('documents/{document}/force', [Admin\DocumentController::class, 'forceDelete'])->name('documents.force-delete')->withTrashed();
     Route::patch('documents/{document}/lock',   [Admin\DocumentController::class, 'lock'])->name('documents.lock');
     Route::patch('documents/{document}/unlock', [Admin\DocumentController::class, 'unlock'])->name('documents.unlock');
-    Route::patch('documents/{document}/approve',[Admin\DocumentController::class, 'approve'])->name('documents.approve');
-    Route::patch('documents/{document}/reject', [Admin\DocumentController::class, 'reject'])->name('documents.reject');
+    Route::patch('documents/{document}/approve',  [Admin\DocumentController::class, 'approve'])->name('documents.approve');
+    Route::patch('documents/{document}/reject',   [Admin\DocumentController::class, 'reject'])->name('documents.reject');
+    Route::patch('documents/{document}/archive',  [Admin\DocumentController::class, 'archive'])->name('documents.archive');
+    Route::patch('documents/{document}/unarchive',[Admin\DocumentController::class, 'unarchive'])->name('documents.unarchive');
 
     // Bulk actions
     Route::post('documents/bulk/approve',          [Admin\DocumentController::class, 'bulkApprove'])->name('documents.bulk-approve');
@@ -97,9 +100,14 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::resource('tags', Admin\TagController::class);
     Route::post('tags/merge',  [Admin\TagController::class, 'merge'])->name('tags.merge');
 
-    // Problems & Reference Solutions
-    Route::get('problems',           [Admin\ProblemController::class, 'index'])->name('problems.index');
-    Route::get('problems/{problem}', [Admin\ProblemController::class, 'show'])->name('problems.show');
+    // Problems & Reference Solutions — static routes before {problem} wildcard
+    Route::get('problems',                    [Admin\ProblemController::class, 'index'])->name('problems.index');
+    Route::get('problems/create',             [Admin\ProblemController::class, 'create'])->name('problems.create');
+    Route::post('problems',                   [Admin\ProblemController::class, 'store'])->name('problems.store');
+    Route::get('problems/{problem}/edit',     [Admin\ProblemController::class, 'edit'])->name('problems.edit');
+    Route::put('problems/{problem}',          [Admin\ProblemController::class, 'update'])->name('problems.update');
+    Route::delete('problems/{problem}',       [Admin\ProblemController::class, 'destroy'])->name('problems.destroy');
+    Route::get('problems/{problem}',          [Admin\ProblemController::class, 'show'])->name('problems.show');
 
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');

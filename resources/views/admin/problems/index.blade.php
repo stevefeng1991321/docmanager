@@ -11,6 +11,13 @@
     {{-- ── Left Panel: Problem List ─────────────────────────────────────────── --}}
     <div class="w-72 xl:w-80 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
 
+        {{-- Panel header --}}
+        <div class="px-3 py-2.5 border-b border-gray-100 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-700">Problems</span>
+            <a href="{{ route('admin.problems.create') }}"
+               class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition">+ New</a>
+        </div>
+
         {{-- Search + Filter --}}
         <div class="p-3 border-b border-gray-100 space-y-2">
             <input
@@ -116,7 +123,7 @@
                 {{-- Header --}}
                 <div class="px-5 py-4 bg-white border-b border-gray-200 flex-shrink-0">
                     <div class="flex items-start justify-between gap-3">
-                        <div>
+                        <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs text-gray-400 font-mono" x-text="'#' + detail.id"></span>
                                 <span
@@ -140,6 +147,16 @@
                                     x-text="detail.category"></span>
                             </div>
                             <h2 class="text-lg font-bold text-gray-900" x-text="detail.title"></h2>
+                        </div>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <a :href="`{{ url('admin/problems') }}/${detail.id}/edit`"
+                               class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                Edit
+                            </a>
+                            <button @click="confirmDelete()"
+                                    class="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">
+                                Delete
+                            </button>
                         </div>
                     </div>
                     <p class="mt-2 text-sm text-gray-600 leading-relaxed" x-text="detail.description"></p>
@@ -364,6 +381,21 @@ function problemExplorer() {
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2000);
             });
+        },
+
+        confirmDelete() {
+            if (!this.detail || !confirm(`Delete "${this.detail.title}"?`)) return;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/problems/${this.detail.id}`;
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden'; csrf.name = '_token';
+            csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+            const method = document.createElement('input');
+            method.type = 'hidden'; method.name = '_method'; method.value = 'DELETE';
+            form.appendChild(csrf); form.appendChild(method);
+            document.body.appendChild(form);
+            form.submit();
         },
 
         init() {

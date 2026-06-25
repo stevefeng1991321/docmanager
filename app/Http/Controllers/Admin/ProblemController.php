@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Problem;
+use Illuminate\Http\Request;
 
 class ProblemController extends Controller
 {
@@ -26,5 +27,56 @@ class ProblemController extends Controller
             'category'      => $problem->category,
             'solution_code' => $problem->solution_code,
         ]);
+    }
+
+    public function create()
+    {
+        return view('admin.problems.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'order_index'   => ['required', 'integer', 'min:1'],
+            'title'         => ['required', 'string', 'max:255'],
+            'description'   => ['required', 'string'],
+            'difficulty'    => ['required', 'in:easy,medium,hard'],
+            'category'      => ['required', 'string', 'max:100'],
+            'solution_code' => ['nullable', 'string'],
+        ]);
+
+        Problem::create($validated);
+
+        return redirect()->route('admin.problems.index')
+            ->with('message', 'Problem created.');
+    }
+
+    public function edit(Problem $problem)
+    {
+        return view('admin.problems.edit', compact('problem'));
+    }
+
+    public function update(Request $request, Problem $problem)
+    {
+        $validated = $request->validate([
+            'order_index'   => ['required', 'integer', 'min:1'],
+            'title'         => ['required', 'string', 'max:255'],
+            'description'   => ['required', 'string'],
+            'difficulty'    => ['required', 'in:easy,medium,hard'],
+            'category'      => ['required', 'string', 'max:100'],
+            'solution_code' => ['nullable', 'string'],
+        ]);
+
+        $problem->update($validated);
+
+        return redirect()->route('admin.problems.index')
+            ->with('message', 'Problem updated.');
+    }
+
+    public function destroy(Problem $problem)
+    {
+        $problem->delete();
+        return redirect()->route('admin.problems.index')
+            ->with('message', 'Problem deleted.');
     }
 }

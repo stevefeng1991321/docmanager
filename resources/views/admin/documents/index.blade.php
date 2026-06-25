@@ -110,7 +110,7 @@
             <tbody class="divide-y divide-gray-50">
                 @forelse($documents as $doc)
                     @php
-                        $badge = ['draft'=>'bg-gray-100 text-gray-600','pending_review'=>'bg-yellow-100 text-yellow-700','published'=>'bg-green-100 text-green-700','rejected'=>'bg-red-100 text-red-600'];
+                        $badge = ['draft'=>'bg-gray-100 text-gray-600','pending_review'=>'bg-yellow-100 text-yellow-700','published'=>'bg-green-100 text-green-700','rejected'=>'bg-red-100 text-red-600','archived'=>'bg-slate-100 text-slate-600'];
                     @endphp
                     <tr class="hover:bg-gray-50" :class="selected.includes({{ $doc->id }}) ? 'bg-blue-50' : ''">
                         <td class="px-4 py-3">
@@ -139,6 +139,17 @@
                                     <form action="{{ route('admin.documents.approve', $doc) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
                                         <button class="text-green-600 hover:underline text-xs">Approve</button>
+                                    </form>
+                                @endif
+                                @if($doc->status === 'archived')
+                                    <form action="{{ route('admin.documents.unarchive', $doc) }}" method="POST" class="inline">
+                                        @csrf @method('PATCH')
+                                        <button class="text-slate-600 hover:underline text-xs">Unarchive</button>
+                                    </form>
+                                @elseif($doc->status !== 'draft')
+                                    <form action="{{ route('admin.documents.archive', $doc) }}" method="POST" class="inline">
+                                        @csrf @method('PATCH')
+                                        <button class="text-slate-500 hover:underline text-xs">Archive</button>
                                     </form>
                                 @endif
                                 @if(!$doc->locked_by)

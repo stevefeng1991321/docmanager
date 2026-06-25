@@ -331,6 +331,22 @@ class DocumentController extends Controller
             ->deleteFileAfterSend(true);
     }
 
+    public function archive(Resource $document)
+    {
+        $document->update(['status' => 'archived']);
+        AuditLog::record('document.archived', $document->id, ['title' => $document->title]);
+        $this->clearDocumentCaches();
+        return back()->with('message', 'Document archived.');
+    }
+
+    public function unarchive(Resource $document)
+    {
+        $document->update(['status' => 'draft']);
+        AuditLog::record('document.unarchived', $document->id, ['title' => $document->title]);
+        $this->clearDocumentCaches();
+        return back()->with('message', 'Document moved back to draft.');
+    }
+
     public function approve(Request $request, Resource $document)
     {
         $document->update(['status' => 'published']);
