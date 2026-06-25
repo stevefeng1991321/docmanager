@@ -74,6 +74,7 @@
                         <div x-show="open" @click.outside="open = false" x-cloak
                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                             <a href="{{ route('home') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Browse Documents</a>
+                            <a href="{{ route('science-tech.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Science &amp; Technology</a>
                             <a href="{{ route('favorites.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Favorites</a>
                             <a href="{{ route('reading-lists.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Reading Lists</a>
                             <a href="{{ route('history.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Recently Viewed</a>
@@ -149,6 +150,7 @@
                 {{-- Nav links --}}
                 <nav class="space-y-0.5">
                     <a href="{{ route('home') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Browse Documents</a>
+                    <a href="{{ route('science-tech.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Science &amp; Technology</a>
                     <a href="{{ route('favorites.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Favorites</a>
                     <a href="{{ route('reading-lists.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Reading Lists</a>
                     <a href="{{ route('history.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Recently Viewed</a>

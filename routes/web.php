@@ -50,6 +50,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::patch('/notifications/{notification}/read',[Client\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::delete('/notifications/{notification}',    [Client\NotificationController::class, 'destroy'])->name('notifications.destroy');
 
+    // Science & Technology
+    Route::get('/science-tech',        [Client\ScienceTechController::class, 'index'])->name('science-tech.index');
+    Route::get('/science-tech/{trend}', [Client\ScienceTechController::class, 'show'])->name('science-tech.show');
+
     Route::get('/profile',                   [Client\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile',                 [Client\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile',                [Client\ProfileController::class, 'destroy'])->name('profile.destroy');
