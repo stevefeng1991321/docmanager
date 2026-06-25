@@ -100,6 +100,15 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::resource('tags', Admin\TagController::class);
     Route::post('tags/merge',  [Admin\TagController::class, 'merge'])->name('tags.merge');
 
+    // Science & Technology Trends
+    Route::get('science-tech',                      [Admin\ScienceTechTrendController::class, 'index'])->name('science-tech.index');
+    Route::get('science-tech/create',               [Admin\ScienceTechTrendController::class, 'create'])->name('science-tech.create');
+    Route::post('science-tech',                     [Admin\ScienceTechTrendController::class, 'store'])->name('science-tech.store');
+    Route::get('science-tech/{trend}/edit',         [Admin\ScienceTechTrendController::class, 'edit'])->name('science-tech.edit');
+    Route::put('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'update'])->name('science-tech.update');
+    Route::delete('science-tech/{trend}',           [Admin\ScienceTechTrendController::class, 'destroy'])->name('science-tech.destroy');
+    Route::get('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'show'])->name('science-tech.show');
+
     // Problems & Reference Solutions — static routes before {problem} wildcard
     Route::get('problems',                    [Admin\ProblemController::class, 'index'])->name('problems.index');
     Route::get('problems/create',             [Admin\ProblemController::class, 'create'])->name('problems.create');
@@ -161,7 +170,14 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     });
 
     // Documentation
-    Route::get('help', fn() => response(file_get_contents(base_path('documentation/project/index.html')), 200, ['Content-Type' => 'text/html']))->name('help');
+    Route::get('help/{path?}', function ($path = 'index.html') {
+        $docRoot = realpath(base_path('documentation'));
+        $file    = realpath(base_path('documentation/' . ltrim($path, '/')));
+        if (!$file || !str_starts_with($file, $docRoot)) {
+            abort(404);
+        }
+        return response()->file($file);
+    })->where('path', '.*')->name('help');
 });
 
 require __DIR__.'/auth.php';
