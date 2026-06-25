@@ -89,7 +89,7 @@ td code{font-size:.75rem}
 .feature-block p{margin:0;font-size:.85rem;color:var(--muted)}
 
 /* Dir tree */
-.tree{font-family:'SFMono-Regular',Consolas,monospace;font-size:.82em;line-height:1.8;color:#e2e8f0;background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0}
+.tree{font-family:'SFMono-Regular',Consolas,monospace;font-size:.82em;line-height:1.8;color:#e2e8f0;background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;margin:1rem 0;white-space:pre}
 .tree .dir{color:#93c5fd;font-weight:600}
 .tree .file{color:#e2e8f0}
 .tree .comment{color:var(--dim)}
@@ -163,6 +163,7 @@ td code{font-size:.75rem}
     <a class="nav-item" onclick="show('feat-upload')">File Upload</a>
     <a class="nav-item" onclick="show('feat-sharing')">Sharing</a>
     <a class="nav-item" onclick="show('feat-notifications')">Notifications</a>
+    <a class="nav-item" onclick="show('feat-problems')">Problems</a>
     <a class="nav-item" onclick="show('feat-api')">REST API</a>
     <a class="nav-item" onclick="show('feat-schedule')">Scheduled Tasks</a>
   </nav>
@@ -192,7 +193,7 @@ td code{font-size:.75rem}
     <tr><td>Database tables</td><td>31</td></tr>
     <tr><td>Models</td><td>24</td></tr>
     <tr><td>Controllers</td><td>40</td></tr>
-    <tr><td>Blade views</td><td>54</td></tr>
+    <tr><td>Blade views</td><td>56</td></tr>
     <tr><td>Migrations</td><td>31</td></tr>
     <tr><td>Artisan commands</td><td>8 custom + 2 import/build docs</td></tr>
   </table>
@@ -292,32 +293,106 @@ php artisan search:build-tfidf</code></pre>
 <!-- ── ROOT DIR ── -->
 <div class="section" id="s-folder-root">
   <h1>Root Directory</h1>
-  <p class="lead">Top-level layout of the project.</p>
-  <div class="tree">
-<span class="dir">docmanager/</span>
-├── <span class="dir">app/</span>           <span class="comment"># Application PHP code</span>
-├── <span class="dir">bootstrap/</span>     <span class="comment"># App bootstrap and provider cache</span>
-├── <span class="dir">config/</span>        <span class="comment"># Laravel config files</span>
-├── <span class="dir">database/</span>      <span class="comment"># Migrations, seeders, factories</span>
-├── <span class="dir">documentation/</span> <span class="comment"># Offline HTML docs (offline-first reference)</span>
-├── <span class="dir">node_modules/</span>  <span class="comment"># npm packages (generated)</span>
-├── <span class="dir">public/</span>        <span class="comment"># Web root — only this folder is exposed by the web server</span>
-├── <span class="dir">resources/</span>     <span class="comment"># Blade views, CSS, JS sources</span>
-├── <span class="dir">routes/</span>        <span class="comment"># Route definitions</span>
-├── <span class="dir">storage/</span>       <span class="comment"># Uploaded files, logs, cache, TF-IDF index</span>
-├── <span class="dir">tests/</span>         <span class="comment"># PHPUnit test suites</span>
-├── <span class="dir">vendor/</span>        <span class="comment"># Composer packages (generated)</span>
-├── <span class="file">.env</span>           <span class="comment"># Local environment variables (not committed)</span>
-├── <span class="file">.env.example</span>   <span class="comment"># Template for .env</span>
-├── <span class="file">artisan</span>        <span class="comment"># Laravel CLI entry point</span>
-├── <span class="file">composer.json</span>  <span class="comment"># PHP dependencies</span>
-├── <span class="file">package.json</span>   <span class="comment"># Node dependencies</span>
-├── <span class="file">tailwind.config.js</span>
-├── <span class="file">vite.config.js</span>
-└── <span class="file">document_management_schema.sql</span> <span class="comment"># Reference DB schema</span>
+  <p class="lead">Top-level layout of the project. Only <code>public/</code> is exposed to the web — everything else stays private on the server.</p>
+
+  <div class="tree"><span class="dir">docmanager/</span>
+├── <span class="dir">app/</span>                <span class="comment"># ★ All PHP application code (models, controllers, services…)</span>
+├── <span class="dir">bootstrap/</span>          <span class="comment"># Framework startup files and provider/binding cache</span>
+├── <span class="dir">config/</span>             <span class="comment"># Laravel config files (database, mail, queue, filesystems…)</span>
+├── <span class="dir">database/</span>           <span class="comment"># Migrations (schema), seeders (starter data), factories (test data)</span>
+├── <span class="dir">documentation/</span>      <span class="comment"># Self-contained offline HTML docs — open in browser, no server needed</span>
+├── <span class="dir">node_modules/</span>       <span class="comment"># npm packages — generated, never edit manually</span>
+├── <span class="dir">public/</span>             <span class="comment"># ★ WEB ROOT — the only folder the web server exposes</span>
+├── <span class="dir">resources/</span>          <span class="comment"># ★ Blade views, CSS source, JS source (compiled by Vite)</span>
+├── <span class="dir">routes/</span>             <span class="comment"># URL → controller mappings (web.php, api.php, auth.php)</span>
+├── <span class="dir">storage/</span>            <span class="comment"># ★ Uploaded files, logs, cache, TF-IDF index (never public)</span>
+├── <span class="dir">tests/</span>              <span class="comment"># PHPUnit feature & unit tests</span>
+├── <span class="dir">vendor/</span>             <span class="comment"># Composer packages — generated, never edit manually</span>
+├── <span class="file">.env</span>                <span class="comment"># ⚠ Secrets & local config — never commit to git</span>
+├── <span class="file">.env.example</span>        <span class="comment"># Safe template for .env (committed)</span>
+├── <span class="file">artisan</span>             <span class="comment"># Laravel CLI: php artisan &lt;command&gt;</span>
+├── <span class="file">composer.json</span>       <span class="comment"># PHP dependencies</span>
+├── <span class="file">package.json</span>        <span class="comment"># Node/npm dependencies</span>
+├── <span class="file">tailwind.config.js</span>  <span class="comment"># Tailwind CSS configuration</span>
+├── <span class="file">vite.config.js</span>      <span class="comment"># Vite asset bundler configuration</span>
+└── <span class="file">document_management_schema.sql</span>  <span class="comment"># Reference DB schema snapshot</span></div>
+
+  <h2>Folder groups at a glance</h2>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem;margin:1rem 0">
+
+    <div style="background:#0f2d1a;border:1px solid #166534;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4ade80;margin-bottom:.6rem">Application Code</div>
+      <div style="font-size:.82rem;color:#d1fae5;line-height:1.7">
+        <div><code style="color:#86efac">app/</code> — Models, Controllers, Services, Jobs, Middleware</div>
+        <div><code style="color:#86efac">routes/</code> — URL routing (web, API, auth)</div>
+        <div><code style="color:#86efac">resources/</code> — Blade views, CSS &amp; JS source files</div>
+      </div>
+    </div>
+
+    <div style="background:#0c2340;border:1px solid #1e40af;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#60a5fa;margin-bottom:.6rem">Database</div>
+      <div style="font-size:.82rem;color:#bfdbfe;line-height:1.7">
+        <div><code style="color:#93c5fd">database/migrations/</code> — Table schema, run with <code style="color:#93c5fd">php artisan migrate</code></div>
+        <div><code style="color:#93c5fd">database/seeders/</code> — Starter data (admin account, categories, problems)</div>
+        <div><code style="color:#93c5fd">database/factories/</code> — Fake data factories for tests</div>
+      </div>
+    </div>
+
+    <div style="background:#1a1230;border:1px solid #6d28d9;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c084fc;margin-bottom:.6rem">Configuration</div>
+      <div style="font-size:.82rem;color:#e9d5ff;line-height:1.7">
+        <div><code style="color:#d8b4fe">config/</code> — Laravel config (DB, mail, cache, queue…)</div>
+        <div><code style="color:#d8b4fe">bootstrap/</code> — App startup &amp; binding cache</div>
+        <div><code style="color:#d8b4fe">.env</code> — Local secrets (not committed to git)</div>
+      </div>
+    </div>
+
+    <div style="background:#1c1206;border:1px solid #92400e;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fb923c;margin-bottom:.6rem">Runtime Storage <span style="font-weight:400;text-transform:none;font-size:.7rem;color:#f97316">(private)</span></div>
+      <div style="font-size:.82rem;color:#fed7aa;line-height:1.7">
+        <div><code style="color:#fdba74">storage/app/private/resources/</code> — Uploaded files (UUID-named)</div>
+        <div><code style="color:#fdba74">storage/app/private/search/</code> — TF-IDF index JSON</div>
+        <div><code style="color:#fdba74">storage/logs/</code> — Application logs</div>
+        <div style="font-size:.78rem;color:#f97316;margin-top:.3rem">⚠ Never accessible via URL — served through controller only</div>
+      </div>
+    </div>
+
+    <div style="background:#0a1f2e;border:1px solid #0e7490;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#22d3ee;margin-bottom:.6rem">Web Root <span style="font-weight:400;text-transform:none;font-size:.7rem;color:#06b6d4">(public)</span></div>
+      <div style="font-size:.82rem;color:#a5f3fc;line-height:1.7">
+        <div><code style="color:#67e8f9">public/</code> — The ONLY folder the web server exposes</div>
+        <div><code style="color:#67e8f9">public/build/</code> — Compiled CSS &amp; JS (Vite output)</div>
+        <div><code style="color:#67e8f9">public/storage/</code> — Symlink → avatars &amp; public files</div>
+        <div><code style="color:#67e8f9">public/vendor/pdfjs/</code> — PDF.js worker for browser preview</div>
+      </div>
+    </div>
+
+    <div style="background:#0f1f2a;border:1px solid #334155;border-radius:10px;padding:1rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:.6rem">Generated (do not edit)</div>
+      <div style="font-size:.82rem;color:#cbd5e1;line-height:1.7">
+        <div><code style="color:#94a3b8">vendor/</code> — PHP packages (regenerate: <code style="color:#94a3b8">composer install</code>)</div>
+        <div><code style="color:#94a3b8">node_modules/</code> — JS packages (regenerate: <code style="color:#94a3b8">npm install</code>)</div>
+        <div><code style="color:#94a3b8">bootstrap/cache/</code> — Config &amp; route cache (clear: <code style="color:#94a3b8">artisan optimize:clear</code>)</div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="info-box">The web server's document root must point to <code>public/</code>, <strong>not</strong> the project root. All uploaded files are stored in <code>storage/app/private/</code> and are never publicly accessible by URL.</div>
+  <h2>Key root-level files</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th><th>Commit to git?</th></tr>
+    <tr><td><code>.env</code></td><td>DB credentials, API keys, app URL, queue driver</td><td style="color:#f87171">No — contains secrets</td></tr>
+    <tr><td><code>.env.example</code></td><td>Template with all keys listed but no real values</td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>artisan</code></td><td>Laravel CLI entry point — <code>php artisan &lt;command&gt;</code></td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>composer.json</code></td><td>PHP dependency manifest</td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>composer.lock</code></td><td>Exact resolved versions — ensures reproducible installs</td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>package.json</code></td><td>Node dependency manifest (Vite, Tailwind, Alpine)</td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>vite.config.js</code></td><td>Asset bundler — entry points, hot reload config</td><td style="color:#4ade80">Yes</td></tr>
+    <tr><td><code>tailwind.config.js</code></td><td>Tailwind CSS — content paths for purging unused styles</td><td style="color:#4ade80">Yes</td></tr>
+  </table>
+
+  <div class="warn-box"><strong>Web server setup:</strong> Point the document root to <code>public/</code>, not the project root. Requests to <code>public/index.php</code> bootstrap the entire Laravel application. Uploaded files live in <code>storage/app/private/</code> and are only accessible through authenticated controller routes.</div>
 </div>
 
 <!-- ── APP/ ── -->
@@ -390,6 +465,8 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method get">GET</span></td><td><code>/downloads</code></td><td>DownloadHistoryController@index</td><td>downloads.index</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/reading-lists</code></td><td>ReadingListController@index</td><td>reading-lists.index</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/notifications</code></td><td>NotificationController@index</td><td>notifications.index</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/notifications/read-all</code></td><td>NotificationController@markAllRead</td><td>notifications.read-all</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/notifications/{id}/read</code></td><td>NotificationController@markRead</td><td>notifications.read</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/profile</code></td><td>ProfileController@edit</td><td>profile.edit</td></tr>
   </table>
 
@@ -404,6 +481,9 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/lock</code></td><td>Lock document (blocks download/preview)</td></tr>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/unlock</code></td><td>Unlock document</td></tr>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/approve</code></td><td>Approve draft/pending document</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/reject</code></td><td>Reject a document with optional reason</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/archive</code></td><td>Set status → archived</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/unarchive</code></td><td>Revert archived document to draft</td></tr>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/documents/{id}/restore</code></td><td>Restore soft-deleted document</td></tr>
     <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/documents/{id}/force</code></td><td>Permanently delete (removes file from disk)</td></tr>
     <tr><td><span class="method post">POST</span></td><td><code>/admin/documents/bulk/approve</code></td><td>Bulk approve selected documents</td></tr>
@@ -417,6 +497,12 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method get">GET</span></td><td><code>/admin/storage</code></td><td>Storage usage by user / file type</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/admin/jobs</code></td><td>Queue job monitor (pending/failed)</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/admin/settings</code></td><td>Global application settings</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/problems</code></td><td>Programming problems explorer</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/problems/create</code></td><td>New problem form</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/problems</code></td><td>Create problem</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/problems/{id}/edit</code></td><td>Edit problem form</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/admin/problems/{id}</code></td><td>Update problem</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/problems/{id}</code></td><td>Delete problem</td></tr>
   </table>
 
   <h2>api.php — REST routes</h2>
@@ -883,8 +969,8 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     </tr>
     <tr>
       <td><strong>NotificationController</strong></td>
-      <td><code>index()</code>, <code>markRead()</code>, <code>destroy()</code></td>
-      <td>View, mark as read, and delete in-app notifications.</td>
+      <td><code>index()</code>, <code>markRead()</code>, <code>markAllRead()</code>, <code>destroy()</code></td>
+      <td>View, mark individual notifications as read, bulk mark-all-read (only shown when unread exist), and delete in-app notifications.</td>
     </tr>
     <tr>
       <td><strong>ProfileController</strong></td>
@@ -917,8 +1003,9 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     </tr>
     <tr>
       <td><strong>DocumentController</strong></td>
-      <td>Full document lifecycle: list, create, edit, soft-delete, restore, force-delete, lock/unlock, approve/reject, access log. Bulk: approve, trash, reject, assign-category, download as ZIP. Chunked upload: receive chunk, assemble.<br>
-      <strong>List enhancements:</strong> Sort-by dropdown (newest/oldest/title A–Z/title Z–A/largest/most downloaded), configurable page size (10/20/30/40) persisted via query string, compact sliding-window pagination, tree-structured category filter (parent → indented children), <code>archived</code> included in status filter.<br>
+      <td>Full document lifecycle: list, create, edit, soft-delete, restore, force-delete, lock/unlock, approve/reject, archive/unarchive, access log. Bulk: approve, trash, reject, assign-category, download as ZIP. Chunked upload: receive chunk, assemble.<br>
+      <strong>Archive:</strong> <code>archive()</code> sets status → <code>archived</code>. <code>unarchive()</code> reverts to <code>draft</code>. Both record AuditLog entries. Archive button shown for non-draft documents; Unarchive button shown for archived documents.<br>
+      <strong>List enhancements:</strong> Sort-by dropdown (newest/oldest/title A–Z/title Z–A/largest/most downloaded), configurable page size (10/20/30/40) persisted via query string, compact sliding-window pagination, tree-structured category filter (parent → indented children), <code>archived</code> badge (slate colour) included in status filter and badge map.<br>
       <strong>Create/Edit forms:</strong> Category dropdown renders as a tree using the shared partial <code>admin/partials/category_options.blade.php</code>.</td>
     </tr>
     <tr>
@@ -947,7 +1034,7 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     </tr>
     <tr>
       <td><strong>SearchIndexController</strong></td>
-      <td>UI for the search index — shows per-doc index status, triggers <code>search:reindex</code> (queues extraction jobs) and <code>search:build-tfidf</code> (rebuilds IDF + embeddings).</td>
+      <td>UI for the search index — shows TF-IDF status, top search queries, and zero-result queries (content gap panel with amber styling; queries searched ≥3 times flagged high priority). Triggers <code>search:reindex</code> (queues extraction jobs) and <code>search:build-tfidf</code> (rebuilds IDF + embeddings).</td>
     </tr>
     <tr>
       <td><strong>AuditLogController</strong></td>
@@ -972,6 +1059,10 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr>
       <td><strong>NotificationController</strong></td>
       <td>Lists all notifications + a broadcast form that sends a message to all active users at once.</td>
+    </tr>
+    <tr>
+      <td><strong>ProblemController</strong></td>
+      <td>Full CRUD for programming problems. <code>index()</code>: split-panel explorer (filter by difficulty/category, search, select a problem to view its description and runnable solution code). <code>show()</code>: returns JSON for the detail panel. <code>create()</code> / <code>store()</code>: add new problem. <code>edit()</code> / <code>update()</code>: modify title, description, difficulty, category, order_index, solution_code. <code>destroy()</code>: delete problem (triggered via JS form submission from the detail panel's Delete button).</td>
     </tr>
   </table>
 </div>
@@ -1195,7 +1286,7 @@ Route::middleware(['auth:sanctum', 'active'])-&gt;group(function () { ... });</c
     <tr><td><span class="badge badge-gray">draft</span></td><td>No</td><td>Default on upload</td></tr>
     <tr><td><span class="badge badge-yellow">pending</span></td><td>No</td><td>Submitted for review</td></tr>
     <tr><td><span class="badge badge-green">published</span></td><td>Yes</td><td>Admin approves</td></tr>
-    <tr><td><span class="badge badge-orange">archived</span></td><td>No</td><td>Admin archives or <code>expires_at</code> passes</td></tr>
+    <tr><td><span class="badge badge-orange">archived</span></td><td>No</td><td>Admin clicks Archive, or <code>expires_at</code> passes (auto via <code>dms:archive-expired</code>). Unarchive reverts to draft.</td></tr>
     <tr><td><span class="badge badge-red">rejected</span></td><td>No</td><td>Admin rejects</td></tr>
   </table>
 
@@ -1381,8 +1472,40 @@ Route::middleware(['auth:sanctum', 'active'])-&gt;group(function () { ... });</c
   <ul>
     <li>Unread count badge appears in the nav bar (<code>$navUnread</code> pre-computed in the layout)</li>
     <li>Notifications page (<code>GET /notifications</code>) lists all notifications, sorted newest first</li>
-    <li>Individual mark-read and delete actions</li>
+    <li>Individual mark-read and delete actions per notification</li>
+    <li><strong>Mark all as read</strong> — bulk action button shown at the top of the list only when at least one unread notification exists; sends <code>PATCH /notifications/read-all</code></li>
   </ul>
+</div>
+
+<!-- ── FEATURE: PROBLEMS ── -->
+<div class="section" id="s-feat-problems">
+  <h1>Problems (Programming Challenges)</h1>
+  <p class="lead">A standalone coding-challenge tool for admins and editors. Browse, create, edit, and delete programming problems with runnable JavaScript solution code.</p>
+
+  <h2>Data model</h2>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+    <tr><td><code>order_index</code></td><td>integer</td><td>Sort order in the left panel list</td></tr>
+    <tr><td><code>title</code></td><td>string</td><td>Problem title</td></tr>
+    <tr><td><code>description</code></td><td>text</td><td>Problem statement</td></tr>
+    <tr><td><code>difficulty</code></td><td>enum</td><td><code>easy</code> / <code>medium</code> / <code>hard</code></td></tr>
+    <tr><td><code>category</code></td><td>string</td><td>e.g. JavaScript, Math, Algorithms, AI</td></tr>
+    <tr><td><code>solution_code</code></td><td>text</td><td>JavaScript code — runs in a sandboxed <code>&lt;iframe&gt;</code></td></tr>
+  </table>
+
+  <h2>Explorer interface (index page)</h2>
+  <p>Split-panel layout: left panel lists problems with search and difficulty/category filters; right panel shows the selected problem's description, syntax-highlighted code (highlight.js), and a sandboxed Run button that executes the code and streams <code>console.log</code> / <code>console.error</code> output.</p>
+  <ul>
+    <li><strong>Edit</strong> — links to <code>/admin/problems/{id}/edit</code></li>
+    <li><strong>Delete</strong> — JavaScript creates and submits a hidden <code>DELETE</code> form with CSRF token, prompts for confirmation first</li>
+    <li><strong>+ New</strong> — button in the left panel header links to <code>/admin/problems/create</code></li>
+  </ul>
+
+  <h2>Seeding problems</h2>
+  <pre><code>php artisan db:seed --class=JavaScriptSeeder
+php artisan db:seed --class=MathSeeder
+php artisan db:seed --class=AlgorithmsSeeder
+php artisan db:seed --class=AISeeder</code></pre>
 </div>
 
 <!-- ── FEATURE: API ── -->

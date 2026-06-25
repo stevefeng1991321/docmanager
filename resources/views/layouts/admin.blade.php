@@ -86,6 +86,21 @@
             @endforeach
         </nav>
 
+        {{-- Help link --}}
+        <div class="px-3 pb-3 flex-shrink-0">
+            <a href="{{ route('admin.help') }}" target="_blank" rel="noopener"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition w-full">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Help &amp; Docs
+                <svg class="w-3 h-3 ml-auto flex-shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+            </a>
+        </div>
+
         {{-- Bottom user info --}}
         <div class="border-t border-gray-700 p-4 flex-shrink-0">
             <div class="flex items-center gap-3">

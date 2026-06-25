@@ -161,3 +161,13 @@ documentation/index.html           ← open this
 ## Tech Stack
 
 Laravel 12 · PHP 8.2 · MySQL 8 · Tailwind CSS 3 · Alpine.js 3 · Vite 7 · Flowbite 2 · Laravel Sanctum · TF-IDF semantic search (pure PHP, fully offline)
+
+---
+
+## Tests
+
+```bash
+php artisan test
+```
+
+Feature tests cover: Search (keyword, AI, hybrid), Favorites, Bookmarks, ReadingLists, Ratings, Notifications.

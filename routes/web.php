@@ -159,6 +159,9 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         Route::get('settings',  [Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('settings',  [Admin\SettingController::class, 'update'])->name('settings.update');
     });
+
+    // Documentation
+    Route::get('help', fn() => response(file_get_contents(base_path('documentation/project/index.html')), 200, ['Content-Type' => 'text/html']))->name('help');
 });
 
 require __DIR__.'/auth.php';
