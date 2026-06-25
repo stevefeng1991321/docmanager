@@ -23,28 +23,6 @@ class DatabaseSeeder extends Seeder
                 'status'   => 'active',
             ]
         );
-        // First Editor account
-        User::firstOrCreate(
-            ['username' => 'editor'],
-            [
-                'name'     => 'Editor',
-                'email'    => null,
-                'password' => Hash::make('123456'),
-                'role'     => 'editor',
-                'status'   => 'active',
-            ]
-        );
-        // First User account
-        User::firstOrCreate(
-            ['username' => 'user'],
-            [
-                'name'     => 'User',
-                'email'    => null,
-                'password' => Hash::make('123456'),
-                'role'     => 'viewer',
-                'status'   => 'active',
-            ]
-        );
         // Starter categories
         $categories = [
             ['name' => 'Engineering',       'slug' => 'engineering'],
@@ -68,6 +46,13 @@ class DatabaseSeeder extends Seeder
         $this->call(MathSeeder::class);
         $this->call(AlgorithmsSeeder::class);
         $this->call(AISeeder::class);
+
+        $this->call(VanadiumKnowledgeSeeder::class);
+        $this->call(RefractoryGoldKnowledgeSeeder::class);
+        $this->call(VanadiumVsLithiumSeeder::class);
+        $this->call(VanadiumVsOtherBatteriesSeeder::class);
+        $this->call(VRFBInnovativeTechnologySeeder::class);
+        $this->call(VRFBBuildPreparationSeeder::class);
 
         $this->command->info('Admin account: username=admin  password=Admin@1234');
         $this->command->warn('Change the admin password after first login!');
