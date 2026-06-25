@@ -1,6 +1,6 @@
 # DocManager
 
-A full-featured document management system built with **Laravel 12**. Supports dual-mode search (keyword + offline TF-IDF semantic), document versioning, role-based access control, chunked upload, and a REST API — no cloud dependency.
+A full-featured, self-hosted **document management system** built with **Laravel 12**. Designed for organizations that need a private, offline-capable alternative to cloud DMS platforms — no internet dependency, no third-party services required.
 
 | App | URL | Who |
 |---|---|---|
@@ -8,6 +8,89 @@ A full-featured document management system built with **Laravel 12**. Supports d
 | Admin Panel | `/admin` | Admins and Editors |
 
 > **Full documentation** → open `documentation/index.html` in your browser.
+
+---
+
+## Project Overview
+
+### What It Does
+
+DocManager lets teams upload, organize, search, and share documents from a single self-hosted platform. All processing — file parsing, indexing, and semantic search — runs on-premise with no cloud dependency.
+
+### User Roles
+
+| Role | Access | Capabilities |
+|---|---|---|
+| **Admin** | Client + Admin panel | Full control: users, settings, audit logs, storage quotas |
+| **Editor** | Client + Admin panel | Manage documents, categories, tags, approve/reject uploads |
+| **Viewer** | Client only | Upload, search, download, organize personal library |
+
+### Core Features
+
+**Document Handling**
+- Chunked upload for large files with automatic text extraction (PDF, Word, Excel, PowerPoint)
+- Document status workflow: draft → pending → published (with approve/reject)
+- Version history — every revision is tracked and restorable
+- Document locking to prevent concurrent edits
+- Soft delete with configurable trash retention; permanent purge via scheduled command
+- Document expiry with auto-archive
+
+**Search**
+- Keyword search — fast full-text match against extracted content
+- TF-IDF semantic search — finds conceptually related documents; runs 100% offline in pure PHP
+- Autocomplete suggestions, saved searches, search history
+
+**Personal Library**
+- Favorites, Bookmarks (with notes), Reading Lists, Recently Viewed, Download History
+- Document ratings and written reviews
+
+**Sharing & Access Control**
+- Shareable public links with configurable expiry (`SHARE_LINK_EXPIRY_HOURS`)
+- Per-user storage quotas with enforcement on upload
+- Account request flow — new users request access, admins approve or reject
+
+**Observability**
+- Audit log (admin actions) and Activity log (user actions) — both exportable
+- Download tracking per document
+- Search analytics log
+- Background job monitor (queue health)
+- Storage usage dashboard
+
+**REST API**
+- Token-based auth via Laravel Sanctum
+- Endpoints: list/get/create/update/delete documents, download, share, search
+
+**Offline Documentation Hub**
+- Bundled offline reference docs for the full stack — no internet needed during development
+
+### Architecture at a Glance
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Browser (Tailwind CSS 3 + Alpine.js 3 + Flowbite)  │
+└────────────────────┬────────────────────────────────┘
+                     │ HTTP
+┌────────────────────▼────────────────────────────────┐
+│  Laravel 12 (PHP 8.2+)                              │
+│  ├── Client web routes  (/*)                        │
+│  ├── Admin panel routes (/admin/*)                  │
+│  └── REST API routes    (/api/*)  — Sanctum tokens  │
+└──────┬──────────────┬──────────────┬────────────────┘
+       │              │              │
+┌──────▼──────┐ ┌─────▼──────┐ ┌───▼──────────────────┐
+│  MySQL 8    │ │  Queue     │ │  Local File Storage   │
+│  (or SQLite)│ │  Worker    │ │  (disk / configurable)│
+└─────────────┘ │  - Extract │ └──────────────────────┘
+                │  - TF-IDF  │
+                └────────────┘
+```
+
+**Key database tables:** `resources`, `document_versions`, `categories`, `tags`, `users`, `shares`, `resource_embeddings` (TF-IDF vectors), `audit_logs`, `activity_logs`, `download_logs`, `search_logs`
+
+### Design Principles
+- **Offline-first** — no S3, no Elasticsearch, no external AI service
+- **Self-contained** — single server, standard LAMP/LEMP stack
+- **Observable** — every significant action is logged and queryable by admins
 
 ---
 
