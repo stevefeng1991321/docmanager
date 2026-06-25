@@ -31,7 +31,8 @@
       "Bash(grep \"Admin\\\\\\\\\\\\w\" routes/web.php)",
       "Bash(php -l app/Mail/AccountActivated.php app/Mail/AccountRejected.php app/Mail/DocumentApproved.php app/Mail/DocumentRejected.php app/Mail/AdminPasswordReset.php app/Http/Controllers/Admin/UserController.php app/Http/Controllers/Admin/DocumentController.php app/Http/Controllers/Api/AuthController.php)",
       "Bash(php -r \"echo file_exists\\(base_path\\('documentation/project/index.html'\\)\\) ? 'file OK' : 'file MISSING';\")",
-      "Bash(php -r \"echo file_exists\\('d:/Github/docmanager/documentation/project/index.html'\\) ? 'file OK' : 'file MISSING';\")"
+      "Bash(php -r \"echo file_exists\\('d:/Github/docmanager/documentation/project/index.html'\\) ? 'file OK' : 'file MISSING';\")",
+      "Bash(grep -oE 'name=\"_token\" value=\"[^\"]+\"' __TRACKED_VAR__/start.html)"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"

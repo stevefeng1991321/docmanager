@@ -68,6 +68,13 @@ Route::middleware(['auth', 'active'])->group(function () {
 // Public share link (no auth required)
 Route::get('/share/{token}', [Client\ShareController::class, 'show'])->name('share.show');
 
+// Public developer-test link (no auth required)
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('/test/{token}',         [Client\TestSessionController::class, 'show'])->name('test.show');
+    Route::post('/test/{token}/start',  [Client\TestSessionController::class, 'start'])->name('test.start');
+    Route::post('/test/{token}/submit', [Client\TestSessionController::class, 'submit'])->name('test.submit');
+});
+
 // ─── Admin Panel ─────────────────────────────────────────────────────────────
 
 Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->name('admin.')->group(function () {
@@ -134,6 +141,20 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::put('problems/{problem}',          [Admin\ProblemController::class, 'update'])->name('problems.update');
     Route::delete('problems/{problem}',       [Admin\ProblemController::class, 'destroy'])->name('problems.destroy');
     Route::get('problems/{problem}',          [Admin\ProblemController::class, 'show'])->name('problems.show');
+
+    // Developer Tests — static routes before {test} wildcard
+    Route::get('tests',                 [Admin\TestController::class, 'index'])->name('tests.index');
+    Route::get('tests/create',          [Admin\TestController::class, 'create'])->name('tests.create');
+    Route::post('tests',                [Admin\TestController::class, 'store'])->name('tests.store');
+    Route::get('tests/{test}/edit',     [Admin\TestController::class, 'edit'])->name('tests.edit');
+    Route::put('tests/{test}',          [Admin\TestController::class, 'update'])->name('tests.update');
+    Route::delete('tests/{test}',       [Admin\TestController::class, 'destroy'])->name('tests.destroy');
+    Route::post('tests/{test}/invites', [Admin\TestInviteController::class, 'store'])->name('tests.invites.store');
+    Route::delete('tests/{test}/invites/{invite}', [Admin\TestInviteController::class, 'destroy'])->name('tests.invites.destroy');
+    Route::get('tests/{test}',          [Admin\TestController::class, 'show'])->name('tests.show');
+
+    Route::get('test-invites/{invite}/grade', [Admin\TestInviteController::class, 'grade'])->name('test-invites.grade');
+    Route::put('test-invites/{invite}/grade', [Admin\TestInviteController::class, 'storeGrade'])->name('test-invites.grade.store');
 
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');
