@@ -143,7 +143,7 @@ php artisan db:seed
 php artisan migrate:fresh --seed
 
 # Delete stale Algorithms records from database
-php artisan tinker --execute="App\Models\Problem::where('category', 'Algorithms')->delete()"
+php artisan tinker --execute="App\Models\ProgrammingProblem::where('category', 'Algorithms')->delete()"
 
 # Refresh database and run a specific seeder
 php artisan db:seed --class=JavaScriptSeeder
