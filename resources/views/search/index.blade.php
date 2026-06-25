@@ -155,8 +155,22 @@
                     ✦ AI Semantic
                 </button>
 
+                {{-- Hybrid button --}}
+                <button type="submit" name="mode" value="hybrid"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all
+                               {{ $mode === 'hybrid'
+                                   ? 'bg-teal-600 border-teal-600 text-white shadow-sm'
+                                   : 'bg-white border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700' }}">
+                    @if($mode === 'hybrid')
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    @endif
+                    ⚡ Hybrid
+                </button>
+
                 @if($mode === 'ai')
                 <span class="text-xs text-purple-600">Finds conceptually related documents</span>
+                @elseif($mode === 'hybrid')
+                <span class="text-xs text-teal-600">Blends keyword + semantic scoring</span>
                 @endif
             </div>
         </form>
@@ -183,6 +197,8 @@
                         <strong>{{ number_format($total) }}</strong> result{{ $total !== 1 ? 's' : '' }} for "<strong>{{ $query }}</strong>"
                         @if($mode === 'ai')
                         <span class="text-purple-600">&mdash; AI ranked</span>
+                        @elseif($mode === 'hybrid')
+                        <span class="text-teal-600">&mdash; Hybrid ranked</span>
                         @endif
                     @else
                         No results for "<strong>{{ $query }}</strong>"
@@ -216,6 +232,8 @@
                     <option value="size_desc" {{ $sort === 'size_desc' ? 'selected' : '' }}>Largest first</option>
                 </select>
             </form>
+            @elseif($mode === 'hybrid')
+            <span class="text-xs text-gray-400 italic">Sorted by hybrid score</span>
             @else
             <span class="text-xs text-gray-400 italic">Sorted by semantic similarity</span>
             @endif
@@ -225,10 +243,16 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
             @forelse ($results as $doc)
             @php
-                $hl = fn($text) => $query
-                    ? preg_replace('/(' . preg_quote(e($query), '/') . ')/iu', '<mark class="bg-yellow-100 text-yellow-800 rounded px-0.5">$1</mark>', e($text))
-                    : e($text);
+                // Highlight full phrase AND individual words (>= 3 chars) for better snippet coverage
+                $hl = function(string $text) use ($query): string {
+                    if (!$query) return e($text);
+                    $words   = array_filter(explode(' ', $query), fn($w) => mb_strlen($w) >= 3);
+                    $terms   = array_unique(array_merge([preg_quote($query, '/')], array_map(fn($w) => preg_quote($w, '/'), $words)));
+                    $pattern = '/(' . implode('|', $terms) . ')/iu';
+                    return preg_replace($pattern, '<mark class="bg-yellow-100 text-yellow-800 rounded px-0.5">$1</mark>', e($text));
+                };
                 $similarity = $scores[$doc->id] ?? null;
+                $snippet    = $snippets[$doc->id] ?? null;
             @endphp
             <a href="{{ route('documents.show', $doc) }}"
                class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
@@ -236,12 +260,15 @@
                     <div class="flex items-center gap-2 flex-wrap">
                         <p class="font-semibold text-gray-800 text-sm">{!! $hl($doc->title) !!}</p>
                         @if($similarity !== null)
-                        <span class="text-xs font-medium text-purple-700 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full flex-shrink-0">
+                        <span class="text-xs font-medium border px-2 py-0.5 rounded-full flex-shrink-0
+                            {{ $mode === 'hybrid' ? 'text-teal-700 bg-teal-50 border-teal-100' : 'text-purple-700 bg-purple-50 border-purple-100' }}">
                             {{ round($similarity * 100) }}% match
                         </span>
                         @endif
                     </div>
-                    @if($doc->description)
+                    @if($snippet)
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">{!! $hl($snippet) !!}</p>
+                    @elseif($doc->description)
                     <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{!! $hl($doc->description) !!}</p>
                     @endif
                     <div class="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
