@@ -123,7 +123,7 @@
                     @endforelse
                 </div>
                 <div class="px-4 py-3 border-t border-gray-100">
-                    <form method="POST" action="{{ route('admin.plans.comments.store', $plan) }}">
+                    <form method="POST" action="{{ route('plans.comments.store', $plan) }}">
                         @csrf
                         <textarea name="body" rows="2" placeholder="Write a comment…" required
                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none mb-2"></textarea>

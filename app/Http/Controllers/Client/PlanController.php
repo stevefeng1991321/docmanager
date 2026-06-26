@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
 use Illuminate\Http\Request;
+use App\Models\AuditLog;
 
 class PlanController extends Controller
 {
@@ -60,5 +61,26 @@ class PlanController extends Controller
         ]);
 
         return view('plans.show', compact('plan'));
+    }
+
+    public function storeComment(Request $request, Plan $plan)
+    {
+        $user     = auth()->user();
+        $employee = $user->employee;
+
+        // Must be assigned to the plan (or admin/editor)
+        $assigned = $employee && $plan->employees()->where('employees.id', $employee->id)->exists();
+        abort_unless($assigned || $user->isAdmin() || $user->isEditor(), 403);
+
+        $validated = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+
+        $plan->comments()->create([
+            'user_id' => $user->id,
+            'body'    => $validated['body'],
+        ]);
+
+        AuditLog::record('plan.comment_added', $plan->id, ['plan' => $plan->plan_number]);
+
+        return back()->with('message', 'Comment posted.');
     }
 }

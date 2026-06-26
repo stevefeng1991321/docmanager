@@ -102,8 +102,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::delete('/attendance/leaves/{leave}', [\App\Http\Controllers\AttendanceLeaveController::class, 'destroy'])->name('attendance.leaves.destroy');
 
     // Plans (client — assigned only)
-    Route::get('/plans',        [\App\Http\Controllers\Client\PlanController::class, 'index'])->name('plans.index');
-    Route::get('/plans/{plan}', [\App\Http\Controllers\Client\PlanController::class, 'show'])->name('plans.show');
+    Route::get('/plans',                    [\App\Http\Controllers\Client\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/{plan}',             [\App\Http\Controllers\Client\PlanController::class, 'show'])->name('plans.show');
+    Route::post('/plans/{plan}/comments',   [\App\Http\Controllers\Client\PlanController::class, 'storeComment'])->name('plans.comments.store');
 });
 
 // Public share link (no auth required)
