@@ -59,4 +59,6 @@ class Employee extends Model
     public function subordinates(): HasMany   { return $this->hasMany(Employee::class, 'manager_id'); }
     public function documents(): HasMany      { return $this->hasMany(EmployeeDocument::class); }
     public function workReports(): HasMany    { return $this->hasMany(WorkReport::class); }
+    public function attendances(): HasMany    { return $this->hasMany(Attendance::class); }
+    public function leaves(): HasMany         { return $this->hasMany(AttendanceLeave::class); }
 }

@@ -92,6 +92,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/work-reports/{workReport}/attachments/{attachment}/download', [Client\WorkReportController::class, 'downloadAttachment'])->name('work-reports.attachments.download');
     Route::get('/work-reports/{workReport}/attachments/{attachment}/preview', [Client\WorkReportController::class, 'previewAttachment'])->name('work-reports.attachments.preview');
     Route::get('/work-reports/{workReport}',    [Client\WorkReportController::class, 'show'])->name('work-reports.show');
+
+    // Attendance (client)
+    Route::get('/attendance',          [\App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('/attendance/check-in',  [\App\Http\Controllers\AttendanceController::class, 'checkIn'])->name('attendance.check-in');
+    Route::post('/attendance/check-out', [\App\Http\Controllers\AttendanceController::class, 'checkOut'])->name('attendance.check-out');
+    Route::get('/attendance/leaves',     [\App\Http\Controllers\AttendanceLeaveController::class, 'index'])->name('attendance.leaves.index');
+    Route::post('/attendance/leaves',    [\App\Http\Controllers\AttendanceLeaveController::class, 'store'])->name('attendance.leaves.store');
+    Route::delete('/attendance/leaves/{leave}', [\App\Http\Controllers\AttendanceLeaveController::class, 'destroy'])->name('attendance.leaves.destroy');
 });
 
 // Public share link (no auth required)
@@ -215,6 +223,16 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         Route::get('work-report-analytics/export',           [Admin\WorkReportAnalyticsController::class, 'export'])->name('work-report-analytics.export');
     });
     Route::resource('projects', Admin\ProjectController::class)->except(['create', 'edit', 'show']);
+
+    // Attendance management
+    Route::get('attendance',                                   [Admin\AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('attendance/mark',                             [Admin\AttendanceController::class, 'mark'])->name('attendance.mark');
+    Route::post('attendance/bulk-mark',                        [Admin\AttendanceController::class, 'bulkMark'])->name('attendance.bulk-mark');
+    Route::get('attendance/report',                            [Admin\AttendanceController::class, 'report'])->name('attendance.report');
+    Route::get('attendance/leaves',                            [Admin\AttendanceLeaveController::class, 'index'])->name('attendance.leaves.index');
+    Route::post('attendance/leaves/{leave}/approve',           [Admin\AttendanceLeaveController::class, 'approve'])->name('attendance.leaves.approve');
+    Route::post('attendance/leaves/{leave}/reject',            [Admin\AttendanceLeaveController::class, 'reject'])->name('attendance.leaves.reject');
+    Route::delete('attendance/leaves/{leave}',                 [Admin\AttendanceLeaveController::class, 'destroy'])->name('attendance.leaves.destroy');
 
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');

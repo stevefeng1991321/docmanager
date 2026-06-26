@@ -90,6 +90,7 @@
                             ['route' => 'admin.employees.index',        'label' => 'Employees',        'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 100-8 4 4 0 000 8zm6 0a4 4 0 100-8'],
                             ['route' => 'admin.account-requests.index', 'label' => 'Account Requests', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
                             ['route' => 'admin.work-reports.index',     'label' => 'Work Reports',     'icon' => 'M9 17v-2a4 4 0 014-4h2m-6 6h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zm3-10h4'],
+                            ['route' => 'admin.attendance.index',       'label' => 'Attendance',        'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                         ],
                     ],
                     [
