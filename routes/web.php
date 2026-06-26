@@ -75,6 +75,23 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/chat/conversations/{conversation}/messages', [Chat\MessageController::class, 'store'])->name('chat.messages.store');
     Route::post('/chat/conversations/{conversation}/delivered', [Chat\ConversationController::class, 'markDelivered'])->name('chat.conversations.delivered');
     Route::post('/chat/conversations/{conversation}/read', [Chat\ConversationController::class, 'markRead'])->name('chat.conversations.read');
+
+    // Work Reports — static routes before {workReport} wildcard
+    Route::get('/work-reports',                 [Client\WorkReportController::class, 'index'])->name('work-reports.index');
+    Route::get('/work-reports/create',          [Client\WorkReportController::class, 'create'])->name('work-reports.create');
+    Route::post('/work-reports',                [Client\WorkReportController::class, 'store'])->name('work-reports.store');
+    Route::get('/work-reports/{workReport}/edit', [Client\WorkReportController::class, 'edit'])->name('work-reports.edit');
+    Route::put('/work-reports/{workReport}',      [Client\WorkReportController::class, 'update'])->name('work-reports.update');
+    Route::delete('/work-reports/{workReport}',   [Client\WorkReportController::class, 'destroy'])->name('work-reports.destroy');
+    Route::post('/work-reports/{workReport}/duplicate', [Client\WorkReportController::class, 'duplicate'])->name('work-reports.duplicate');
+    Route::post('/work-reports/{workReport}/submit',    [Client\WorkReportController::class, 'submit'])->name('work-reports.submit');
+    Route::patch('/work-reports/{workReport}/review',   [Client\WorkReportController::class, 'review'])->name('work-reports.review');
+    Route::post('/work-reports/{workReport}/comments',  [Client\WorkReportController::class, 'storeComment'])->name('work-reports.comments.store');
+    Route::post('/work-reports/{workReport}/attachments', [Client\WorkReportController::class, 'storeAttachment'])->name('work-reports.attachments.store');
+    Route::delete('/work-reports/{workReport}/attachments/{attachment}', [Client\WorkReportController::class, 'destroyAttachment'])->name('work-reports.attachments.destroy');
+    Route::get('/work-reports/{workReport}/attachments/{attachment}/download', [Client\WorkReportController::class, 'downloadAttachment'])->name('work-reports.attachments.download');
+    Route::get('/work-reports/{workReport}/attachments/{attachment}/preview', [Client\WorkReportController::class, 'previewAttachment'])->name('work-reports.attachments.preview');
+    Route::get('/work-reports/{workReport}',    [Client\WorkReportController::class, 'show'])->name('work-reports.show');
 });
 
 // Public share link (no auth required)
@@ -187,6 +204,14 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     Route::get('employee-reports',        [Admin\EmployeeReportController::class, 'index'])->name('employee-reports.index');
     Route::get('employee-reports/export', [Admin\EmployeeReportController::class, 'export'])->name('employee-reports.export');
+
+    // Work Reports — cross-team oversight is admin-only per spec ("Administrators have full access to all reports")
+    Route::middleware('role:admin')->group(function () {
+        Route::get('work-reports',                  [Admin\WorkReportController::class, 'index'])->name('work-reports.index');
+        Route::get('work-report-analytics',         [Admin\WorkReportAnalyticsController::class, 'index'])->name('work-report-analytics.index');
+        Route::get('work-report-analytics/export',  [Admin\WorkReportAnalyticsController::class, 'export'])->name('work-report-analytics.export');
+    });
+    Route::resource('projects', Admin\ProjectController::class)->except(['create', 'edit', 'show']);
 
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');

@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Resource;
 use App\Models\User;
+use App\Models\WorkReport;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -78,8 +79,20 @@ class DashboardController extends Controller
             ];
         });
 
+        $workReportStats = Cache::remember('dashboard.work_report_stats', 300, function () {
+            return [
+                'total'            => WorkReport::count(),
+                'submitted_today'  => WorkReport::whereDate('submitted_at', today())->count(),
+                'pending_review'   => WorkReport::whereIn('status', ['submitted', 'under_review'])->count(),
+                'approved'         => WorkReport::where('status', 'approved')->count(),
+                'rejected'         => WorkReport::where('status', 'rejected')->count(),
+                'draft'            => WorkReport::where('status', 'draft')->count(),
+                'recent'           => WorkReport::with('employee')->latest('submitted_at')->whereNotNull('submitted_at')->take(5)->get(),
+            ];
+        });
+
         return view('admin.dashboard.index', compact(
-            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend', 'employeeStats'
+            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend', 'employeeStats', 'workReportStats'
         ));
     }
 }

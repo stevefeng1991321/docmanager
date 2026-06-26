@@ -94,6 +94,55 @@
     @endif
 </div>
 
+{{-- Work Reports overview --}}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-700">Work Reports</h3>
+        @if(auth()->user()->isAdmin())
+        <a href="{{ route('admin.work-reports.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">View all →</a>
+        @endif
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-6 gap-4">
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Total</p>
+            <p class="text-xl font-bold text-gray-900">{{ number_format($workReportStats['total']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Today</p>
+            <p class="text-xl font-bold text-blue-600">{{ number_format($workReportStats['submitted_today']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Pending Review</p>
+            <p class="text-xl font-bold text-amber-600">{{ number_format($workReportStats['pending_review']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Approved</p>
+            <p class="text-xl font-bold text-green-600">{{ number_format($workReportStats['approved']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Rejected</p>
+            <p class="text-xl font-bold text-red-600">{{ number_format($workReportStats['rejected']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Draft</p>
+            <p class="text-xl font-bold text-gray-500">{{ number_format($workReportStats['draft']) }}</p>
+        </div>
+    </div>
+    @if($workReportStats['recent']->isNotEmpty())
+    <div class="mt-4 pt-4 border-t border-gray-100">
+        <p class="text-xs font-medium text-gray-500 mb-2">Recent Activity</p>
+        <div class="space-y-1.5">
+            @foreach($workReportStats['recent'] as $report)
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">{{ $report->employee->full_name }} — {{ $report->title }}</span>
+                <span class="text-gray-400">{{ $report->submitted_at->diffForHumans() }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+</div>
+
 {{-- Charts row --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 
