@@ -109,65 +109,87 @@
         @endforeach
     </div>
 
-    {{-- Attendance list --}}
+    {{-- Calendar --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-800">Attendance Records — {{ $start->format('F Y') }}</h3>
         </div>
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Day</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Check In</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Check Out</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Duration</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @php
-                    $current = $start->copy();
-                    $colors = [
-                        'present'  => 'bg-green-100 text-green-700',
-                        'absent'   => 'bg-red-100 text-red-700',
-                        'late'     => 'bg-yellow-100 text-yellow-700',
-                        'on_leave' => 'bg-blue-100 text-blue-700',
-                        'holiday'  => 'bg-purple-100 text-purple-700',
-                        'half_day' => 'bg-orange-100 text-orange-700',
-                    ];
-                @endphp
-                @while($current <= $end)
-                @php
-                    $dateStr = $current->toDateString();
-                    $rec     = $records->get($dateStr);
-                    $isWknd  = $current->isWeekend();
-                    $isFuture = $current->isFuture();
-                @endphp
-                <tr class="{{ $isWknd ? 'bg-gray-50/50' : '' }} {{ $current->isToday() ? 'bg-blue-50/30' : '' }}">
-                    <td class="px-4 py-2.5 {{ $isWknd ? 'text-gray-400' : 'text-gray-700' }}">{{ $current->format('M d') }}</td>
-                    <td class="px-4 py-2.5 {{ $isWknd ? 'text-gray-400' : 'text-gray-500' }} text-xs">{{ $current->format('D') }}</td>
-                    <td class="px-4 py-2.5">
-                        @if($isWknd)
-                            <span class="text-xs text-gray-400">Weekend</span>
-                        @elseif($isFuture)
-                            <span class="text-xs text-gray-400">—</span>
-                        @elseif($rec)
-                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $colors[$rec->status] ?? 'bg-gray-100 text-gray-600' }}">
-                                {{ $rec->status_label }}
-                            </span>
-                        @else
-                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">Not Marked</span>
+
+        {{-- Day headers --}}
+        <div class="grid grid-cols-7 border-b border-gray-100">
+            @foreach(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $day)
+            <div class="py-2 text-center text-xs font-semibold {{ in_array($day, ['Sat','Sun']) ? 'text-gray-400' : 'text-gray-500' }}">
+                {{ $day }}
+            </div>
+            @endforeach
+        </div>
+
+        @php
+            $colors = [
+                'present'  => ['bg' => 'bg-green-500',  'light' => 'bg-green-50  text-green-700  border-green-200'],
+                'absent'   => ['bg' => 'bg-red-500',    'light' => 'bg-red-50    text-red-700    border-red-200'],
+                'late'     => ['bg' => 'bg-yellow-400', 'light' => 'bg-yellow-50 text-yellow-700 border-yellow-200'],
+                'on_leave' => ['bg' => 'bg-blue-500',   'light' => 'bg-blue-50   text-blue-700   border-blue-200'],
+                'holiday'  => ['bg' => 'bg-purple-500', 'light' => 'bg-purple-50 text-purple-700 border-purple-200'],
+                'half_day' => ['bg' => 'bg-orange-400', 'light' => 'bg-orange-50 text-orange-700 border-orange-200'],
+            ];
+
+            // Pad to Monday start
+            $firstDow = $start->copy()->dayOfWeekIso; // 1=Mon … 7=Sun
+            $calStart = $start->copy()->subDays($firstDow - 1);
+            $lastDow  = $end->copy()->dayOfWeekIso;
+            $calEnd   = $end->copy()->addDays(7 - $lastDow);
+            $cur      = $calStart->copy();
+        @endphp
+
+        <div class="grid grid-cols-7">
+            @while($cur <= $calEnd)
+            @php
+                $dateStr  = $cur->toDateString();
+                $rec      = $records->get($dateStr);
+                $inMonth  = $cur->month === $start->month;
+                $isWknd   = $cur->isWeekend();
+                $isToday  = $cur->isToday();
+                $isFuture = $cur->isFuture();
+                $cur->addDay();
+            @endphp
+            <div class="min-h-[80px] p-1.5 border-b border-r border-gray-100 {{ !$inMonth ? 'bg-gray-50/50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                {{-- Date number --}}
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full
+                        {{ $isToday ? 'bg-blue-600 text-white' : ($isWknd && $inMonth ? 'text-gray-400' : ($inMonth ? 'text-gray-700' : 'text-gray-300')) }}">
+                        {{ \Carbon\Carbon::parse($dateStr)->day }}
+                    </span>
+                </div>
+
+                {{-- Status badge --}}
+                @if($inMonth && !$isFuture)
+                    @if($rec)
+                    <div class="rounded-md border px-1.5 py-0.5 text-center {{ $colors[$rec->status]['light'] ?? 'bg-gray-50 text-gray-500 border-gray-200' }}">
+                        <div class="text-[10px] font-semibold leading-tight">{{ $rec->status_label }}</div>
+                        @if($rec->check_in_time)
+                        <div class="text-[9px] opacity-70 leading-tight">{{ $rec->check_in_time }}{{ $rec->check_out_time ? ' – '.$rec->check_out_time : '' }}</div>
                         @endif
-                    </td>
-                    <td class="px-4 py-2.5 text-gray-500 text-xs hidden sm:table-cell">{{ $rec?->check_in_time ?? '—' }}</td>
-                    <td class="px-4 py-2.5 text-gray-500 text-xs hidden sm:table-cell">{{ $rec?->check_out_time ?? '—' }}</td>
-                    <td class="px-4 py-2.5 text-gray-500 text-xs hidden md:table-cell">{{ $rec?->work_duration ?? '—' }}</td>
-                </tr>
-                @php $current->addDay() @endphp
-                @endwhile
-            </tbody>
-        </table>
+                    </div>
+                    @elseif(!$isWknd)
+                    <div class="rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-center">
+                        <div class="text-[10px] text-gray-400 leading-tight">No record</div>
+                    </div>
+                    @endif
+                @endif
+            </div>
+            @endwhile
+        </div>
+
+        {{-- Legend --}}
+        <div class="px-4 py-3 border-t border-gray-100 flex flex-wrap gap-3">
+            @foreach(['present' => 'Present', 'absent' => 'Absent', 'late' => 'Late', 'on_leave' => 'On Leave', 'holiday' => 'Holiday', 'half_day' => 'Half Day'] as $key => $label)
+            <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-sm {{ $colors[$key]['bg'] }}"></span>
+                <span class="text-xs text-gray-500">{{ $label }}</span>
+            </div>
+            @endforeach
+        </div>
     </div>
 
 @endif
