@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Chat;
 use App\Http\Controllers\Client;
 use Illuminate\Support\Facades\Route;
 
@@ -63,6 +64,17 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::delete('/profile',                [Client\ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/request-username', [Client\ProfileController::class, 'requestUsernameChange'])->name('profile.request-username-change');
     Route::post('/profile/request-deletion', [Client\ProfileController::class, 'requestDeletion'])->name('profile.request-deletion');
+
+    // Chat
+    Route::get('/chat', [Chat\ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/unread-count', [Chat\ChatController::class, 'unreadCount'])->name('chat.unread-count');
+    Route::get('/chat/users', [Chat\ConversationController::class, 'users'])->name('chat.users');
+    Route::get('/chat/conversations', [Chat\ConversationController::class, 'index'])->name('chat.conversations.index');
+    Route::post('/chat/conversations', [Chat\ConversationController::class, 'store'])->name('chat.conversations.store');
+    Route::get('/chat/conversations/{conversation}', [Chat\ConversationController::class, 'show'])->name('chat.conversations.show');
+    Route::post('/chat/conversations/{conversation}/messages', [Chat\MessageController::class, 'store'])->name('chat.messages.store');
+    Route::post('/chat/conversations/{conversation}/delivered', [Chat\ConversationController::class, 'markDelivered'])->name('chat.conversations.delivered');
+    Route::post('/chat/conversations/{conversation}/read', [Chat\ConversationController::class, 'markRead'])->name('chat.conversations.read');
 });
 
 // Public share link (no auth required)

@@ -8,7 +8,9 @@
     },
     "dependencies": {
         "flowbite": "^2.3.0",
-        "pdfjs-dist": "^3.11.174"
+        "laravel-echo": "^2.3.7",
+        "pdfjs-dist": "^3.11.174",
+        "pusher-js": "^8.5.0"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

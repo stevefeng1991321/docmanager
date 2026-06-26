@@ -65,6 +65,27 @@
                 ];
             @endphp
 
+            @if(Route::has('chat.index'))
+            <a href="{{ route('chat.index') }}"
+               @click="sidebarOpen = false"
+               x-data="{ unread: 0 }"
+               x-init="
+                   fetch('{{ route('chat.unread-count') }}').then(r => r.json()).then(d => unread = d.unread_count);
+                   window.Echo?.private('App.Models.User.{{ auth()->id() }}').listen('.message.sent', e => {
+                       if (e.sender_id !== {{ auth()->id() }}) unread++;
+                   });
+               "
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
+                      {{ request()->routeIs('chat.*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                Messages
+                <span x-show="unread > 0" x-cloak class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5" x-text="unread > 9 ? '9+' : unread"></span>
+            </a>
+            @endif
+
             @foreach($nav as $item)
                 @if(Route::has($item['route']))
                 <a href="{{ route($item['route']) }}"

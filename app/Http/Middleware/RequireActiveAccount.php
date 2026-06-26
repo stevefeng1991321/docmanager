@@ -47,6 +47,10 @@ class RequireActiveAccount
                     ->with('message', 'Your account has been deactivated. Please contact support.');
         }
 
+        if (!$user->last_seen_at || $user->last_seen_at->lt(now()->subMinute())) {
+            $user->forceFill(['last_seen_at' => now()])->saveQuietly();
+        }
+
         return $next($request);
     }
 }

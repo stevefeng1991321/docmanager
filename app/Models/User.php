@@ -16,7 +16,7 @@ class User extends Authenticatable
         'role', 'status',
         'failed_login_attempts', 'locked_until',
         'two_factor_secret', 'two_factor_recovery_codes',
-        'last_login_at', 'storage_quota_mb',
+        'last_login_at', 'storage_quota_mb', 'last_seen_at',
     ];
 
     protected $hidden = [
@@ -30,6 +30,7 @@ class User extends Authenticatable
             'password'                  => 'hashed',
             'locked_until'              => 'datetime',
             'last_login_at'             => 'datetime',
+            'last_seen_at'              => 'datetime',
             'two_factor_recovery_codes' => 'array',
         ];
     }
@@ -75,4 +76,10 @@ class User extends Authenticatable
     public function preferences()      { return $this->hasOne(UserPreference::class); }
     public function auditLogs()        { return $this->hasMany(AuditLog::class); }
     public function activityLogs()     { return $this->hasMany(ActivityLog::class); }
+
+    public function conversations()
+    {
+        return Conversation::where('user_one_id', $this->id)
+            ->orWhere('user_two_id', $this->id);
+    }
 }
