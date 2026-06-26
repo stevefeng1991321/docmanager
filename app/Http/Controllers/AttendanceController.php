@@ -69,8 +69,8 @@ class AttendanceController extends Controller
         $lateMinutes  = null;
 
         if ($checkIn > $expectedIn) {
-            $lateMinutes = Carbon::createFromTimeString($checkIn)
-                ->diffInMinutes(Carbon::createFromTimeString($expectedIn));
+            $lateMinutes = Carbon::createFromTimeString($expectedIn)
+                ->diffInMinutes(Carbon::createFromTimeString($checkIn));
         }
 
         $attendance->fill([

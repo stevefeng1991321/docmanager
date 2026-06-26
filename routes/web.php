@@ -229,6 +229,7 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::post('attendance/mark',                             [Admin\AttendanceController::class, 'mark'])->name('attendance.mark');
     Route::post('attendance/bulk-mark',                        [Admin\AttendanceController::class, 'bulkMark'])->name('attendance.bulk-mark');
     Route::get('attendance/report',                            [Admin\AttendanceController::class, 'report'])->name('attendance.report');
+    Route::get('attendance/export',                            [Admin\AttendanceController::class, 'export'])->name('attendance.export');
     Route::get('attendance/leaves',                            [Admin\AttendanceLeaveController::class, 'index'])->name('attendance.leaves.index');
     Route::post('attendance/leaves/{leave}/approve',           [Admin\AttendanceLeaveController::class, 'approve'])->name('attendance.leaves.approve');
     Route::post('attendance/leaves/{leave}/reject',            [Admin\AttendanceLeaveController::class, 'reject'])->name('attendance.leaves.reject');

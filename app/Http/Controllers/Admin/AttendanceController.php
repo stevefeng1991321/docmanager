@@ -75,7 +75,7 @@ class AttendanceController extends Controller
     {
         $validated = $request->validate([
             'date'   => 'required|date',
-            'status' => 'required|in:present,absent,holiday',
+            'status' => 'required|in:present,absent,late,on_leave,holiday,half_day',
         ]);
 
         $employees = Employee::where('employment_status', 'active')
@@ -98,6 +98,73 @@ class AttendanceController extends Controller
         ]);
 
         return back()->with('message', "Bulk marked {$employees->count()} employees as {$validated['status']}.");
+    }
+
+    public function export(Request $request)
+    {
+        $month      = $request->integer('month', today()->month);
+        $year       = $request->integer('year', today()->year);
+        $employeeId = $request->input('employee_id');
+        $deptId     = $request->input('department_id');
+        $date       = $request->input('date'); // single-day export from daily view
+
+        if ($date) {
+            $start = Carbon::parse($date)->startOfDay();
+            $end   = Carbon::parse($date)->endOfDay();
+            $filename = 'attendance_' . $date . '.csv';
+        } else {
+            $start    = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+            $end      = $start->copy()->endOfMonth();
+            $filename = 'attendance_' . $year . '_' . str_pad($month, 2, '0', STR_PAD_LEFT) . '.csv';
+        }
+
+        $records = Attendance::with('employee.department')
+            ->whereBetween('date', [$start, $end])
+            ->when($employeeId, fn($q) => $q->where('employee_id', $employeeId))
+            ->when($deptId, fn($q) => $q->whereHas('employee', fn($eq) => $eq->where('department_id', $deptId)))
+            ->orderBy('date')
+            ->orderBy('employee_id')
+            ->get();
+
+        AuditLog::record('attendance.exported', null, [
+            'start' => $start->toDateString(),
+            'end'   => $end->toDateString(),
+            'count' => $records->count(),
+        ]);
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-store',
+        ];
+
+        $callback = function () use ($records) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Date', 'Employee Code', 'Employee Name', 'Department',
+                'Status', 'Check In', 'Check Out', 'Work Duration', 'Late (min)', 'Notes',
+            ]);
+
+            foreach ($records as $rec) {
+                fputcsv($handle, [
+                    $rec->date->format('Y-m-d'),
+                    $rec->employee->employee_code,
+                    $rec->employee->full_name,
+                    $rec->employee->department?->name ?? '',
+                    $rec->status_label,
+                    $rec->check_in_time  ?? '',
+                    $rec->check_out_time ?? '',
+                    $rec->work_duration  ?? '',
+                    $rec->late_minutes   ?? '',
+                    $rec->notes          ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function report(Request $request)

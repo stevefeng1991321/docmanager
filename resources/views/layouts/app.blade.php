@@ -96,6 +96,7 @@
                             <a href="{{ route('basic-knowledge.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Basic Knowledge</a>
                             <a href="{{ route('favorites.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Favorites</a>
                             <a href="{{ route('work-reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Work Reports</a>
+                            <a href="{{ route('attendance.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Attendance</a>
                             <a href="{{ route('reading-lists.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Reading Lists</a>
                             <a href="{{ route('history.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Recently Viewed</a>
                             <hr class="my-1 border-gray-100">
