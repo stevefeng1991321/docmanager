@@ -6,14 +6,20 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin — {{ config('app.name') }} — @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>[x-cloak]{display:none!important}</style>
+    <style>
+        [x-cloak] { display: none !important; }
+        .nav-scroll::-webkit-scrollbar { width: 4px; }
+        .nav-scroll::-webkit-scrollbar-track { background: transparent; }
+        .nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
+        .nav-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.15); }
+    </style>
     @stack('head')
 </head>
 <body class="h-full flex" x-data="{ sidebarOpen: false }">
 
-    {{-- Mobile sidebar backdrop --}}
+    {{-- Mobile backdrop --}}
     <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
-         class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -22,112 +28,171 @@
          x-transition:leave-end="opacity-0">
     </div>
 
-    {{-- Sidebar --}}
-    <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 text-gray-100 flex flex-col
+    {{-- ── Sidebar ─────────────────────────────────────────────────────────── --}}
+    <aside class="fixed inset-y-0 left-0 z-40 w-60 flex flex-col
                   transform transition-transform duration-200 ease-in-out
                   lg:relative lg:translate-x-0 lg:z-auto lg:flex-shrink-0"
+           style="background:#0d1117;"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
-        <div class="h-16 flex items-center px-6 border-b border-gray-700 flex-shrink-0">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 font-bold text-white text-lg">
-                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                DocManager
+        <div class="h-14 flex items-center px-4 flex-shrink-0" style="border-bottom:1px solid rgba(255,255,255,.06)">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
+                <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/40">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <span class="font-semibold text-white text-sm tracking-tight truncate">DocManager</span>
+                <span class="ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/20 flex-shrink-0">Admin</span>
             </a>
         </div>
 
-        {{-- Nav links --}}
-        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {{-- Nav --}}
+        <nav class="nav-scroll flex-1 overflow-y-auto py-3 px-2.5">
             @php
-                $pendingCount           = \App\Models\User::where('status', 'pending')->count();
-                $pendingRequestsCount   = \App\Models\AccountRequest::where('status', 'pending')->count();
-                $failedJobs             = \DB::table('failed_jobs')->count();
-                $nav = [
-                    ['route' => 'admin.dashboard',       'label' => 'Dashboard',      'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                    ['route' => 'admin.documents.index', 'label' => 'Documents',      'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    ['route' => 'admin.compare.index',   'label' => 'Compare',        'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
-                    ['route' => 'admin.categories.index','label' => 'Categories',     'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'],
-                    ['route' => 'admin.tags.index',      'label' => 'Tags',           'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
-                    ['route' => 'admin.users.index',     'label' => 'Users',          'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-                    ['route' => 'admin.employees.index', 'label' => 'Employees',      'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 100-8 4 4 0 000 8zm6 0a4 4 0 100-8'],
-                    ['route' => 'admin.roles.index',            'label' => 'Roles',            'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
-                    ['route' => 'admin.account-requests.index','label' => 'Account Requests', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
-                    ['route' => 'admin.problems.index',  'label' => 'Programming Problems',       'icon' => 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'],
-                    ['route' => 'admin.tests.index',     'label' => 'Developer Tests',            'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
-                    ['route' => 'admin.work-reports.index', 'label' => 'Work Reports',            'icon' => 'M9 17v-2a4 4 0 014-4h2m-6 6h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zm3-10h4'],
-                    ['route' => 'admin.science-tech.index', 'label' => 'Science & Technology', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
-                    ['route' => 'admin.basic-knowledge.index', 'label' => 'Basic Knowledge', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
-                    ['route' => 'admin.audit-logs.index','label' => 'Audit Logs',     'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-                    ['route' => 'admin.storage.index',   'label' => 'Storage',        'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4'],
-                    ['route' => 'admin.search.index',    'label' => 'Search Index',   'icon' => 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'],
-                    ['route' => 'admin.backup.index',    'label' => 'DB Backup',      'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4'],
-                    ['route' => 'admin.settings.index',  'label' => 'Settings',       'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
+                $pendingCount         = \App\Models\User::where('status', 'pending')->count();
+                $pendingRequestsCount = \App\Models\AccountRequest::where('status', 'pending')->count();
+                $failedJobs           = \DB::table('failed_jobs')->count();
+
+                $groups = [
+                    [
+                        'label' => 'Overview',
+                        'items' => [
+                            ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                            ['route' => 'chat.index',      'label' => 'Messages',  'icon' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', 'live_badge' => true],
+                        ],
+                    ],
+                    [
+                        'label' => 'Content',
+                        'items' => [
+                            ['route' => 'admin.documents.index',       'label' => 'Documents',           'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                            ['route' => 'admin.categories.index',      'label' => 'Categories',          'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'],
+                            ['route' => 'admin.tags.index',            'label' => 'Tags',                'icon' => 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'],
+                            ['route' => 'admin.science-tech.index',    'label' => 'Science & Tech',      'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
+                            ['route' => 'admin.basic-knowledge.index', 'label' => 'Basic Knowledge',     'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+                        ],
+                    ],
+                    [
+                        'label' => 'Developer & Testing',
+                        'items' => [
+                            ['route' => 'admin.problems.index', 'label' => 'Problems',        'icon' => 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'],
+                            ['route' => 'admin.tests.index',    'label' => 'Developer Tests', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+                            ['route' => 'admin.compare.index',  'label' => 'Compare Docs',   'icon' => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'],
+                        ],
+                    ],
+                    [
+                        'label' => 'People & HR',
+                        'items' => [
+                            ['route' => 'admin.users.index',            'label' => 'Users',            'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
+                            ['route' => 'admin.roles.index',            'label' => 'Roles',            'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
+                            ['route' => 'admin.employees.index',        'label' => 'Employees',        'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 100-8 4 4 0 000 8zm6 0a4 4 0 100-8'],
+                            ['route' => 'admin.account-requests.index', 'label' => 'Account Requests', 'icon' => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'],
+                            ['route' => 'admin.work-reports.index',     'label' => 'Work Reports',     'icon' => 'M9 17v-2a4 4 0 014-4h2m-6 6h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zm3-10h4'],
+                        ],
+                    ],
+                    [
+                        'label' => 'System',
+                        'items' => [
+                            ['route' => 'admin.audit-logs.index', 'label' => 'Audit Logs',   'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                            ['route' => 'admin.search.index',     'label' => 'Search Index', 'icon' => 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'],
+                            ['route' => 'admin.storage.index',    'label' => 'Storage',      'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4'],
+                            ['route' => 'admin.backup.index',     'label' => 'DB Backup',    'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4'],
+                            ['route' => 'admin.settings.index',   'label' => 'Settings',     'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
+                        ],
+                    ],
                 ];
             @endphp
 
-            @if(Route::has('chat.index'))
-            <a href="{{ route('chat.index') }}"
-               @click="sidebarOpen = false"
-               x-data="{ unread: 0 }"
-               x-init="
-                   fetch('{{ route('chat.unread-count') }}').then(r => r.json()).then(d => unread = d.unread_count);
-                   window.Echo?.private('App.Models.User.{{ auth()->id() }}').listen('.message.sent', e => {
-                       if (e.sender_id !== {{ auth()->id() }}) unread++;
-                   });
-               "
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('chat.*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                </svg>
-                Messages
-                <span x-show="unread > 0" x-cloak class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5" x-text="unread > 9 ? '9+' : unread"></span>
-            </a>
-            @endif
+            <div class="space-y-4">
+            @foreach ($groups as $group)
+                <div>
+                    <p class="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest"
+                       style="color:rgba(255,255,255,.28)">{{ $group['label'] }}</p>
+                    <div class="space-y-0.5">
+                    @foreach ($group['items'] as $item)
+                        @if(!Route::has($item['route']))
+                            @continue
+                        @endif
+                        @php
+                            $active = request()->routeIs(
+                                rtrim(preg_replace('/\.(index|show|edit|create)$/', '', $item['route']), '.') . '.*'
+                            );
+                        @endphp
 
-            @foreach($nav as $item)
-                @if(Route::has($item['route']))
-                <a href="{{ route($item['route']) }}"
-                   @click="sidebarOpen = false"
-                   class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                          {{ request()->routeIs(rtrim(preg_replace('/\.(index|show|edit|create)$/', '', $item['route']), '.') . '.*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
-                    </svg>
-                    {{ $item['label'] }}
-                    @if($item['route'] === 'admin.users.index' && $pendingCount > 0)
-                        <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ $pendingCount }}</span>
-                    @endif
-                    @if($item['route'] === 'admin.account-requests.index' && $pendingRequestsCount > 0)
-                        <span class="ml-auto bg-amber-500 text-white text-xs rounded-full px-2 py-0.5">{{ $pendingRequestsCount }}</span>
-                    @endif
-                    @if($item['route'] === 'admin.jobs.index' && $failedJobs > 0)
-                        <span class="ml-auto bg-yellow-500 text-white text-xs rounded-full px-2 py-0.5">{{ $failedJobs }}</span>
-                    @endif
-                </a>
-                @endif
+                        @if(!empty($item['live_badge']))
+                        {{-- Messages: live unread badge via Alpine --}}
+                        <a href="{{ route($item['route']) }}"
+                           @click="sidebarOpen = false"
+                           x-data="{ unread: 0 }"
+                           x-init="
+                               fetch('{{ route('chat.unread-count') }}').then(r => r.json()).then(d => unread = d.unread_count);
+                               window.Echo?.private('App.Models.User.{{ auth()->id() }}').listen('.message.sent', e => {
+                                   if (e.sender_id !== {{ auth()->id() }}) unread++;
+                               });
+                           "
+                           class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-100
+                                  {{ $active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white' }}"
+                           style="{{ $active ? '' : 'hover:background:rgba(255,255,255,.05)' }}"
+                           :style="!{{ $active ? 'true' : 'false' }} ? 'background:transparent' : ''"
+                           @mouseenter="if (!{{ $active ? 'true' : 'false' }}) $el.style.background='rgba(255,255,255,.05)'"
+                           @mouseleave="if (!{{ $active ? 'true' : 'false' }}) $el.style.background='transparent'">
+                            <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-white' : 'text-gray-500' }}"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
+                            </svg>
+                            <span class="truncate">{{ $item['label'] }}</span>
+                            <span x-show="unread > 0" x-cloak
+                                  class="ml-auto text-[10px] font-semibold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none"
+                                  x-text="unread > 9 ? '9+' : unread"></span>
+                        </a>
+
+                        @else
+                        {{-- Regular nav item --}}
+                        <a href="{{ route($item['route']) }}"
+                           @click="sidebarOpen = false"
+                           class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-100
+                                  {{ $active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+                            <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-white' : 'text-gray-500' }}"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
+                            </svg>
+                            <span class="truncate">{{ $item['label'] }}</span>
+                            @if($item['route'] === 'admin.users.index' && $pendingCount > 0)
+                                <span class="ml-auto text-[10px] font-semibold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $pendingCount }}</span>
+                            @elseif($item['route'] === 'admin.account-requests.index' && $pendingRequestsCount > 0)
+                                <span class="ml-auto text-[10px] font-semibold bg-amber-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $pendingRequestsCount }}</span>
+                            @elseif($item['route'] === 'admin.jobs.index' && $failedJobs > 0)
+                                <span class="ml-auto text-[10px] font-semibold bg-yellow-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $failedJobs }}</span>
+                            @endif
+                        </a>
+                        @endif
+
+                    @endforeach
+                    </div>
+                </div>
             @endforeach
+            </div>
         </nav>
 
-        {{-- Bottom user info --}}
-        <div class="border-t border-gray-700 p-4 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold uppercase text-sm flex-shrink-0">
+        {{-- User footer --}}
+        <div class="flex-shrink-0 p-2.5" style="border-top:1px solid rgba(255,255,255,.06)">
+            <div class="flex items-center gap-2.5 px-2 py-2 rounded-md group">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-semibold uppercase text-white text-xs flex-shrink-0 shadow">
                     {{ substr(auth()->user()->name, 0, 1) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-gray-400 capitalize">{{ auth()->user()->role }}</p>
+                    <p class="text-[13px] font-medium text-white truncate leading-tight">{{ auth()->user()->name }}</p>
+                    <p class="text-[11px] capitalize leading-tight" style="color:rgba(255,255,255,.35)">{{ auth()->user()->role }}</p>
                 </div>
-                <form action="{{ route('logout') }}" method="POST">
+                <form action="{{ route('logout') }}" method="POST" class="flex-shrink-0">
                     @csrf
-                    <button type="submit" title="Sign out" class="text-gray-400 hover:text-red-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    <button type="submit" title="Sign out"
+                            class="p-1 rounded transition-colors text-gray-600 hover:text-red-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                     </button>
                 </form>
@@ -135,23 +200,28 @@
         </div>
     </aside>
 
-    {{-- Main area --}}
+    {{-- ── Main area ───────────────────────────────────────────────────────── --}}
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {{-- Top bar --}}
-        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+        <header class="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
             <div class="flex items-center gap-3">
-                {{-- Hamburger (mobile/tablet) --}}
                 <button @click="sidebarOpen = !sidebarOpen"
                         class="lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <h1 class="text-base sm:text-lg font-semibold text-gray-800 truncate">@yield('title', 'Dashboard')</h1>
+                <h1 class="text-sm font-semibold text-gray-800 truncate">@yield('title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('home') }}" class="text-xs sm:text-sm text-gray-500 hover:text-blue-600 whitespace-nowrap">← Client View</a>
+                <a href="{{ route('home') }}"
+                   class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-600 transition-colors whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    Client View
+                </a>
             </div>
         </header>
 
@@ -164,10 +234,10 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-1"
                  class="mx-4 sm:mx-6 mt-4">
-                <div class="flex items-center justify-between gap-3 p-4 rounded-lg text-sm
+                <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm
                     {{ session('status') === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200' }}">
                     <span>{{ session('message') }}</span>
-                    <button @click="show = false" class="shrink-0 opacity-50 hover:opacity-100 transition-opacity text-base leading-none">&times;</button>
+                    <button @click="show = false" class="shrink-0 opacity-40 hover:opacity-100 transition-opacity leading-none text-lg">&times;</button>
                 </div>
             </div>
         @endif

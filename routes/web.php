@@ -207,9 +207,12 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     // Work Reports — cross-team oversight is admin-only per spec ("Administrators have full access to all reports")
     Route::middleware('role:admin')->group(function () {
-        Route::get('work-reports',                  [Admin\WorkReportController::class, 'index'])->name('work-reports.index');
-        Route::get('work-report-analytics',         [Admin\WorkReportAnalyticsController::class, 'index'])->name('work-report-analytics.index');
-        Route::get('work-report-analytics/export',  [Admin\WorkReportAnalyticsController::class, 'export'])->name('work-report-analytics.export');
+        Route::get('work-reports',                           [Admin\WorkReportController::class, 'index'])->name('work-reports.index');
+        Route::get('work-reports/{workReport}',              [Admin\WorkReportController::class, 'show'])->name('work-reports.show');
+        Route::patch('work-reports/{workReport}/review',     [Admin\WorkReportController::class, 'review'])->name('work-reports.review');
+        Route::post('work-reports/{workReport}/comments',    [Admin\WorkReportController::class, 'storeComment'])->name('work-reports.comments.store');
+        Route::get('work-report-analytics',                  [Admin\WorkReportAnalyticsController::class, 'index'])->name('work-report-analytics.index');
+        Route::get('work-report-analytics/export',           [Admin\WorkReportAnalyticsController::class, 'export'])->name('work-report-analytics.export');
     });
     Route::resource('projects', Admin\ProjectController::class)->except(['create', 'edit', 'show']);
 

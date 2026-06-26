@@ -67,7 +67,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @forelse($reports as $report)
-                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('work-reports.show', $report) }}'">
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='{{ route('admin.work-reports.show', $report) }}'">
                     <td class="px-4 py-3 font-medium text-gray-800">{{ $report->title }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ $report->employee->full_name }}</td>
                     <td class="px-4 py-3 text-gray-500">{{ $report->employee->department?->name ?? '—' }}</td>
