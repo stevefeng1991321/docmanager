@@ -8,6 +8,7 @@
     },
     "dependencies": {
         "flowbite": "^2.3.0",
+        "highlight.js": "^11.9.0",
         "laravel-echo": "^2.3.7",
         "pdfjs-dist": "^3.11.174",
         "pusher-js": "^8.5.0"

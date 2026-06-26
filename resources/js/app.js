@@ -1,6 +1,7 @@
 import './bootstrap';
 import './pdf-viewer';
 import './echo';
+import './highlight';
 
 import Alpine from 'alpinejs';
 import 'flowbite';

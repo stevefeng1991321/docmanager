@@ -49,6 +49,18 @@ DocManager lets teams upload, organize, search, and share documents from a singl
 - Per-user storage quotas with enforcement on upload
 - Account request flow — new users request access, admins approve or reject
 
+**Real-Time Chat & Messaging**
+- 1:1 private conversations between any two active users (Admin ↔ Client, Client ↔ Client)
+- True real-time delivery via **Laravel Reverb** — a self-hosted WebSocket server (no Pusher/third-party service)
+- Online/offline presence, message timestamps, sent/delivered/read indicators
+- Lightweight emoji picker, conversation + message search, live unread badges in both the client and admin nav
+- Broadcasts degrade gracefully — if the WebSocket server is briefly unavailable, messages still save; only the live push is skipped
+
+**Programming Problems & Developer Assessments**
+- Curated bank of coding problems (JavaScript, Math, Algorithms, AI) with reference solutions, browsable in an in-browser code explorer
+- **Developer Tests** — build a timed test from existing problems or add one-off custom problems inline, generate a no-account-needed invite link, and grade submissions manually against the reference solution
+- Invite links are public but token-scoped and rate-limited; an abandoned in-progress test auto-finalizes on expiry
+
 **Observability**
 - Audit log (admin actions) and Activity log (user actions) — both exportable
 - Download tracking per document
@@ -68,14 +80,14 @@ DocManager lets teams upload, organize, search, and share documents from a singl
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Browser (Tailwind CSS 3 + Alpine.js 3 + Flowbite)  │
-└────────────────────┬────────────────────────────────┘
-                     │ HTTP
-┌────────────────────▼────────────────────────────────┐
-│  Laravel 12 (PHP 8.2+)                              │
-│  ├── Client web routes  (/*)                        │
-│  ├── Admin panel routes (/admin/*)                  │
-│  └── REST API routes    (/api/*)  — Sanctum tokens  │
-└──────┬──────────────┬──────────────┬────────────────┘
+└──────┬───────────────────────────────────────┬──────┘
+       │ HTTP                                  │ WebSocket (Echo/pusher-js)
+┌──────▼────────────────────────────────┐  ┌────▼──────────────────────┐
+│  Laravel 12 (PHP 8.2+)                │  │  Laravel Reverb            │
+│  ├── Client web routes  (/*)          │◄─┤  Self-hosted WS server     │
+│  ├── Admin panel routes (/admin/*)    │  │  (chat + presence channels)│
+│  └── REST API routes    (/api/*)      │  └────────────────────────────┘
+└──────┬──────────────┬──────────────┬──┘
        │              │              │
 ┌──────▼──────┐ ┌─────▼──────┐ ┌───▼──────────────────┐
 │  MySQL 8    │ │  Queue     │ │  Local File Storage   │
@@ -85,7 +97,7 @@ DocManager lets teams upload, organize, search, and share documents from a singl
                 └────────────┘
 ```
 
-**Key database tables:** `resources`, `document_versions`, `categories`, `tags`, `users`, `shares`, `resource_embeddings` (TF-IDF vectors), `audit_logs`, `activity_logs`, `download_logs`, `search_logs`
+**Key database tables:** `resources`, `document_versions`, `categories`, `tags`, `users`, `shares`, `resource_embeddings` (TF-IDF vectors), `audit_logs`, `activity_logs`, `download_logs`, `search_logs`, `problems`, `tests` / `test_problems` / `test_invites` / `test_answers` (developer assessments), `conversations` / `messages` / `conversation_reads` (chat)
 
 ### Design Principles
 - **Offline-first** — no S3, no Elasticsearch, no external AI service
@@ -142,10 +154,10 @@ php artisan db:seed
 # Refresh database and re-run all seeders
 php artisan migrate:fresh --seed
 
-# Delete stale Algorithms records from database
-php artisan tinker --execute="App\Models\ProgrammingProblem::where('category', 'Algorithms')->delete()"
+# Delete stale records from the programming problem bank by category
+php artisan tinker --execute="App\Models\Problem::where('category', 'Algorithms')->delete()"
 
-# Refresh database and run a specific seeder
+# Re-run a specific seeder (problem bank is grouped by category)
 php artisan db:seed --class=JavaScriptSeeder
 php artisan db:seed --class=MathSeeder
 php artisan db:seed --class=AlgorithmsSeeder
@@ -166,7 +178,7 @@ The seeder creates:
 
 ## Start
 
-### Dev mode (three processes)
+### Dev mode (four processes)
 
 ```bash
 composer run dev
@@ -177,6 +189,7 @@ composer run dev
 | `server` | `php artisan serve` on port 8000 |
 | `queue` | `php artisan queue:listen` — content extraction + TF-IDF indexing |
 | `vite` | `npm run dev` — Tailwind + Alpine HMR |
+| `reverb` | `php artisan reverb:start` on port 8080 — real-time chat |
 
 ### Offline mode (no npm, no internet)
 
@@ -187,9 +200,12 @@ npm run build
 # Remove hot file if present
 rm -f public/hot
 
-# Start Laravel only
+# Start Laravel and the chat WebSocket server
 php artisan serve --host=0.0.0.0 --port=8000
+php artisan reverb:start
 ```
+
+> In production, keep `reverb:start` running under a process manager (e.g. Supervisor) and proxy WebSocket upgrades on the Reverb port through your reverse proxy. Without it, chat falls back to save-only — messages still send, but live delivery/presence won't update until the page is reloaded.
 
 > All fonts and assets are self-hosted. No CDN dependencies.
 
@@ -204,6 +220,9 @@ php artisan serve --host=0.0.0.0 --port=8000
 | `APP_URL` | `http://localhost` | Set to `http://127.0.0.1:8000` when using `artisan serve` |
 | `SHARE_LINK_EXPIRY_HOURS` | `24` | Share link lifetime |
 | `TRASH_RETENTION_DAYS` | `30` | Days before soft-deleted docs are purged |
+| `BROADCAST_CONNECTION` | `reverb` | Chat real-time transport — self-hosted, no third-party broadcaster |
+| `REVERB_APP_ID` / `REVERB_APP_KEY` / `REVERB_APP_SECRET` | generated on install | Reverb app credentials — see `php artisan reverb:install` |
+| `REVERB_HOST` / `REVERB_PORT` / `REVERB_SCHEME` | `localhost` / `8080` / `http` | Where the Reverb WebSocket server listens; matched by `VITE_REVERB_*` for the browser client |
 
 ---
 
@@ -217,11 +236,14 @@ php artisan search:build-tfidf      # Rebuild TF-IDF semantic index (in-process)
 # Maintenance
 php artisan dms:prune-trash         # Permanently delete old soft-deleted docs
 php artisan dms:archive-expired     # Archive docs past their expiry date
+php artisan dms:prune-shares        # Delete expired share links
+php artisan dms:prune-tokens        # Delete expired Sanctum tokens
 
-# Offline documentation
-php artisan docs:import-laravel --branch=12.x   # Import Laravel docs into search DB
-php artisan docs:build-laravel-offline           # Build offline HTML doc file
+# Real-time chat
+php artisan reverb:start            # Start the WebSocket server (required for live chat delivery)
 ```
+
+All maintenance commands accept `--dry-run` to preview what would change without modifying anything.
 
 ---
 
@@ -243,7 +265,7 @@ documentation/index.html           ← open this
 
 ## Tech Stack
 
-Laravel 12 · PHP 8.2 · MySQL 8 · Tailwind CSS 3 · Alpine.js 3 · Vite 7 · Flowbite 2 · Laravel Sanctum · TF-IDF semantic search (pure PHP, fully offline)
+Laravel 12 · PHP 8.2 · MySQL 8 · Tailwind CSS 3 · Alpine.js 3 · Vite 7 · Flowbite 2 · Laravel Sanctum · Laravel Reverb (self-hosted WebSockets) · Laravel Echo / pusher-js (client) · TF-IDF semantic search (pure PHP, fully offline)
 
 ---
 

@@ -1,10 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Programming Problems')
 
-@push('head')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-@endpush
-
 @section('content')
 <div x-data="problemExplorer()" class="flex gap-0 -m-4 sm:-m-6" style="height: calc(100vh - 4rem);">
 
@@ -254,7 +250,6 @@ pre code.hljs { background: #fff !important; padding: 1.25rem !important; }
 @endpush
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 function problemExplorer() {
     return {

@@ -151,6 +151,7 @@ td code{font-size:.75rem}
     <a class="nav-item" onclick="show('controllers-admin')">Admin Controllers</a>
     <a class="nav-item" onclick="show('controllers-auth')">Auth Controllers</a>
     <a class="nav-item" onclick="show('controllers-api')">API Controllers</a>
+    <a class="nav-item" onclick="show('controllers-chat')">Chat Controllers</a>
     <a class="nav-item" onclick="show('services')">Services</a>
     <a class="nav-item" onclick="show('jobs')">Jobs (Queue)</a>
     <a class="nav-item" onclick="show('commands')">Artisan Commands</a>
@@ -164,6 +165,8 @@ td code{font-size:.75rem}
     <a class="nav-item" onclick="show('feat-sharing')">Sharing</a>
     <a class="nav-item" onclick="show('feat-notifications')">Notifications</a>
     <a class="nav-item" onclick="show('feat-problems')">Problems</a>
+    <a class="nav-item" onclick="show('feat-tests')">Developer Tests</a>
+    <a class="nav-item" onclick="show('feat-chat')">Chat &amp; Messaging</a>
     <a class="nav-item" onclick="show('feat-api')">REST API</a>
     <a class="nav-item" onclick="show('feat-schedule')">Scheduled Tasks</a>
   </nav>
@@ -175,7 +178,7 @@ td code{font-size:.75rem}
 <!-- ── OVERVIEW ── -->
 <div class="section active" id="s-overview">
   <h1>DocManager</h1>
-  <p class="lead">A full-featured document management system built with Laravel 12. Supports file upload, content extraction, TF-IDF semantic search, role-based access control, and a REST API — all served from a single application.</p>
+  <p class="lead">A full-featured document management system built with Laravel 12. Supports file upload, content extraction, TF-IDF semantic search, role-based access control, real-time chat, developer assessments, and a REST API — all served from a single application.</p>
 
   <h2>What it does</h2>
   <div class="card-grid">
@@ -185,17 +188,20 @@ td code{font-size:.75rem}
     <div class="card"><div class="card-icon">🔗</div><h4>Share Links</h4><p>Time-limited public share tokens. No login required for recipients.</p></div>
     <div class="card"><div class="card-icon">🔒</div><h4>Lock &amp; Archive</h4><p>Admins can lock documents to block downloads/previews, or auto-archive on a date.</p></div>
     <div class="card"><div class="card-icon">🌐</div><h4>REST API</h4><p>Sanctum token-based API for programmatic document access and search.</p></div>
+    <div class="card"><div class="card-icon">💬</div><h4>Real-Time Chat</h4><p>1:1 messaging over a self-hosted WebSocket server (Laravel Reverb) — no third-party broadcaster.</p></div>
+    <div class="card"><div class="card-icon">🧪</div><h4>Developer Tests</h4><p>Build a timed coding test from the problem bank, send a no-account invite link, grade manually.</p></div>
   </div>
 
   <h2>Key numbers</h2>
   <table>
     <tr><th>Item</th><th>Count</th></tr>
-    <tr><td>Database tables</td><td>31</td></tr>
-    <tr><td>Models</td><td>24</td></tr>
-    <tr><td>Controllers</td><td>40</td></tr>
-    <tr><td>Blade views</td><td>56</td></tr>
-    <tr><td>Migrations</td><td>31</td></tr>
-    <tr><td>Artisan commands</td><td>8 custom + 2 import/build docs</td></tr>
+    <tr><td>Database tables</td><td>42</td></tr>
+    <tr><td>Models</td><td>32</td></tr>
+    <tr><td>Controllers</td><td>52</td></tr>
+    <tr><td>Blade views</td><td>96</td></tr>
+    <tr><td>Migrations</td><td>44</td></tr>
+    <tr><td>Broadcast events</td><td>3 (chat — MessageSent, MessagesDelivered, MessagesRead)</td></tr>
+    <tr><td>Artisan commands</td><td>6 custom</td></tr>
   </table>
 </div>
 
@@ -215,8 +221,8 @@ td code{font-size:.75rem}
     <tr><th>Process</th><th>Command</th><th>Purpose</th></tr>
     <tr><td><span class="badge badge-blue">server</span></td><td><code>php artisan serve</code></td><td>Laravel dev server on port 8000</td></tr>
     <tr><td><span class="badge badge-purple">queue</span></td><td><code>php artisan queue:listen</code></td><td>Processes ExtractDocumentContent &amp; IndexDocumentTfidf jobs</td></tr>
-    <tr><td><span class="badge badge-gray">logs</span></td><td><code>php artisan pail</code></td><td>Tail application logs in terminal</td></tr>
     <tr><td><span class="badge badge-cyan">vite</span></td><td><code>npm run dev</code></td><td>Vite HMR for CSS/JS assets</td></tr>
+    <tr><td><span class="badge badge-gray">reverb</span></td><td><code>php artisan reverb:start</code></td><td>Self-hosted WebSocket server for the chat feature's realtime message push</td></tr>
   </table>
 
   <h2>Environment variables (.env)</h2>
@@ -228,6 +234,8 @@ td code{font-size:.75rem}
     <tr><td><code>FILESYSTEM_DISK</code></td><td>local</td><td>Private uploads stored under <code>storage/app/private/</code></td></tr>
     <tr><td><code>SHARE_LINK_EXPIRY_HOURS</code></td><td>24</td><td>Default share link lifetime</td></tr>
     <tr><td><code>TRASH_RETENTION_DAYS</code></td><td>30</td><td>Days before soft-deleted files are permanently purged</td></tr>
+    <tr><td><code>BROADCAST_CONNECTION</code></td><td>reverb</td><td>Chat transport — self-hosted, set by <code>php artisan reverb:install</code></td></tr>
+    <tr><td><code>REVERB_HOST</code> / <code>REVERB_PORT</code></td><td>localhost / 8080</td><td>Where the WebSocket server listens; mirrored to the browser via <code>VITE_REVERB_*</code></td></tr>
   </table>
 
   <h2>First admin account</h2>
@@ -259,6 +267,7 @@ php artisan search:build-tfidf</code></pre>
     <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
     <tr><td><strong>laravel/framework</strong></td><td>^12.0</td><td>Core MVC framework — Eloquent, Blade, routing, queues, auth</td></tr>
     <tr><td><strong>laravel/sanctum</strong></td><td>^4.3</td><td>API token authentication (SPA + REST)</td></tr>
+    <tr><td><strong>laravel/reverb</strong></td><td>^1.10</td><td>Self-hosted WebSocket server — real-time chat delivery and presence</td></tr>
     <tr><td><strong>laravel/breeze</strong></td><td>^2.4</td><td>Auth scaffolding (login, register, password pages)</td></tr>
     <tr><td><strong>laravel/tinker</strong></td><td>^2.10</td><td>REPL for interactive development</td></tr>
     <tr><td><strong>smalot/pdfparser</strong></td><td>^2.12</td><td>Extract plain text from PDF files</td></tr>
@@ -277,6 +286,7 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><strong>Tailwind CSS 3</strong></td><td>Utility-first CSS — all UI styling, responsive breakpoints</td></tr>
     <tr><td><strong>Alpine.js v3</strong></td><td>Inline reactivity — dropdowns, modals, drawers, star ratings</td></tr>
     <tr><td><strong>Flowbite 2</strong></td><td>Prebuilt Tailwind components (modals, badges, tables)</td></tr>
+    <tr><td><strong>laravel-echo</strong> + <strong>pusher-js</strong></td><td>WebSocket client — connects to Reverb (Pusher-compatible protocol) for live chat events and presence</td></tr>
     <tr><td><strong>PDF.js</strong></td><td>Client-side PDF worker at <code>public/vendor/pdfjs/pdf.worker.min.js</code></td></tr>
   </table>
 
@@ -402,18 +412,20 @@ php artisan search:build-tfidf</code></pre>
   <div class="tree">
 <span class="dir">app/</span>
 ├── <span class="dir">Console/</span>
-│   └── <span class="dir">Commands/</span>       <span class="comment"># 8 custom Artisan commands</span>
+│   └── <span class="dir">Commands/</span>       <span class="comment"># 6 custom Artisan commands</span>
+├── <span class="dir">Events/</span>            <span class="comment"># Broadcast events — MessageSent, MessagesDelivered, MessagesRead</span>
 ├── <span class="dir">Http/</span>
-│   ├── <span class="dir">Controllers/</span>    <span class="comment"># 40 controllers split by area</span>
-│   │   ├── <span class="dir">Admin/</span>       <span class="comment"># 14 admin panel controllers</span>
-│   │   ├── <span class="dir">Api/</span>         <span class="comment"># 3 REST API controllers</span>
-│   │   ├── <span class="dir">Auth/</span>        <span class="comment"># 4 auth flow controllers</span>
-│   │   └── <span class="dir">Client/</span>      <span class="comment"># 15 front-end (user-facing) controllers</span>
-│   ├── <span class="dir">Middleware/</span>     <span class="comment"># RequireRole, RequireActiveAccount, SecurityHeaders</span>
+│   ├── <span class="dir">Controllers/</span>    <span class="comment"># 52 controllers split by area</span>
+│   │   ├── <span class="dir">Admin/</span>       <span class="comment"># Admin panel controllers (docs, users, tests, problems, logs …)</span>
+│   │   ├── <span class="dir">Api/</span>         <span class="comment"># REST API controllers</span>
+│   │   ├── <span class="dir">Auth/</span>        <span class="comment"># Auth flow controllers</span>
+│   │   ├── <span class="dir">Chat/</span>        <span class="comment"># Real-time chat — conversations, messages, presence</span>
+│   │   └── <span class="dir">Client/</span>      <span class="comment"># Front-end (user-facing) controllers, incl. public test-taking</span>
+│   ├── <span class="dir">Middleware/</span>     <span class="comment"># RequireRole, RequireActiveAccount (also touches last_seen_at), SecurityHeaders</span>
 │   ├── <span class="dir">Requests/</span>       <span class="comment"># Form request validators</span>
 │   └── <span class="dir">Resources/</span>      <span class="comment"># API resource transformers (JSON)</span>
-├── <span class="dir">Jobs/</span>              <span class="comment"># 2 queued jobs for text extraction + TF-IDF</span>
-├── <span class="dir">Models/</span>            <span class="comment"># 24 Eloquent models</span>
+├── <span class="dir">Jobs/</span>              <span class="comment"># Queued jobs for text extraction + TF-IDF</span>
+├── <span class="dir">Models/</span>            <span class="comment"># 32 Eloquent models</span>
 ├── <span class="dir">Providers/</span>         <span class="comment"># AppServiceProvider</span>
 ├── <span class="dir">Services/</span>          <span class="comment"># ContentExtractorService, TfidfService</span>
 └── <span class="dir">View/Components/</span>   <span class="comment"># AppLayout, GuestLayout Blade components</span>
@@ -423,10 +435,12 @@ php artisan search:build-tfidf</code></pre>
   <table>
     <tr><th>Folder</th><th>Responsibility</th></tr>
     <tr><td><code>Models/</code></td><td>Eloquent ORM — database access, relationships, scopes</td></tr>
-    <tr><td><code>Http/Controllers/Client/</code></td><td>Handles requests from logged-in users (view docs, search, favorites …)</td></tr>
-    <tr><td><code>Http/Controllers/Admin/</code></td><td>Admin panel — document CRUD, user management, bulk actions, logs</td></tr>
+    <tr><td><code>Http/Controllers/Client/</code></td><td>Handles requests from logged-in users (view docs, search, favorites …) plus the public, no-account test-taking flow</td></tr>
+    <tr><td><code>Http/Controllers/Admin/</code></td><td>Admin panel — document CRUD, user management, bulk actions, logs, developer tests &amp; problem bank</td></tr>
     <tr><td><code>Http/Controllers/Auth/</code></td><td>Login, registration, password management</td></tr>
     <tr><td><code>Http/Controllers/Api/</code></td><td>JSON REST endpoints authenticated by Sanctum tokens</td></tr>
+    <tr><td><code>Http/Controllers/Chat/</code></td><td>Conversations, messages, read/delivered receipts, presence — backs the real-time chat feature</td></tr>
+    <tr><td><code>Events/</code></td><td>Broadcastable events fired over Laravel Reverb for live chat updates</td></tr>
     <tr><td><code>Services/</code></td><td>Reusable business logic that doesn't fit in a controller</td></tr>
     <tr><td><code>Jobs/</code></td><td>Queued background work (heavy text extraction, indexing)</td></tr>
     <tr><td><code>Console/Commands/</code></td><td><code>php artisan</code> maintenance commands</td></tr>
@@ -437,12 +451,13 @@ php artisan search:build-tfidf</code></pre>
 <!-- ── ROUTES/ ── -->
 <div class="section" id="s-folder-routes">
   <h1>routes/</h1>
-  <p class="lead">Four route files, each with a distinct purpose.</p>
+  <p class="lead">Five route files, each with a distinct purpose.</p>
   <div class="tree">
 <span class="dir">routes/</span>
 ├── <span class="file">web.php</span>      <span class="comment"># Browser routes (session auth, CSRF protection)</span>
 ├── <span class="file">auth.php</span>     <span class="comment"># Login / register / password routes (included by web.php)</span>
 ├── <span class="file">api.php</span>      <span class="comment"># REST API routes (/api prefix, Sanctum token auth)</span>
+├── <span class="file">channels.php</span> <span class="comment"># Broadcasting channel authorization (chat private + presence channels)</span>
 └── <span class="file">console.php</span>  <span class="comment"># Scheduled Artisan command definitions</span>
   </div>
 
@@ -468,6 +483,24 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/notifications/read-all</code></td><td>NotificationController@markAllRead</td><td>notifications.read-all</td></tr>
     <tr><td><span class="method patch">PATCH</span></td><td><code>/notifications/{id}/read</code></td><td>NotificationController@markRead</td><td>notifications.read</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/profile</code></td><td>ProfileController@edit</td><td>profile.edit</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/chat</code></td><td>Chat\ChatController@index</td><td>chat.index</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/chat/unread-count</code></td><td>Chat\ChatController@unreadCount</td><td>chat.unread-count</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/chat/users</code></td><td>Chat\ConversationController@users</td><td>chat.users</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/chat/conversations</code></td><td>Chat\ConversationController@index</td><td>chat.conversations.index</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/chat/conversations</code></td><td>Chat\ConversationController@store</td><td>chat.conversations.store</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/chat/conversations/{id}</code></td><td>Chat\ConversationController@show</td><td>chat.conversations.show</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/chat/conversations/{id}/messages</code></td><td>Chat\MessageController@store</td><td>chat.messages.store</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/chat/conversations/{id}/delivered</code></td><td>Chat\ConversationController@markDelivered</td><td>chat.conversations.delivered</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/chat/conversations/{id}/read</code></td><td>Chat\ConversationController@markRead</td><td>chat.conversations.read</td></tr>
+  </table>
+
+  <h2>web.php — Public developer-test routes (no auth)</h2>
+  <p>Candidate-facing test-taking flow, reached via a token link — throttled at 60 req/min, no account required.</p>
+  <table>
+    <tr><th>Method</th><th>URI</th><th>Controller</th><th>Name</th></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/test/{token}</code></td><td>Client\TestSessionController@show</td><td>test.show</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/test/{token}/start</code></td><td>Client\TestSessionController@start</td><td>test.start</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/test/{token}/submit</code></td><td>Client\TestSessionController@submit</td><td>test.submit</td></tr>
   </table>
 
   <h2>web.php — Admin routes</h2>
@@ -503,6 +536,17 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method get">GET</span></td><td><code>/admin/problems/{id}/edit</code></td><td>Edit problem form</td></tr>
     <tr><td><span class="method put">PUT</span></td><td><code>/admin/problems/{id}</code></td><td>Update problem</td></tr>
     <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/problems/{id}</code></td><td>Delete problem</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/tests</code></td><td>Developer Tests list</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/tests/create</code></td><td>New test form — pick from problem bank or add custom problems inline</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/tests</code></td><td>Create test</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/tests/{id}</code></td><td>Test detail — problems, invites, scores</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/tests/{id}/edit</code></td><td>Edit test form</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/admin/tests/{id}</code></td><td>Update test</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/tests/{id}</code></td><td>Delete test</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/tests/{id}/invites</code></td><td>Generate a candidate invite link</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/tests/{id}/invites/{invite}</code></td><td>Revoke an invite</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/test-invites/{invite}/grade</code></td><td>Grading screen — candidate code vs. reference solution</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/admin/test-invites/{invite}/grade</code></td><td>Save scores &amp; feedback</td></tr>
   </table>
 
   <h2>api.php — REST routes</h2>
@@ -518,6 +562,15 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method delete">DELETE</span></td><td><code>/api/resources/{id}</code></td><td>token</td><td>Soft-delete document</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/api/resources/{id}/download</code></td><td>token</td><td>Download file (throttled)</td></tr>
     <tr><td><span class="method get">GET</span></td><td><code>/api/search</code></td><td>token</td><td>Keyword search (logs query)</td></tr>
+  </table>
+
+  <h2>channels.php — Broadcasting authorization</h2>
+  <p>Every WebSocket subscription is authorized server-side via Laravel's <code>/broadcasting/auth</code> endpoint (registered automatically by the <code>channels:</code> path in <code>bootstrap/app.php</code>) before Reverb lets the client join.</p>
+  <table>
+    <tr><th>Channel</th><th>Type</th><th>Authorization rule</th></tr>
+    <tr><td><code>conversation.{conversationId}</code></td><td>Private</td><td>Allowed only if the authenticated user is one of the conversation's two participants — denies with 403 otherwise</td></tr>
+    <tr><td><code>online</code> (wire name <code>presence-online</code>)</td><td>Presence</td><td>Any authenticated, active user — tracks who's currently connected for the online/offline indicator</td></tr>
+    <tr><td><code>App.Models.User.{id}</code></td><td>Private</td><td>Laravel's default per-user channel; also used to push <code>message.sent</code> to the recipient's nav badge even when that conversation isn't open</td></tr>
   </table>
 
   <h2>console.php — Scheduled tasks</h2>
@@ -817,7 +870,7 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
 <!-- ── MODELS ── -->
 <div class="section" id="s-models">
   <h1>Models</h1>
-  <p class="lead">24 Eloquent models in <code>app/Models/</code>. Each maps to a database table and defines relationships, scopes, and domain logic.</p>
+  <p class="lead">32 Eloquent models in <code>app/Models/</code>. Each maps to a database table and defines relationships, scopes, and domain logic.</p>
 
   <h2>Core document models</h2>
   <table>
@@ -854,8 +907,8 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
     <tr>
       <td><strong>User</strong></td><td><code>users</code></td>
-      <td>username, name, role, status, storage_quota_mb, failed_login_attempts, locked_until</td>
-      <td><code>isAdmin()</code>, <code>isEditor()</code>, <code>isActive()</code>, <code>storageUsedBytes()</code>, <code>wouldExceedQuota()</code></td>
+      <td>username, name, role, status, storage_quota_mb, failed_login_attempts, locked_until, last_seen_at</td>
+      <td><code>isAdmin()</code>, <code>isEditor()</code>, <code>isActive()</code>, <code>storageUsedBytes()</code>, <code>wouldExceedQuota()</code>, <code>conversations()</code> (chat, see below)</td>
     </tr>
     <tr>
       <td><strong>UserPreference</strong></td><td><code>user_preferences</code></td>
@@ -896,6 +949,51 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
   <table>
     <tr><th>Model</th><th>Table</th><th>Purpose</th></tr>
     <tr><td><strong>Setting</strong></td><td><code>settings</code></td><td>Global config key-value. <code>Setting::get($key)</code>, <code>Setting::set($key, $val)</code>, <code>Setting::allKeyed()</code> (cached)</td></tr>
+  </table>
+
+  <h2>Developer assessment models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
+    <tr>
+      <td><strong>Problem</strong></td><td><code>problems</code></td>
+      <td>title, description, difficulty, category, solution_code, order_index</td>
+      <td>Shared bank — used by both the problem explorer and Developer Tests; problems added inline while building a test are saved here too (category defaults to "Custom")</td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td><td><code>tests</code></td>
+      <td>title, description, time_limit_minutes, status (draft/active/archived)</td>
+      <td><code>problems()</code> (belongsToMany via <code>test_problems</code>, ordered), <code>invites()</code>, <code>isActive()</code></td>
+    </tr>
+    <tr>
+      <td><strong>TestInvite</strong></td><td><code>test_invites</code></td>
+      <td>candidate_name, candidate_email (nullable), token, status (pending/started/submitted/graded), started_at, expires_at, total_score, max_score</td>
+      <td><code>isExpired()</code> — drives auto-finalize of abandoned attempts; <code>answers()</code></td>
+    </tr>
+    <tr>
+      <td><strong>TestAnswer</strong></td><td><code>test_answers</code></td>
+      <td>test_invite_id, problem_id, code, score, feedback</td>
+      <td>One row per problem per invite — created blank on submit, scored manually by an admin</td>
+    </tr>
+  </table>
+
+  <h2>Chat models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
+    <tr>
+      <td><strong>Conversation</strong></td><td><code>conversations</code></td>
+      <td>user_one_id, user_two_id (normalized low/high id pair, unique), last_message_at</td>
+      <td><code>Conversation::between($a, $b)</code> (find-or-create), <code>otherUser()</code>, <code>unreadCountFor()</code>, <code>toListItem()</code> (API shape)</td>
+    </tr>
+    <tr>
+      <td><strong>Message</strong></td><td><code>messages</code></td>
+      <td>conversation_id, sender_id, body, delivered_at</td>
+      <td>Read status is <em>derived</em>, not stored per-message — compared against the recipient's <code>ConversationRead.last_read_at</code></td>
+    </tr>
+    <tr>
+      <td><strong>ConversationRead</strong></td><td><code>conversation_reads</code></td>
+      <td>conversation_id, user_id, last_read_at</td>
+      <td>One row per participant per conversation (unique) — a single upsert marks the whole thread read, instead of updating every message row</td>
+    </tr>
   </table>
 </div>
 
@@ -987,6 +1085,14 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
       <td><code>index()</code></td>
       <td>Lists the authenticated user's download history from <code>download_logs</code>.</td>
     </tr>
+    <tr>
+      <td><strong>TestSessionController</strong></td>
+      <td><code>show()</code>, <code>start()</code>, <code>submit()</code></td>
+      <td>Public, no-account developer-test flow reached via <code>/test/{token}</code> (outside the <code>auth</code> middleware group, rate-limited).
+      <code>show</code> renders one of four states (start / take / submitted / unavailable) based on the invite's status and the parent test's status;
+      if a started invite's timer has expired it auto-finalizes the submission (whatever was filled in) before rendering.
+      <code>start</code> stamps <code>started_at</code>/<code>expires_at</code>. <code>submit</code> saves one <code>TestAnswer</code> row per problem and marks the invite submitted.</td>
+    </tr>
   </table>
 </div>
 
@@ -1064,6 +1170,14 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
       <td><strong>ProblemController</strong></td>
       <td>Full CRUD for programming problems. <code>index()</code>: split-panel explorer (filter by difficulty/category, search, select a problem to view its description and runnable solution code). <code>show()</code>: returns JSON for the detail panel. <code>create()</code> / <code>store()</code>: add new problem. <code>edit()</code> / <code>update()</code>: modify title, description, difficulty, category, order_index, solution_code. <code>destroy()</code>: delete problem (triggered via JS form submission from the detail panel's Delete button).</td>
     </tr>
+    <tr>
+      <td><strong>TestController</strong></td>
+      <td>Developer Tests CRUD. <code>create()</code> / <code>store()</code> / <code>edit()</code> / <code>update()</code> accept both <code>problems[]</code> (existing bank IDs, via an "Add Existing Problem" modal) and <code>new_problems[]</code> (ad-hoc problems typed inline — each becomes a real <code>Problem</code> row, category defaults to "Custom", then gets attached like any other). At least one problem (existing or new) is required. <code>show()</code> lists the test's problems and candidate invites with status/score.</td>
+    </tr>
+    <tr>
+      <td><strong>TestInviteController</strong></td>
+      <td><code>store()</code>: generates a unique unguessable token and creates the candidate invite (email is optional). <code>destroy()</code>: revokes an invite. <code>grade()</code>: renders the grading screen (candidate's submitted code next to the reference solution, per-problem score + feedback inputs). <code>storeGrade()</code>: clamps each score to its problem's point value, sums into <code>total_score</code>/<code>max_score</code>, sets the invite status to <code>graded</code>.</td>
+    </tr>
   </table>
 </div>
 
@@ -1130,6 +1244,31 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
   </table>
 </div>
 
+<!-- ── CHAT CONTROLLERS ── -->
+<div class="section" id="s-controllers-chat">
+  <h1>Chat Controllers</h1>
+  <p class="lead">Located in <code>app/Http/Controllers/Chat/</code>.</p>
+
+  <table>
+    <tr><th>Controller</th><th>Methods</th><th>What it does</th></tr>
+    <tr>
+      <td><strong>ChatController</strong></td>
+      <td><code>index()</code>, <code>unreadCount()</code></td>
+      <td><code>index</code> renders the chat page with the current user's conversation list pre-hydrated server-side; supports <code>?user=</code> to find-or-create and auto-open a conversation. <code>unreadCount</code> backs the live nav badge.</td>
+    </tr>
+    <tr>
+      <td><strong>ConversationController</strong></td>
+      <td><code>index()</code>, <code>store()</code>, <code>show()</code>, <code>markDelivered()</code>, <code>markRead()</code>, <code>users()</code></td>
+      <td><code>index</code>: list + search by participant name/username or message body, scoped to the caller's own conversations. <code>store</code>: find-or-create a 1:1 conversation. <code>show</code>: returns message history and marks the other party's pending messages delivered + the thread read, broadcasting both. <code>users()</code>: picker for starting a new conversation. Every action checks <code>involves($user-&gt;id)</code> — 403 otherwise.</td>
+    </tr>
+    <tr>
+      <td><strong>MessageController</strong></td>
+      <td><code>store()</code></td>
+      <td>Saves the message, bumps <code>last_message_at</code>, broadcasts <code>MessageSent</code>. Wrapped in try/catch — a Reverb outage logs a warning but never fails the send.</td>
+    </tr>
+  </table>
+</div>
+
 <!-- ── SERVICES ── -->
 <div class="section" id="s-services">
   <h1>Services</h1>
@@ -1192,6 +1331,7 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
   </table>
 
   <div class="info-box">The queue worker must be running for uploads to become searchable: <code>php artisan queue:listen</code>. In production use <code>php artisan queue:work --daemon</code> supervised by Supervisor.</div>
+  <div class="info-box">The Reverb server must also be running for chat realtime push (<code>php artisan reverb:start</code>). Without it, chat falls back to no live updates — messages still send/receive via the REST endpoints, but the unread badge and new-message events won't appear until the page is reloaded. In production, supervise it the same way as the queue worker (e.g. Supervisor with <code>--no-interaction</code>).</div>
 </div>
 
 <!-- ── COMMANDS ── -->
@@ -1222,8 +1362,9 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
   </table>
 
   <h2>Documentation commands</h2>
+  <p><strong>Note:</strong> <code>docs:import-laravel</code> and <code>docs:build-laravel-offline</code> were one-off generator commands used to produce the bundled <code>documentation/laravel/index.html</code>. They are <strong>not present</strong> in the current <code>app/Console/Commands/</code> — the table below documents what they did, not a command you can run today.</p>
   <table>
-    <tr><th>Signature</th><th>Options</th><th>What it does</th></tr>
+    <tr><th>Signature</th><th>Options</th><th>What it did</th></tr>
     <tr>
       <td><code>docs:import-laravel</code></td>
       <td><code>--branch=12.x</code>, <code>--force</code></td>
@@ -1252,7 +1393,7 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr>
       <td><strong>RequireActiveAccount</strong></td>
       <td><code>active</code></td>
-      <td>Checks <code>auth()-&gt;user()-&gt;status</code>. Pending users are redirected to a "waiting for activation" page; inactive/suspended users get a 403. For API requests returns JSON 403.</td>
+      <td>Checks <code>auth()-&gt;user()-&gt;status</code>. Pending users are redirected to a "waiting for activation" page; inactive/suspended users get a 403. For API requests returns JSON 403. Also opportunistically touches <code>users.last_seen_at</code> (throttled to once per minute) — the fallback "last seen" shown in chat when a user is offline.</td>
     </tr>
     <tr>
       <td><strong>SecurityHeaders</strong></td>
@@ -1506,6 +1647,72 @@ Route::middleware(['auth:sanctum', 'active'])-&gt;group(function () { ... });</c
 php artisan db:seed --class=MathSeeder
 php artisan db:seed --class=AlgorithmsSeeder
 php artisan db:seed --class=AISeeder</code></pre>
+</div>
+
+<!-- ── FEATURE: DEVELOPER TESTS ── -->
+<div class="section" id="s-feat-tests">
+  <h1>Developer Tests</h1>
+  <p class="lead">Turns the problem bank into a timed coding assessment that an external candidate can take with no DocManager account, via a single invite link.</p>
+
+  <h2>Building a test</h2>
+  <p>An admin/editor picks any mix of existing bank problems (via an "Add Existing Problem" search modal) and/or types brand-new problems inline. Each inline problem becomes a real <code>Problem</code> row (category defaults to "Custom") so it's reusable in future tests too — no separate "custom problem" schema. A test has a title, optional description (shown to the candidate), a time limit in minutes, and a status: <code>draft</code> (not invitable), <code>active</code> (invites can be created), or <code>archived</code>.</p>
+
+  <h2>Inviting a candidate</h2>
+  <p>From the test's detail page, entering just a name (email is optional) generates a 48-character random token and a public link: <code>/test/{token}</code>. The link is unguessable, scoped to that one invite, and rate-limited at the route level (60 req/min) since it requires no authentication.</p>
+
+  <h2>Taking the test</h2>
+  <p>The candidate sees a start screen (title, description, problem count, time limit), then a single page with all problems and a countdown timer (<code>mm:ss</code> under an hour, <code>hh:mm:ss</code> at or above it) that auto-submits when it hits zero. If the candidate abandons the tab, the <em>next</em> time anyone loads that link (including the admin checking status), the server notices the timer has expired and force-finalizes the submission with whatever was filled in — no orphaned "in progress forever" invites.</p>
+
+  <h2>Grading</h2>
+  <p>Each problem carries a point value (default 100, editable per problem in the test). The grading screen shows the candidate's submitted code next to the problem's reference <code>solution_code</code>, with a score input (clamped server-side to the problem's point value) and a free-text feedback field. Saving computes <code>total_score</code> / <code>max_score</code> and flips the invite to <code>graded</code>.</p>
+
+  <h2>Data model</h2>
+  <table>
+    <tr><th>Table</th><th>Purpose</th></tr>
+    <tr><td><code>tests</code></td><td>Title, description, time_limit_minutes, status</td></tr>
+    <tr><td><code>test_problems</code></td><td>Pivot: which problems belong to a test, in what order, worth how many points</td></tr>
+    <tr><td><code>test_invites</code></td><td>One row per candidate — token, status, timing, computed score</td></tr>
+    <tr><td><code>test_answers</code></td><td>One row per problem per invite — submitted code, score, feedback</td></tr>
+  </table>
+</div>
+
+<!-- ── FEATURE: CHAT ── -->
+<div class="section" id="s-feat-chat">
+  <h1>Chat &amp; Messaging</h1>
+  <p class="lead">Real-time 1:1 messaging between any two active users, built on <strong>Laravel Reverb</strong> — a self-hosted WebSocket server, so there's no third-party broadcasting service (Pusher, Ably) in the loop.</p>
+
+  <h2>Why Reverb</h2>
+  <p>Consistent with the rest of the project's offline-first, self-hosted design: Reverb ships as a first-party Laravel package and speaks the Pusher protocol, so the standard <code>laravel-echo</code> + <code>pusher-js</code> client libraries work unmodified — just pointed at a server you run yourself (<code>php artisan reverb:start</code>).</p>
+
+  <h2>Real-time pipeline</h2>
+  <table>
+    <tr><th>Event</th><th>Broadcast on</th><th>Triggers when</th></tr>
+    <tr><td><code>MessageSent</code></td><td><code>private-conversation.{id}</code> and the recipient's <code>private-App.Models.User.{id}</code></td><td>A message is created — the second channel lets the nav badge/sidebar update even if that conversation isn't open</td></tr>
+    <tr><td><code>MessagesDelivered</code></td><td><code>private-conversation.{id}</code></td><td>The recipient's client fetches the thread (or acks a live message) and pending messages get a <code>delivered_at</code> timestamp</td></tr>
+    <tr><td><code>MessagesRead</code></td><td><code>private-conversation.{id}</code></td><td>The recipient opens the thread — upserts their <code>conversation_reads.last_read_at</code> pointer</td></tr>
+  </table>
+  <p>All three use <code>ShouldBroadcastNow</code> (synchronous, no queue worker needed for chat to feel instant) and are wrapped in try/catch at the call site — if Reverb is briefly down, the underlying save still succeeds and only the live push is skipped.</p>
+
+  <h2>Read &amp; delivered indicators</h2>
+  <p>Status ticks are <em>derived</em>, not stored per message: a sent message you own shows "read" if its timestamp is at or before the other participant's <code>last_read_at</code>, "delivered" if <code>delivered_at</code> is set, otherwise "sent". Marking an entire thread read is one upsert on <code>conversation_reads</code>, not N message updates.</p>
+
+  <h2>Presence (online/offline)</h2>
+  <p>A presence channel (<code>presence-online</code>) tracks who's currently connected — joining/leaving fires purely over the socket, no database polling. <code>users.last_seen_at</code> is updated opportunistically (throttled to once per minute) by <code>RequireActiveAccount</code> middleware as a fallback "last seen" for when a user is offline.</p>
+
+  <h2>Other features</h2>
+  <ul>
+    <li><strong>Search</strong> — conversations are filtered by participant name/username or by message content, scoped to the caller's own conversations</li>
+    <li><strong>Emoji picker</strong> — a static grid of common emoji, no external package</li>
+    <li><strong>Responsive layout</strong> — the conversation list and the open thread collapse to a single pane on narrow screens</li>
+  </ul>
+
+  <h2>Data model</h2>
+  <table>
+    <tr><th>Table</th><th>Purpose</th></tr>
+    <tr><td><code>conversations</code></td><td>Normalized 1:1 pair (<code>user_one_id</code> &lt; <code>user_two_id</code>, unique) + <code>last_message_at</code> for sort order</td></tr>
+    <tr><td><code>messages</code></td><td>conversation_id, sender_id, body, delivered_at</td></tr>
+    <tr><td><code>conversation_reads</code></td><td>One row per participant per conversation — their read pointer</td></tr>
+  </table>
 </div>
 
 <!-- ── FEATURE: API ── -->
