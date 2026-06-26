@@ -15,7 +15,7 @@
         ];
     }
 @endphp
-<div x-data="testForm(@json($initialPoints), @json($allProblemsJson))" class="max-w-4xl mx-auto space-y-5">
+<div x-data="testForm({{ \Illuminate\Support\Js::from($initialPoints) }}, {{ \Illuminate\Support\Js::from($allProblemsJson) }})" class="max-w-4xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-gray-800">New Test</h1>
         <a href="{{ route('admin.tests.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back to Tests</a>
