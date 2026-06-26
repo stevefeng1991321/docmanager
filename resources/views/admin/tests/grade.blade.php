@@ -60,10 +60,9 @@
                     </div>
                     <div class="flex-1 min-w-[240px]">
                         <label class="block text-xs font-medium text-gray-600 mb-1">Feedback</label>
-                        <input type="text" name="feedback[{{ $problem->id }}]"
-                               value="{{ old('feedback.'.$problem->id, $answer->feedback ?? '') }}"
-                               placeholder="Optional comments for this answer"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                        <textarea name="feedback[{{ $problem->id }}]" rows="2"
+                               placeholder="Optional comments for this answer, or auto-grading results"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm font-mono resize-y">{{ old('feedback.'.$problem->id, $answer->feedback ?? '') }}</textarea>
                     </div>
                 </div>
             </div>

@@ -36,6 +36,10 @@ function helloWorld() {
 
 console.log(helloWorld());    // "Hello, World!"
 JS,
+                'function_name' => 'helloWorld',
+                'test_cases'    => [
+                    ['args' => [], 'expected' => 'Hello, World!'],
+                ],
             ],
             [
                 'title'       => 'Even or Odd',
@@ -50,6 +54,12 @@ console.log(evenOrOdd(4));   // Even
 console.log(evenOrOdd(7));   // Odd
 console.log(evenOrOdd(0));   // Even
 JS,
+                'function_name' => 'evenOrOdd',
+                'test_cases'    => [
+                    ['args' => [4], 'expected' => 'Even'],
+                    ['args' => [7], 'expected' => 'Odd'],
+                    ['args' => [0], 'expected' => 'Even'],
+                ],
             ],
             [
                 'title'       => 'FizzBuzz',
@@ -67,6 +77,13 @@ for (let i = 1; i <= 20; i++) {
     console.log(fizzBuzz(i));
 }
 JS,
+                'function_name' => 'fizzBuzz',
+                'test_cases'    => [
+                    ['args' => [3], 'expected' => 'Fizz'],
+                    ['args' => [5], 'expected' => 'Buzz'],
+                    ['args' => [15], 'expected' => 'FizzBuzz'],
+                    ['args' => [7], 'expected' => '7'],
+                ],
             ],
             [
                 'title'       => 'Reverse a String',
@@ -81,6 +98,12 @@ console.log(reverseString("hello"));    // "olleh"
 console.log(reverseString("abcde"));    // "edcba"
 console.log(reverseString(""));         // ""
 JS,
+                'function_name' => 'reverseString',
+                'test_cases'    => [
+                    ['args' => ['hello'], 'expected' => 'olleh'],
+                    ['args' => ['abcde'], 'expected' => 'edcba'],
+                    ['args' => [''], 'expected' => ''],
+                ],
             ],
             [
                 'title'       => 'Palindrome Check',
@@ -96,6 +119,12 @@ console.log(isPalindrome("racecar"));                         // true
 console.log(isPalindrome("A man a plan a canal Panama"));     // true
 console.log(isPalindrome("hello"));                           // false
 JS,
+                'function_name' => 'isPalindrome',
+                'test_cases'    => [
+                    ['args' => ['racecar'], 'expected' => true],
+                    ['args' => ['A man a plan a canal Panama'], 'expected' => true],
+                    ['args' => ['hello'], 'expected' => false],
+                ],
             ],
             [
                 'title'       => 'Count Vowels',
@@ -110,6 +139,12 @@ console.log(countVowels("hello"));         // 2
 console.log(countVowels("JavaScript"));    // 3
 console.log(countVowels("rhythm"));        // 0
 JS,
+                'function_name' => 'countVowels',
+                'test_cases'    => [
+                    ['args' => ['hello'], 'expected' => 2],
+                    ['args' => ['JavaScript'], 'expected' => 3],
+                    ['args' => ['rhythm'], 'expected' => 0],
+                ],
             ],
             [
                 'title'       => 'Check Anagram',
@@ -124,6 +159,11 @@ function isAnagram(a, b) {
 console.log(isAnagram("listen", "silent"));   // true
 console.log(isAnagram("hello", "world"));     // false
 JS,
+                'function_name' => 'isAnagram',
+                'test_cases'    => [
+                    ['args' => ['listen', 'silent'], 'expected' => true],
+                    ['args' => ['hello', 'world'], 'expected' => false],
+                ],
             ],
             [
                 'title'       => 'Remove Duplicates from Array',
@@ -137,6 +177,11 @@ function removeDuplicates(arr) {
 console.log(removeDuplicates([1, 2, 2, 3, 4, 4, 5]));   // [1, 2, 3, 4, 5]
 console.log(removeDuplicates(["a", "b", "a", "c"]));     // ["a", "b", "c"]
 JS,
+                'function_name' => 'removeDuplicates',
+                'test_cases'    => [
+                    ['args' => [[1, 2, 2, 3, 4, 4, 5]], 'expected' => [1, 2, 3, 4, 5]],
+                    ['args' => [['a', 'b', 'a', 'c']], 'expected' => ['a', 'b', 'c']],
+                ],
             ],
             [
                 'title'       => 'Two Sum',
@@ -157,6 +202,12 @@ console.log(twoSum([2, 7, 11, 15], 9));   // [0, 1]
 console.log(twoSum([3, 2, 4], 6));         // [1, 2]
 console.log(twoSum([3, 3], 6));            // [0, 1]
 JS,
+                'function_name' => 'twoSum',
+                'test_cases'    => [
+                    ['args' => [[2, 7, 11, 15], 9], 'expected' => [0, 1]],
+                    ['args' => [[3, 2, 4], 6], 'expected' => [1, 2]],
+                    ['args' => [[3, 3], 6], 'expected' => [0, 1]],
+                ],
             ],
             [
                 'title'       => 'Deep Clone Object',
@@ -174,6 +225,10 @@ clone.b.c = 99;
 console.log(original.b.c);   // 2 (unchanged)
 console.log(clone.b.c);      // 99
 JS,
+                'function_name' => 'deepClone',
+                'test_cases'    => [
+                    ['args' => [['a' => 1, 'b' => ['c' => 2, 'd' => [3, 4]]]], 'expected' => ['a' => 1, 'b' => ['c' => 2, 'd' => [3, 4]]]],
+                ],
             ],
 
             // ─── MEDIUM ──────────────────────────────────────────────────────────────
@@ -200,6 +255,12 @@ console.log(isValid("()[]{}"));    // true
 console.log(isValid("(]"));        // false
 console.log(isValid("{[()]}"));    // true
 JS,
+                'function_name' => 'isValid',
+                'test_cases'    => [
+                    ['args' => ['()[]{}'], 'expected' => true],
+                    ['args' => ['(]'], 'expected' => false],
+                    ['args' => ['{[()]}'], 'expected' => true],
+                ],
             ],
             [
                 'title'       => 'Merge Two Sorted Arrays',
@@ -221,6 +282,11 @@ function mergeSorted(arr1, arr2) {
 console.log(mergeSorted([1, 3, 5], [2, 4, 6]));   // [1, 2, 3, 4, 5, 6]
 console.log(mergeSorted([1, 2], [3, 4]));           // [1, 2, 3, 4]
 JS,
+                'function_name' => 'mergeSorted',
+                'test_cases'    => [
+                    ['args' => [[1, 3, 5], [2, 4, 6]], 'expected' => [1, 2, 3, 4, 5, 6]],
+                    ['args' => [[1, 2], [3, 4]], 'expected' => [1, 2, 3, 4]],
+                ],
             ],
             [
                 'title'       => 'Longest Common Prefix',
@@ -242,6 +308,11 @@ function longestCommonPrefix(strs) {
 console.log(longestCommonPrefix(["flower", "flow", "flight"]));   // "fl"
 console.log(longestCommonPrefix(["dog", "racecar", "car"]));      // ""
 JS,
+                'function_name' => 'longestCommonPrefix',
+                'test_cases'    => [
+                    ['args' => [['flower', 'flow', 'flight']], 'expected' => 'fl'],
+                    ['args' => [['dog', 'racecar', 'car']], 'expected' => ''],
+                ],
             ],
             [
                 'title'       => 'Group Anagrams',
@@ -261,6 +332,10 @@ function groupAnagrams(strs) {
 console.log(groupAnagrams(["eat","tea","tan","ate","nat","bat"]));
 // [["eat","tea","ate"],["tan","nat"],["bat"]]
 JS,
+                'function_name' => 'groupAnagrams',
+                'test_cases'    => [
+                    ['args' => [['eat', 'tea', 'tan', 'ate', 'nat', 'bat']], 'expected' => [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]],
+                ],
             ],
             [
                 'title'       => 'Longest Palindromic Substring',
@@ -292,6 +367,12 @@ console.log(longestPalindrome("babad"));    // "bab"
 console.log(longestPalindrome("cbbd"));     // "bb"
 console.log(longestPalindrome("racecar"));  // "racecar"
 JS,
+                'function_name' => 'longestPalindrome',
+                'test_cases'    => [
+                    ['args' => ['babad'], 'expected' => 'bab'],
+                    ['args' => ['cbbd'], 'expected' => 'bb'],
+                    ['args' => ['racecar'], 'expected' => 'racecar'],
+                ],
             ],
             [
                 'title'       => 'Longest Substring Without Repeating Characters',
@@ -315,6 +396,12 @@ console.log(lengthOfLongestSubstring("abcabcbb"));   // 3
 console.log(lengthOfLongestSubstring("bbbbb"));      // 1
 console.log(lengthOfLongestSubstring("pwwkew"));     // 3
 JS,
+                'function_name' => 'lengthOfLongestSubstring',
+                'test_cases'    => [
+                    ['args' => ['abcabcbb'], 'expected' => 3],
+                    ['args' => ['bbbbb'], 'expected' => 1],
+                    ['args' => ['pwwkew'], 'expected' => 3],
+                ],
             ],
             [
                 'title'       => 'Product of Array Except Self',
@@ -339,6 +426,10 @@ function productExceptSelf(nums) {
 
 console.log(productExceptSelf([1, 2, 3, 4]));   // [24, 12, 8, 6]
 JS,
+                'function_name' => 'productExceptSelf',
+                'test_cases'    => [
+                    ['args' => [[1, 2, 3, 4]], 'expected' => [24, 12, 8, 6]],
+                ],
             ],
             [
                 'title'       => 'Container with Most Water',
@@ -359,6 +450,11 @@ function maxArea(height) {
 console.log(maxArea([1, 8, 6, 2, 5, 4, 8, 3, 7]));   // 49
 console.log(maxArea([1, 1]));                           // 1
 JS,
+                'function_name' => 'maxArea',
+                'test_cases'    => [
+                    ['args' => [[1, 8, 6, 2, 5, 4, 8, 3, 7]], 'expected' => 49],
+                    ['args' => [[1, 1]], 'expected' => 1],
+                ],
             ],
             [
                 'title'       => 'Three Sum',
@@ -388,6 +484,10 @@ function threeSum(nums) {
 console.log(JSON.stringify(threeSum([-1, 0, 1, 2, -1, -4])));
 // [[-1,-1,2],[-1,0,1]]
 JS,
+                'function_name' => 'threeSum',
+                'test_cases'    => [
+                    ['args' => [[-1, 0, 1, 2, -1, -4]], 'expected' => [[-1, -1, 2], [-1, 0, 1]]],
+                ],
             ],
             [
                 'title'       => 'Roman to Integer',
@@ -410,6 +510,12 @@ console.log(romanToInt("III"));      // 3
 console.log(romanToInt("LVIII"));    // 58
 console.log(romanToInt("MCMXCIV")); // 1994
 JS,
+                'function_name' => 'romanToInt',
+                'test_cases'    => [
+                    ['args' => ['III'], 'expected' => 3],
+                    ['args' => ['LVIII'], 'expected' => 58],
+                    ['args' => ['MCMXCIV'], 'expected' => 1994],
+                ],
             ],
 
             // ─── HARD ────────────────────────────────────────────────────────────────
@@ -735,6 +841,12 @@ console.log(flattenDeep([1, [2, [3, [4]]]], 2));
 console.log(flattenDeep([[1, 2], [3, [4, 5]]]));
 // [1, 2, 3, 4, 5]
 JS,
+                'function_name' => 'flattenDeep',
+                'test_cases'    => [
+                    ['args' => [[1, [2, [3, [4, [5]]]]]], 'expected' => [1, 2, 3, 4, 5]],
+                    ['args' => [[1, [2, [3, [4]]]], 2], 'expected' => [1, 2, 3, [4]]],
+                    ['args' => [[[1, 2], [3, [4, 5]]]], 'expected' => [1, 2, 3, 4, 5]],
+                ],
             ],
             [
                 'title'       => 'Expression Calculator (Tokenizer + Shunting-Yard + Evaluator)',
@@ -915,6 +1027,16 @@ console.log(calculate("2 * pi"));             // 6.283185307179586 (constant)
 console.log(calculate("10 % 3"));             // 1    (modulo)
 console.log(calculate("pow(2, 3) + max(4, 9)")); // 17 (multi-arg functions)
 JS,
+                'function_name' => 'calculate',
+                'test_cases'    => [
+                    ['args' => ['3 + 4 * 2'], 'expected' => 11],
+                    ['args' => ['(3 + 4) * 2'], 'expected' => 14],
+                    ['args' => ['2 ^ 3 ^ 2'], 'expected' => 512],
+                    ['args' => ['-5 + 3'], 'expected' => -2],
+                    ['args' => ['sqrt(16) + 2'], 'expected' => 6],
+                    ['args' => ['10 % 3'], 'expected' => 1],
+                    ['args' => ['pow(2, 3) + max(4, 9)'], 'expected' => 17],
+                ],
             ],
         ];
     }

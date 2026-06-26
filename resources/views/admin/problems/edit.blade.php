@@ -2,6 +2,12 @@
 @section('title', 'Edit Problem')
 
 @section('content')
+@php
+    $initialCases = old('test_cases') ?: collect($problem->test_cases ?? [])
+        ->map(fn ($c) => ['args' => json_encode($c['args']), 'expected' => json_encode($c['expected'])])
+        ->values()
+        ->all();
+@endphp
 <div class="max-w-2xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-gray-800">Edit Problem</h1>
@@ -9,6 +15,7 @@
     </div>
 
     <form method="POST" action="{{ route('admin.problems.update', $problem) }}"
+          x-data="testCaseBuilder({{ \Illuminate\Support\Js::from($initialCases) }})"
           class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
         @csrf @method('PUT')
 
@@ -64,6 +71,42 @@
             @error('solution_code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
+        <div class="border-t border-gray-100 pt-5 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Function Name <span class="text-gray-400">(for auto-grading)</span></label>
+                <input type="text" name="function_name" value="{{ old('function_name', $problem->function_name) }}" placeholder="e.g. evenOrOdd"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono @error('function_name') border-red-400 @enderror">
+                @error('function_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                <p class="text-xs text-gray-400 mt-1">Must match the function the candidate is expected to define. Leave blank to grade this problem manually.</p>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-sm font-medium text-gray-700">Test Cases</label>
+                    <button type="button" @click="addCase()"
+                            class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1 rounded-lg transition">
+                        + Add Test Case
+                    </button>
+                </div>
+
+                <template x-for="(c, i) in cases" :key="i">
+                    <div class="flex items-start gap-2 mb-2">
+                        <input type="text" :name="`test_cases[${i}][args]`" x-model="c.args" placeholder="Args (JSON array), e.g. [4]"
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono">
+                        <input type="text" :name="`test_cases[${i}][expected]`" x-model="c.expected" placeholder='Expected (JSON), e.g. "Even"'
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono">
+                        <button type="button" @click="removeCase(i)" class="text-xs text-red-500 hover:text-red-700 px-1 py-2.5">Remove</button>
+                    </div>
+                </template>
+                @error('test_cases') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                @foreach(old('test_cases', []) as $i => $case)
+                    @error("test_cases.{$i}.args") <p class="text-red-500 text-xs mt-1">Row {{ $i + 1 }}: {{ $message }}</p> @enderror
+                    @error("test_cases.{$i}.expected") <p class="text-red-500 text-xs mt-1">Row {{ $i + 1 }}: {{ $message }}</p> @enderror
+                @endforeach
+                <p x-show="cases.length === 0" class="text-xs text-gray-400">No test cases yet — this problem will be graded manually.</p>
+            </div>
+        </div>
+
         <div class="flex gap-3 pt-2">
             <button type="submit"
                     class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
@@ -77,3 +120,19 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function testCaseBuilder(initialCases) {
+    return {
+        cases: initialCases.length ? initialCases : [],
+        addCase() {
+            this.cases.push({ args: '', expected: '' });
+        },
+        removeCase(i) {
+            this.cases.splice(i, 1);
+        },
+    };
+}
+</script>
+@endpush

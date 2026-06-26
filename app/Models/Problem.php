@@ -13,5 +13,11 @@ class Problem extends Model
         'difficulty',
         'category',
         'solution_code',
+        'function_name',
+        'test_cases',
+    ];
+
+    protected $casts = [
+        'test_cases' => 'array',
     ];
 }
