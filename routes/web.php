@@ -264,6 +264,16 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         Route::put('settings',  [Admin\SettingController::class, 'update'])->name('settings.update');
     });
 
+    // Database Backup (admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('backup',                            [Admin\DatabaseBackupController::class, 'index'])->name('backup.index');
+        Route::post('backup',                           [Admin\DatabaseBackupController::class, 'store'])->name('backup.store');
+        Route::post('backup/restore-upload',            [Admin\DatabaseBackupController::class, 'restoreFromUpload'])->name('backup.restore-upload');
+        Route::get('backup/{filename}/download',        [Admin\DatabaseBackupController::class, 'download'])->name('backup.download');
+        Route::post('backup/{filename}/restore',        [Admin\DatabaseBackupController::class, 'restoreFromFile'])->name('backup.restore');
+        Route::delete('backup/{filename}',              [Admin\DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
+    });
+
     // Documentation
     Route::get('help/{path?}', function ($path = 'index.html') {
         $docRoot = realpath(base_path('documentation'));
