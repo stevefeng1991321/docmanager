@@ -68,6 +68,34 @@ DocManager lets teams upload, organize, search, and share documents from a singl
 - Background job monitor (queue health)
 - Storage usage dashboard
 
+**HR & People Management**
+- **Employees** — profiles with photo, department, position, manager hierarchy, employment status, and salary
+- **Departments** and **Positions** with headcount tracking
+- **Employee Documents** — store contracts, IDs, and certificates per employee
+
+**Attendance**
+- Daily check-in/check-out records with work hours calculation
+- **Leave Management** — leave requests with type, date range, and approval workflow
+- Admin attendance dashboard and employee-level history
+
+**Work Reports**
+- Employees submit daily, weekly, or monthly reports with task breakdowns and time tracking
+- Manager review workflow: draft → submitted → under review → approved / rejected
+- **Team tab** — managers see all direct reports' submitted reports in one view
+- Threaded comments (with feedback and revision-request types), file attachments
+- Analytics dashboard for admins (submission trends, approval rates)
+
+**Plans**
+- Full plan lifecycle: draft → pending → in progress → on hold → completed → cancelled → archived
+- Categories: daily, weekly, monthly, quarterly, annual, personal, team, project, strategic
+- Priority levels: low, medium, high, critical
+- Per-plan task list with assignment, priority, due dates, and completion toggle
+- Progress bar auto-calculated from completed / total tasks ratio
+- Assign multiple employees via many-to-many (`plan_employees` pivot)
+- Comments and file attachments per plan
+- Duplicate and archive actions; auto-generated plan numbers (PLN-00001)
+- **Client "My Plans"** — employees see only plans they are assigned to; read-only with comment posting
+
 **REST API**
 - Token-based auth via Laravel Sanctum
 - Endpoints: list/get/create/update/delete documents, download, share, search
@@ -97,7 +125,7 @@ DocManager lets teams upload, organize, search, and share documents from a singl
                 └────────────┘
 ```
 
-**Key database tables:** `resources`, `document_versions`, `categories`, `tags`, `users`, `shares`, `resource_embeddings` (TF-IDF vectors), `audit_logs`, `activity_logs`, `download_logs`, `search_logs`, `problems`, `tests` / `test_problems` / `test_invites` / `test_answers` (developer assessments), `conversations` / `messages` / `conversation_reads` (chat)
+**Key database tables:** `resources`, `document_versions`, `categories`, `tags`, `users`, `shares`, `resource_embeddings` (TF-IDF vectors), `audit_logs`, `activity_logs`, `download_logs`, `search_logs`, `problems`, `tests` / `test_problems` / `test_invites` / `test_answers` (developer assessments), `conversations` / `messages` / `conversation_reads` (chat), `departments` / `positions` / `employees` / `employee_documents`, `attendances` / `attendance_leaves`, `work_reports` / `work_report_tasks` / `work_report_comments` / `work_report_attachments`, `plans` / `plan_employees` / `plan_tasks` / `plan_comments` / `plan_attachments`
 
 ### Design Principles
 - **Offline-first** — no S3, no Elasticsearch, no external AI service
