@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -61,4 +62,5 @@ class Employee extends Model
     public function workReports(): HasMany    { return $this->hasMany(WorkReport::class); }
     public function attendances(): HasMany    { return $this->hasMany(Attendance::class); }
     public function leaves(): HasMany         { return $this->hasMany(AttendanceLeave::class); }
+    public function plans(): BelongsToMany   { return $this->belongsToMany(Plan::class, 'plan_employees'); }
 }

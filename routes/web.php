@@ -100,6 +100,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/attendance/leaves',     [\App\Http\Controllers\AttendanceLeaveController::class, 'index'])->name('attendance.leaves.index');
     Route::post('/attendance/leaves',    [\App\Http\Controllers\AttendanceLeaveController::class, 'store'])->name('attendance.leaves.store');
     Route::delete('/attendance/leaves/{leave}', [\App\Http\Controllers\AttendanceLeaveController::class, 'destroy'])->name('attendance.leaves.destroy');
+
+    // Plans (client — assigned only)
+    Route::get('/plans',        [\App\Http\Controllers\Client\PlanController::class, 'index'])->name('plans.index');
+    Route::get('/plans/{plan}', [\App\Http\Controllers\Client\PlanController::class, 'show'])->name('plans.show');
 });
 
 // Public share link (no auth required)
@@ -234,6 +238,21 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::post('attendance/leaves/{leave}/approve',           [Admin\AttendanceLeaveController::class, 'approve'])->name('attendance.leaves.approve');
     Route::post('attendance/leaves/{leave}/reject',            [Admin\AttendanceLeaveController::class, 'reject'])->name('attendance.leaves.reject');
     Route::delete('attendance/leaves/{leave}',                 [Admin\AttendanceLeaveController::class, 'destroy'])->name('attendance.leaves.destroy');
+
+    // Plans
+    Route::get('plans/dashboard',                            [Admin\PlanReportController::class, 'dashboard'])->name('plans.dashboard');
+    Route::resource('plans', Admin\PlanController::class);
+    Route::post('plans/{plan}/archive',                      [Admin\PlanController::class, 'archive'])->name('plans.archive');
+    Route::post('plans/{plan}/duplicate',                    [Admin\PlanController::class, 'duplicate'])->name('plans.duplicate');
+    Route::post('plans/{plan}/tasks',                        [Admin\PlanTaskController::class, 'store'])->name('plans.tasks.store');
+    Route::patch('plans/{plan}/tasks/{task}',                [Admin\PlanTaskController::class, 'update'])->name('plans.tasks.update');
+    Route::patch('plans/{plan}/tasks/{task}/toggle',         [Admin\PlanTaskController::class, 'toggle'])->name('plans.tasks.toggle');
+    Route::delete('plans/{plan}/tasks/{task}',               [Admin\PlanTaskController::class, 'destroy'])->name('plans.tasks.destroy');
+    Route::post('plans/{plan}/comments',                     [Admin\PlanCommentController::class, 'store'])->name('plans.comments.store');
+    Route::delete('plans/{plan}/comments/{comment}',         [Admin\PlanCommentController::class, 'destroy'])->name('plans.comments.destroy');
+    Route::post('plans/{plan}/attachments',                  [Admin\PlanAttachmentController::class, 'store'])->name('plans.attachments.store');
+    Route::get('plans/{plan}/attachments/{attachment}',      [Admin\PlanAttachmentController::class, 'download'])->name('plans.attachments.download');
+    Route::delete('plans/{plan}/attachments/{attachment}',   [Admin\PlanAttachmentController::class, 'destroy'])->name('plans.attachments.destroy');
 
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');
