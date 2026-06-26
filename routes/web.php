@@ -168,6 +168,26 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::get('test-invites/{invite}/grade', [Admin\TestInviteController::class, 'grade'])->name('test-invites.grade');
     Route::put('test-invites/{invite}/grade', [Admin\TestInviteController::class, 'storeGrade'])->name('test-invites.grade.store');
 
+    // Employee Management
+    Route::get('employees',                       [Admin\EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('employees/create',                [Admin\EmployeeController::class, 'create'])->name('employees.create');
+    Route::post('employees',                      [Admin\EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('employees/{employee}/edit',       [Admin\EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('employees/{employee}',            [Admin\EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('employees/{employee}',         [Admin\EmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::patch('employees/{employee}/activate', [Admin\EmployeeController::class, 'activate'])->name('employees.activate');
+    Route::patch('employees/{employee}/deactivate', [Admin\EmployeeController::class, 'deactivate'])->name('employees.deactivate');
+    Route::post('employees/{employee}/documents', [Admin\EmployeeDocumentController::class, 'store'])->name('employees.documents.store');
+    Route::get('employees/{employee}/documents/{document}/download', [Admin\EmployeeDocumentController::class, 'download'])->name('employees.documents.download');
+    Route::delete('employees/{employee}/documents/{document}', [Admin\EmployeeDocumentController::class, 'destroy'])->name('employees.documents.destroy');
+    Route::get('employees/{employee}',            [Admin\EmployeeController::class, 'show'])->name('employees.show');
+
+    Route::resource('departments', Admin\DepartmentController::class)->except(['create', 'edit', 'show']);
+    Route::resource('positions', Admin\PositionController::class)->except(['create', 'edit', 'show']);
+
+    Route::get('employee-reports',        [Admin\EmployeeReportController::class, 'index'])->name('employee-reports.index');
+    Route::get('employee-reports/export', [Admin\EmployeeReportController::class, 'export'])->name('employee-reports.export');
+
     // Roles (read-only permission matrix)
     Route::get('roles', fn() => view('admin.roles.index'))->name('roles.index');
 

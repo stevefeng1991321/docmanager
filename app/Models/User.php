@@ -82,4 +82,9 @@ class User extends Authenticatable
         return Conversation::where('user_one_id', $this->id)
             ->orWhere('user_two_id', $this->id);
     }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
 }

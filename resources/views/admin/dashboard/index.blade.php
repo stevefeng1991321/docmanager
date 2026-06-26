@@ -55,6 +55,45 @@
     </div>
 @endif
 
+{{-- Employees overview --}}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-700">Employees</h3>
+        <a href="{{ route('admin.employees.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">View all →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Total</p>
+            <p class="text-xl font-bold text-gray-900">{{ number_format($employeeStats['total']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Active</p>
+            <p class="text-xl font-bold text-green-600">{{ number_format($employeeStats['active']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Inactive</p>
+            <p class="text-xl font-bold text-gray-500">{{ number_format($employeeStats['inactive']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">New Hires (30d)</p>
+            <p class="text-xl font-bold text-blue-600">{{ number_format($employeeStats['recent_hires']) }}</p>
+        </div>
+    </div>
+    @if($employeeStats['by_department']->isNotEmpty())
+    <div class="mt-4 pt-4 border-t border-gray-100">
+        <p class="text-xs font-medium text-gray-500 mb-2">Top Departments</p>
+        <div class="space-y-1.5">
+            @foreach($employeeStats['by_department'] as $dept)
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">{{ $dept->name }}</span>
+                <span class="text-gray-400">{{ $dept->employees_count }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+</div>
+
 {{-- Charts row --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 

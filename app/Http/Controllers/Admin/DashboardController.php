@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Employee;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -66,8 +68,18 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $employeeStats = Cache::remember('dashboard.employee_stats', 300, function () {
+            return [
+                'total'         => Employee::count(),
+                'active'        => Employee::where('employment_status', 'active')->count(),
+                'inactive'      => Employee::where('employment_status', 'inactive')->count(),
+                'recent_hires'  => Employee::where('date_of_joining', '>=', now()->subDays(30))->count(),
+                'by_department' => Department::withCount('employees')->orderByDesc('employees_count')->limit(5)->get(),
+            ];
+        });
+
         return view('admin.dashboard.index', compact(
-            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend'
+            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend', 'employeeStats'
         ));
     }
 }
