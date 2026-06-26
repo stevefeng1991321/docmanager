@@ -169,6 +169,10 @@ td code{font-size:.75rem}
     <a class="nav-item" onclick="show('feat-chat')">Chat &amp; Messaging</a>
     <a class="nav-item" onclick="show('feat-api')">REST API</a>
     <a class="nav-item" onclick="show('feat-schedule')">Scheduled Tasks</a>
+    <a class="nav-item" onclick="show('feat-hr')">HR &amp; People</a>
+    <a class="nav-item" onclick="show('feat-attendance')">Attendance &amp; Leave</a>
+    <a class="nav-item" onclick="show('feat-work-reports')">Work Reports</a>
+    <a class="nav-item" onclick="show('feat-plans')">Plans</a>
   </nav>
 </div>
 
@@ -190,16 +194,20 @@ td code{font-size:.75rem}
     <div class="card"><div class="card-icon">🌐</div><h4>REST API</h4><p>Sanctum token-based API for programmatic document access and search.</p></div>
     <div class="card"><div class="card-icon">💬</div><h4>Real-Time Chat</h4><p>1:1 messaging over a self-hosted WebSocket server (Laravel Reverb) — no third-party broadcaster.</p></div>
     <div class="card"><div class="card-icon">🧪</div><h4>Developer Tests</h4><p>Build a timed coding test from the problem bank, send a no-account invite link, grade manually.</p></div>
+    <div class="card"><div class="card-icon">👤</div><h4>HR &amp; People</h4><p>Employee profiles, departments, positions, documents, and manager hierarchy.</p></div>
+    <div class="card"><div class="card-icon">🕐</div><h4>Attendance</h4><p>Daily check-in/out records, work hours, and leave requests with approval workflow.</p></div>
+    <div class="card"><div class="card-icon">📋</div><h4>Work Reports</h4><p>Daily/weekly/monthly reports with task tracking, manager review, and analytics.</p></div>
+    <div class="card"><div class="card-icon">🗂️</div><h4>Plans</h4><p>Full plan lifecycle with task lists, employee assignment, progress tracking, and comments.</p></div>
   </div>
 
   <h2>Key numbers</h2>
   <table>
     <tr><th>Item</th><th>Count</th></tr>
-    <tr><td>Database tables</td><td>42</td></tr>
-    <tr><td>Models</td><td>32</td></tr>
-    <tr><td>Controllers</td><td>52</td></tr>
-    <tr><td>Blade views</td><td>96</td></tr>
-    <tr><td>Migrations</td><td>44</td></tr>
+    <tr><td>Database tables</td><td>~58</td></tr>
+    <tr><td>Models</td><td>47</td></tr>
+    <tr><td>Controllers</td><td>~66</td></tr>
+    <tr><td>Blade views</td><td>~120</td></tr>
+    <tr><td>Migrations</td><td>65</td></tr>
     <tr><td>Broadcast events</td><td>3 (chat — MessageSent, MessagesDelivered, MessagesRead)</td></tr>
     <tr><td>Artisan commands</td><td>6 custom</td></tr>
   </table>
@@ -494,6 +502,63 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><span class="method post">POST</span></td><td><code>/chat/conversations/{id}/read</code></td><td>Chat\ConversationController@markRead</td><td>chat.conversations.read</td></tr>
   </table>
 
+  <h2>web.php — HR, Attendance, Work Reports &amp; Plans (client)</h2>
+  <table>
+    <tr><th>Method</th><th>URI</th><th>Controller</th><th>Name</th></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/attendance</code></td><td>AttendanceController@index</td><td>attendance.index</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/attendance/check-in</code></td><td>AttendanceController@checkIn</td><td>attendance.check-in</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/attendance/check-out</code></td><td>AttendanceController@checkOut</td><td>attendance.check-out</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/attendance/leaves</code></td><td>AttendanceLeaveController@index</td><td>attendance.leaves.index</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/attendance/leaves</code></td><td>AttendanceLeaveController@store</td><td>attendance.leaves.store</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/attendance/leaves/{leave}</code></td><td>AttendanceLeaveController@destroy</td><td>attendance.leaves.destroy</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/work-reports</code></td><td>WorkReportController@index</td><td>work-reports.index</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/work-reports/create</code></td><td>WorkReportController@create</td><td>work-reports.create</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/work-reports</code></td><td>WorkReportController@store</td><td>work-reports.store</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/work-reports/{id}</code></td><td>WorkReportController@show</td><td>work-reports.show</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/work-reports/{id}/edit</code></td><td>WorkReportController@edit</td><td>work-reports.edit</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/work-reports/{id}</code></td><td>WorkReportController@update</td><td>work-reports.update</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/work-reports/{id}</code></td><td>WorkReportController@destroy</td><td>work-reports.destroy</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/work-reports/{id}/submit</code></td><td>WorkReportController@submit</td><td>work-reports.submit</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/work-reports/{id}/review</code></td><td>WorkReportController@review</td><td>work-reports.review</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/plans</code></td><td>Client\PlanController@index</td><td>plans.index</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/plans/{plan}</code></td><td>Client\PlanController@show</td><td>plans.show</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/plans/{plan}/comments</code></td><td>Client\PlanController@storeComment</td><td>plans.comments.store</td></tr>
+  </table>
+
+  <h2>web.php — Admin HR, Attendance, Work Reports &amp; Plans</h2>
+  <table>
+    <tr><th>Method</th><th>URI</th><th>Action</th></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/departments</code></td><td>List departments with employee counts</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/positions</code></td><td>List positions</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/employees</code></td><td>Employee list with filters</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/employees/{id}</code></td><td>Employee profile (tabbed)</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/attendance</code></td><td>Attendance records with filters</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/attendance/{id}/mark</code></td><td>Mark attendance status for a record</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/attendance/leaves</code></td><td>All leave requests</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/attendance/leaves/{id}/approve</code></td><td>Approve leave request</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/attendance/leaves/{id}/reject</code></td><td>Reject leave request</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/work-reports</code></td><td>All work reports across employees</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/work-reports/{id}</code></td><td>Report detail with review panel</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/work-reports/analytics</code></td><td>Submission trends and analytics dashboard</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans/dashboard</code></td><td>Plan analytics dashboard</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans</code></td><td>Plan list with filters</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans/create</code></td><td>New plan form</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans</code></td><td>Create plan</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans/{id}</code></td><td>Plan detail</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans/{id}/edit</code></td><td>Edit plan form</td></tr>
+    <tr><td><span class="method put">PUT</span></td><td><code>/admin/plans/{id}</code></td><td>Update plan</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/plans/{id}</code></td><td>Soft-delete plan</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans/{id}/archive</code></td><td>Archive plan</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans/{id}/duplicate</code></td><td>Duplicate plan (new PLN number, status=draft)</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans/{id}/tasks</code></td><td>Add task to plan</td></tr>
+    <tr><td><span class="method patch">PATCH</span></td><td><code>/admin/plans/{id}/tasks/{task}/toggle</code></td><td>Toggle task complete/pending, recalculates progress</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/plans/{id}/tasks/{task}</code></td><td>Delete task</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans/{id}/comments</code></td><td>Post comment on plan</td></tr>
+    <tr><td><span class="method post">POST</span></td><td><code>/admin/plans/{id}/attachments</code></td><td>Upload attachment</td></tr>
+    <tr><td><span class="method get">GET</span></td><td><code>/admin/plans/{id}/attachments/{att}</code></td><td>Download attachment</td></tr>
+    <tr><td><span class="method delete">DELETE</span></td><td><code>/admin/plans/{id}/attachments/{att}</code></td><td>Delete attachment</td></tr>
+  </table>
+
   <h2>web.php — Public developer-test routes (no auth)</h2>
   <p>Candidate-facing test-taking flow, reached via a token link — throttled at 60 req/min, no account required.</p>
   <table>
@@ -674,6 +739,22 @@ php artisan search:build-tfidf</code></pre>
     <tr><td><code>settings</code></td><td>Global key-value config store (cached)</td></tr>
     <tr><td><code>personal_access_tokens</code></td><td>Sanctum API tokens</td></tr>
     <tr><td><code>jobs</code> + <code>cache</code></td><td>Laravel queue and cache tables</td></tr>
+    <tr><td><code>departments</code></td><td>Departments — name, description, manager_id</td></tr>
+    <tr><td><code>positions</code></td><td>Job positions linked to departments</td></tr>
+    <tr><td><code>employees</code></td><td>Employee profiles — EMP-00001 codes, user_id link, manager hierarchy, salary, employment status</td></tr>
+    <tr><td><code>employee_documents</code></td><td>Files attached to an employee profile (contracts, IDs)</td></tr>
+    <tr><td><code>projects</code></td><td>Projects referenced by work reports and plans</td></tr>
+    <tr><td><code>work_reports</code></td><td>Daily/weekly/monthly work reports — status workflow, review fields</td></tr>
+    <tr><td><code>work_report_tasks</code></td><td>Structured task list per report with completion %</td></tr>
+    <tr><td><code>work_report_comments</code></td><td>Comments on a report (comment / feedback / revision_request types)</td></tr>
+    <tr><td><code>work_report_attachments</code></td><td>Files attached to a work report</td></tr>
+    <tr><td><code>attendances</code></td><td>Daily attendance records — check_in, check_out, work_hours, status</td></tr>
+    <tr><td><code>attendance_leaves</code></td><td>Leave requests — type, date range, days, approval status</td></tr>
+    <tr><td><code>plans</code></td><td>Plans — full lifecycle, category, priority, JSON tags, progress %, soft-deletes</td></tr>
+    <tr><td><code>plan_employees</code></td><td>Many-to-many pivot: employees assigned to a plan</td></tr>
+    <tr><td><code>plan_tasks</code></td><td>Tasks within a plan — assignment, priority, sort order, status</td></tr>
+    <tr><td><code>plan_comments</code></td><td>Comments on a plan</td></tr>
+    <tr><td><code>plan_attachments</code></td><td>File attachments on a plan</td></tr>
   </table>
 </div>
 
@@ -951,6 +1032,101 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr><td><strong>Setting</strong></td><td><code>settings</code></td><td>Global config key-value. <code>Setting::get($key)</code>, <code>Setting::set($key, $val)</code>, <code>Setting::allKeyed()</code> (cached)</td></tr>
   </table>
 
+  <h2>HR &amp; People models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods/relationships</th></tr>
+    <tr>
+      <td><strong>Department</strong></td><td><code>departments</code></td>
+      <td>name, description, manager_id</td>
+      <td><code>employees()</code> HasMany, <code>manager()</code> BelongsTo Employee</td>
+    </tr>
+    <tr>
+      <td><strong>Position</strong></td><td><code>positions</code></td>
+      <td>name, department_id, description</td>
+      <td><code>department()</code> BelongsTo, <code>employees()</code> HasMany</td>
+    </tr>
+    <tr>
+      <td><strong>Employee</strong></td><td><code>employees</code></td>
+      <td>employee_code (EMP-00001), user_id, full_name, email, employment_status, department_id, position_id, manager_id, date_of_joining, salary</td>
+      <td><code>isActive()</code>, <code>nextCode()</code> static, <code>manager()</code> BelongsTo self, <code>subordinates()</code> HasMany self, <code>plans()</code> BelongsToMany via <code>plan_employees</code></td>
+    </tr>
+    <tr>
+      <td><strong>EmployeeDocument</strong></td><td><code>employee_documents</code></td>
+      <td>employee_id, title, type, file_path</td>
+      <td><code>employee()</code> BelongsTo</td>
+    </tr>
+    <tr>
+      <td><strong>Project</strong></td><td><code>projects</code></td>
+      <td>name, description, status, start_date, end_date</td>
+      <td><code>workReports()</code> HasMany, <code>plans()</code> HasMany</td>
+    </tr>
+  </table>
+
+  <h2>Attendance models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
+    <tr>
+      <td><strong>Attendance</strong></td><td><code>attendances</code></td>
+      <td>employee_id, date, check_in, check_out, work_hours, status, notes</td>
+      <td><code>employee()</code> BelongsTo</td>
+    </tr>
+    <tr>
+      <td><strong>AttendanceLeave</strong></td><td><code>attendance_leaves</code></td>
+      <td>employee_id, type, start_date, end_date, days, reason, status (pending/approved/rejected)</td>
+      <td><code>employee()</code> BelongsTo, <code>isPending()</code>, <code>isApproved()</code></td>
+    </tr>
+  </table>
+
+  <h2>Work Report models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
+    <tr>
+      <td><strong>WorkReport</strong></td><td><code>work_reports</code></td>
+      <td>employee_id, title, type (daily/weekly/monthly), report_date, project_id, status (draft/submitted/under_review/approved/rejected), submitted_at, reviewed_by, reviewed_at</td>
+      <td><code>canBeViewedBy($user)</code>, <code>canBeEditedBy($user)</code>, <code>canBeReviewedBy($user)</code>, <code>isOwnedBy($user)</code>, <code>isRejected()</code></td>
+    </tr>
+    <tr>
+      <td><strong>WorkReportTask</strong></td><td><code>work_report_tasks</code></td>
+      <td>work_report_id, title, status (planned/in_progress/completed), priority, completion_percent, time_spent_hours, order_index</td>
+      <td><code>report()</code> BelongsTo</td>
+    </tr>
+    <tr>
+      <td><strong>WorkReportComment</strong></td><td><code>work_report_comments</code></td>
+      <td>work_report_id, user_id, type (comment/feedback/revision_request), body</td>
+      <td><code>user()</code> BelongsTo</td>
+    </tr>
+    <tr>
+      <td><strong>WorkReportAttachment</strong></td><td><code>work_report_attachments</code></td>
+      <td>work_report_id, title, file_path, uploaded_by</td>
+      <td><code>isImage()</code>, <code>uploadedBy()</code> BelongsTo User</td>
+    </tr>
+  </table>
+
+  <h2>Plan models</h2>
+  <table>
+    <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
+    <tr>
+      <td><strong>Plan</strong></td><td><code>plans</code></td>
+      <td>plan_number (PLN-00001), title, description, category (daily/weekly/monthly/quarterly/annual/personal/team/project/strategic), status (draft/pending/in_progress/on_hold/completed/cancelled/archived), priority (low/medium/high/critical), owner_id, department_id, project_id, tags (JSON array), progress, start_date, due_date, estimated_hours, notes</td>
+      <td><code>nextNumber()</code> static, <code>updateProgress()</code>, <code>is_overdue</code> accessor, <code>status_label</code> accessor, <code>employees()</code> BelongsToMany via <code>plan_employees</code>, <code>tasks()</code> HasMany, <code>comments()</code> HasMany, <code>attachments()</code> HasMany; SoftDeletes</td>
+    </tr>
+    <tr>
+      <td><strong>PlanTask</strong></td><td><code>plan_tasks</code></td>
+      <td>plan_id, title, status (pending/in_progress/completed), priority, assigned_to (employee_id), due_date, sort_order</td>
+      <td><code>assignedTo()</code> BelongsTo Employee, <code>is_overdue</code> accessor</td>
+    </tr>
+    <tr>
+      <td><strong>PlanComment</strong></td><td><code>plan_comments</code></td>
+      <td>plan_id, user_id, body</td>
+      <td><code>user()</code> BelongsTo</td>
+    </tr>
+    <tr>
+      <td><strong>PlanAttachment</strong></td><td><code>plan_attachments</code></td>
+      <td>plan_id, original_name, file_path, file_size, uploaded_by</td>
+      <td><code>uploader()</code> BelongsTo User</td>
+    </tr>
+  </table>
+
   <h2>Developer assessment models</h2>
   <table>
     <tr><th>Model</th><th>Table</th><th>Key fields</th><th>Notable methods</th></tr>
@@ -1086,6 +1262,26 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
       <td>Lists the authenticated user's download history from <code>download_logs</code>.</td>
     </tr>
     <tr>
+      <td><strong>WorkReportController</strong></td>
+      <td><code>index()</code>, <code>create()</code>, <code>store()</code>, <code>show()</code>, <code>edit()</code>, <code>update()</code>, <code>destroy()</code>, <code>duplicate()</code>, <code>submit()</code>, <code>review()</code>, <code>storeComment()</code>, <code>storeAttachment()</code>, <code>downloadAttachment()</code>, <code>previewAttachment()</code>, <code>destroyAttachment()</code></td>
+      <td>Full work report lifecycle. <code>index</code>: shows "My Reports" tab by default; managers also see a "Team" tab listing all non-draft reports from their direct subordinates. <code>review</code>: manager saves decision (under_review/approved/rejected) + optional comment, sends notification to employee. Comments support types: comment, feedback, revision_request — type selector shown only to reviewers.</td>
+    </tr>
+    <tr>
+      <td><strong>AttendanceController</strong></td>
+      <td><code>index()</code>, <code>checkIn()</code>, <code>checkOut()</code></td>
+      <td>Employee self-service attendance. <code>index</code>: shows today's record and monthly history. <code>checkIn</code>/<code>checkOut</code>: stamps time on current day's record.</td>
+    </tr>
+    <tr>
+      <td><strong>AttendanceLeaveController</strong> <em>(Client)</em></td>
+      <td><code>index()</code>, <code>store()</code>, <code>destroy()</code></td>
+      <td>Employee leave requests. <code>index</code>: lists all leave requests with status. <code>store</code>: creates new leave request (pending approval). <code>destroy</code>: cancels a pending request.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanController</strong> <em>(Client)</em></td>
+      <td><code>index()</code>, <code>show()</code>, <code>storeComment()</code></td>
+      <td>Read-only plan access for assigned employees. <code>index</code>: lists all plans the employee is assigned to, with status/priority filters and summary cards (total, active, completed, overdue). <code>show</code>: read-only detail view — aborts 403 unless the user is assigned to the plan (or is admin/editor). <code>storeComment</code>: posts a comment after verifying assignment; audit-logged.</td>
+    </tr>
+    <tr>
       <td><strong>TestSessionController</strong></td>
       <td><code>show()</code>, <code>start()</code>, <code>submit()</code></td>
       <td>Public, no-account developer-test flow reached via <code>/test/{token}</code> (outside the <code>auth</code> middleware group, rate-limited).
@@ -1173,6 +1369,62 @@ php artisan docs:build-laravel-offline --branch=12.x</code></pre>
     <tr>
       <td><strong>TestController</strong></td>
       <td>Developer Tests CRUD. <code>create()</code> / <code>store()</code> / <code>edit()</code> / <code>update()</code> accept both <code>problems[]</code> (existing bank IDs, via an "Add Existing Problem" modal) and <code>new_problems[]</code> (ad-hoc problems typed inline — each becomes a real <code>Problem</code> row, category defaults to "Custom", then gets attached like any other). At least one problem (existing or new) is required. <code>show()</code> lists the test's problems and candidate invites with status/score.</td>
+    </tr>
+    <tr>
+      <td><strong>DepartmentController</strong></td>
+      <td>CRUD for departments — list with employee counts, inline edit modal, delete guard (blocks if employees assigned).</td>
+    </tr>
+    <tr>
+      <td><strong>PositionController</strong></td>
+      <td>CRUD for positions — linked to departments, inline edit, delete guard.</td>
+    </tr>
+    <tr>
+      <td><strong>EmployeeController</strong></td>
+      <td>Full employee profile CRUD. <code>index</code>: filterable list with status/department/search. <code>show</code>: tabbed profile (details, documents, attendance summary, work reports, plans). <code>store</code>/<code>update</code>: generates EMP-00001 codes, handles photo upload. <code>destroy</code>: soft-delete.</td>
+    </tr>
+    <tr>
+      <td><strong>EmployeeDocumentController</strong></td>
+      <td>Upload, download, and delete employee-level files (contracts, IDs, certificates).</td>
+    </tr>
+    <tr>
+      <td><strong>EmployeeReportController</strong></td>
+      <td>Export employee data as reports (headcount by department, status breakdowns).</td>
+    </tr>
+    <tr>
+      <td><strong>AttendanceController</strong> <em>(Admin)</em></td>
+      <td><code>index()</code>, <code>mark()</code>, <code>bulkMark()</code>, <code>report()</code>, <code>export()</code>. Admin attendance management — view and edit records for any employee, bulk mark status, generate attendance reports, export to CSV.</td>
+    </tr>
+    <tr>
+      <td><strong>AttendanceLeaveController</strong> <em>(Admin)</em></td>
+      <td><code>index()</code>, <code>approve()</code>, <code>reject()</code>, <code>destroy()</code>. Manage all employee leave requests — approve or reject with a note.</td>
+    </tr>
+    <tr>
+      <td><strong>WorkReportController</strong> <em>(Admin)</em></td>
+      <td><code>index()</code>, <code>show()</code>, <code>review()</code>, <code>storeComment()</code>. Admin view of all work reports across all employees — same review actions as the client manager flow.</td>
+    </tr>
+    <tr>
+      <td><strong>WorkReportAnalyticsController</strong></td>
+      <td><code>index()</code>, <code>export()</code>. Analytics dashboard with submission trends, approval rates, top contributors, and CSV export.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanController</strong> <em>(Admin)</em></td>
+      <td>Full plan CRUD. <code>store</code>/<code>update</code>: splits comma-separated tags to array (JSON cast), syncs employee assignments via <code>plan->employees()->sync()</code>. <code>archive()</code>: sets status → archived. <code>duplicate()</code>: clones plan + tasks with a new plan number, status reset to draft.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanTaskController</strong></td>
+      <td><code>store()</code>, <code>update()</code>, <code>toggle()</code>, <code>destroy()</code>. Manage tasks on a plan. <code>toggle</code>: flips task status between pending and completed, then calls <code>plan->updateProgress()</code>.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanCommentController</strong></td>
+      <td><code>store()</code>, <code>destroy()</code>. Comments on a plan from the admin panel.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanAttachmentController</strong></td>
+      <td><code>store()</code>, <code>download()</code>, <code>destroy()</code>. File attachments on a plan.</td>
+    </tr>
+    <tr>
+      <td><strong>PlanReportController</strong></td>
+      <td><code>dashboard()</code>. Plan analytics — summary counts by status and category, overdue plans, upcoming due dates.</td>
     </tr>
     <tr>
       <td><strong>TestInviteController</strong></td>
@@ -1787,6 +2039,150 @@ Authorization: Bearer 1|abc123...</code></pre>
   <pre><code># Test a specific command now without waiting for its schedule
 php artisan dms:archive-expired --dry-run
 php artisan dms:prune-trash --dry-run</code></pre>
+</div>
+
+<!-- ── FEATURE: HR & PEOPLE ── -->
+<div class="section" id="s-feat-hr">
+  <h1>HR &amp; People Management</h1>
+  <p class="lead">Manage employee profiles, org structure, and HR documents. The hierarchy drives the Work Reports team tab and plan assignment.</p>
+
+  <h2>Org structure</h2>
+  <p>Employees belong to a Department and a Position. The <code>manager_id</code> on Employee creates a self-referential tree:</p>
+  <pre><code>Employee::manager()       → BelongsTo Employee (direct manager)
+Employee::subordinates()  → HasMany Employee (direct reports)</code></pre>
+  <p>This hierarchy is used by the Work Reports Team tab (managers see their direct reports' submissions) and by work report review authorization.</p>
+
+  <h2>Employee codes</h2>
+  <p><code>Employee::nextCode()</code> generates sequential codes in the format <code>EMP-00001</code>. It queries <code>MAX(CAST(SUBSTRING(employee_code,5) AS UNSIGNED))</code> with <code>withTrashed()</code> so codes are never reused after soft-deletion.</p>
+
+  <h2>Employee profile tabs (admin)</h2>
+  <table>
+    <tr><th>Tab</th><th>Content</th></tr>
+    <tr><td>Details</td><td>Personal info, employment info, emergency contact</td></tr>
+    <tr><td>Documents</td><td>Upload and list employee documents (contracts, certificates)</td></tr>
+    <tr><td>Attendance</td><td>Recent attendance records and leave requests</td></tr>
+    <tr><td>Work Reports</td><td>All work reports submitted by this employee</td></tr>
+    <tr><td>Plans</td><td>Plans this employee is assigned to</td></tr>
+  </table>
+
+  <h2>Projects</h2>
+  <p>The <code>projects</code> table is a lightweight entity referenced by both Work Reports and Plans. Created/managed under <code>/admin/projects</code>.</p>
+</div>
+
+<!-- ── FEATURE: ATTENDANCE ── -->
+<div class="section" id="s-feat-attendance">
+  <h1>Attendance &amp; Leave</h1>
+  <p class="lead">Employees record their own attendance; admins manage and report on it. Leave requests go through an approval workflow.</p>
+
+  <h2>Attendance flow (client)</h2>
+  <ol>
+    <li>Employee visits <code>/attendance</code> — sees today's record and monthly calendar</li>
+    <li>Clicks Check In → stamps <code>check_in</code> on today's record</li>
+    <li>Clicks Check Out → stamps <code>check_out</code>, calculates <code>work_hours</code></li>
+  </ol>
+  <p>One record per employee per date. Status values: <code>present</code>, <code>absent</code>, <code>half_day</code>, <code>leave</code>, <code>holiday</code>.</p>
+
+  <h2>Leave request flow</h2>
+  <pre><code>Employee submits → status: pending
+Admin approves   → status: approved
+Admin rejects    → status: rejected  (with optional note)
+Employee cancels → destroy() (pending only)</code></pre>
+
+  <h2>Admin capabilities</h2>
+  <ul>
+    <li>View and edit any employee's attendance records</li>
+    <li>Bulk mark status (e.g. mark all absent for a date)</li>
+    <li>Generate attendance reports by date range and department</li>
+    <li>Export to CSV</li>
+    <li>Approve or reject leave requests with a note</li>
+  </ul>
+</div>
+
+<!-- ── FEATURE: WORK REPORTS ── -->
+<div class="section" id="s-feat-work-reports">
+  <h1>Work Reports</h1>
+  <p class="lead">Structured reporting with a manager review workflow. Employees submit daily, weekly, or monthly reports; managers review and respond.</p>
+
+  <h2>Report lifecycle</h2>
+  <pre><code>draft → submitted → under_review → approved
+                                  → rejected  (employee can resubmit)</code></pre>
+  <table>
+    <tr><th>Status</th><th>Who sets it</th><th>Notes</th></tr>
+    <tr><td><span class="badge badge-gray">draft</span></td><td>Default on create</td><td>Editable; not visible to manager</td></tr>
+    <tr><td><span class="badge badge-blue">submitted</span></td><td>Employee</td><td>Locked for editing; notifies manager</td></tr>
+    <tr><td><span class="badge badge-yellow">under_review</span></td><td>Manager</td><td>Signals review in progress</td></tr>
+    <tr><td><span class="badge badge-green">approved</span></td><td>Manager</td><td>Final — notifies employee</td></tr>
+    <tr><td><span class="badge badge-red">rejected</span></td><td>Manager</td><td>Employee can edit and resubmit</td></tr>
+  </table>
+
+  <h2>Team tab (managers)</h2>
+  <p>On the Work Reports index page, employees who have at least one direct report (<code>subordinates()->exists()</code>) see an additional "Team" tab. It shows all non-draft reports from their direct subordinates, with an extra "Employee" column. The same filters (type, status, project, date range, search) apply to both tabs.</p>
+
+  <h2>Comment types</h2>
+  <table>
+    <tr><th>Type</th><th>Who can set it</th><th>Meaning</th></tr>
+    <tr><td><code>comment</code></td><td>Anyone</td><td>General discussion</td></tr>
+    <tr><td><code>feedback</code></td><td>Reviewer only</td><td>Reviewer feedback</td></tr>
+    <tr><td><code>revision_request</code></td><td>Reviewer only</td><td>Explicit request for changes — triggers distinct notification type</td></tr>
+  </table>
+
+  <h2>Notifications sent</h2>
+  <table>
+    <tr><th>Event</th><th>Sent to</th><th>Type</th></tr>
+    <tr><td>Report submitted</td><td>Employee's manager</td><td><code>report_submitted</code></td></tr>
+    <tr><td>Report approved</td><td>Employee</td><td><code>report_approved</code></td></tr>
+    <tr><td>Report rejected</td><td>Employee</td><td><code>report_rejected</code></td></tr>
+    <tr><td>Comment posted</td><td>Other party</td><td><code>report_feedback_added</code></td></tr>
+    <tr><td>Revision requested</td><td>Employee</td><td><code>report_revision_requested</code></td></tr>
+  </table>
+</div>
+
+<!-- ── FEATURE: PLANS ── -->
+<div class="section" id="s-feat-plans">
+  <h1>Plans</h1>
+  <p class="lead">Full-lifecycle plan management with task tracking, employee assignment, progress calculation, and a client-side view for assigned employees.</p>
+
+  <h2>Plan lifecycle</h2>
+  <pre><code>draft → pending → in_progress → completed
+                → on_hold    → in_progress (resumable)
+                → cancelled
+                → archived</code></pre>
+
+  <h2>Plan categories</h2>
+  <p><code>daily</code>, <code>weekly</code>, <code>monthly</code>, <code>quarterly</code>, <code>annual</code>, <code>personal</code>, <code>team</code>, <code>project</code>, <code>strategic</code></p>
+
+  <h2>Plan numbers</h2>
+  <p><code>Plan::nextNumber()</code> generates <code>PLN-00001</code> format codes, querying with <code>withTrashed()</code> to prevent reuse after soft-deletion.</p>
+
+  <h2>Progress tracking</h2>
+  <p><code>Plan::updateProgress()</code> recalculates <code>progress</code> as <code>floor(completed_tasks / total_tasks * 100)</code>. Called automatically by <code>PlanTaskController@toggle</code> whenever a task is checked or unchecked.</p>
+
+  <h2>Tags</h2>
+  <p>Stored as a JSON array in <code>plans.tags</code>. The form input accepts a comma-separated string; <code>PlanController::validatePlan()</code> splits it to an array before saving:</p>
+  <pre><code>$data['tags'] = array_values(array_filter(array_map('trim', explode(',', $data['tags']))));</code></pre>
+
+  <h2>Employee assignment</h2>
+  <p>Plans use a <code>plan_employees</code> pivot table (BelongsToMany). On create/update: <code>$plan->employees()->sync($employeeIds)</code>. The corresponding relationship on Employee is <code>Employee::plans()</code>.</p>
+
+  <h2>Duplicate action</h2>
+  <p><code>PlanController@duplicate</code> creates a copy of the plan with a new <code>plan_number</code>, status reset to <code>draft</code>, and all tasks copied (statuses reset to <code>pending</code>). Employee assignments are <em>not</em> copied — the duplicate starts unassigned.</p>
+
+  <h2>Client view (assigned employees)</h2>
+  <p>Routes <code>GET /plans</code> and <code>GET /plans/{plan}</code> are under the standard client <code>auth + active</code> middleware. Access control is enforced in the controller:</p>
+  <ul>
+    <li><strong>index</strong> — shows only plans where <code>plan_employees.employee_id = auth user's employee</code></li>
+    <li><strong>show</strong> — aborts 403 unless assigned, or the user is admin/editor</li>
+    <li><strong>storeComment</strong> — same assignment check before allowing a comment; posts to <code>plans.comments.store</code> (not the admin route)</li>
+  </ul>
+
+  <h2>Admin show page layout</h2>
+  <p>Two-column layout: left 2/3 has progress bar, tasks (with add-task Alpine.js panel), comments, and attachments. Right 1/3 has details sidebar, assigned employees, tags, notes, and a danger zone (delete) at the bottom. The Duplicate and Archive buttons use <code>&lt;form class="contents"&gt;</code> to participate as flex children alongside the Back and Edit links without breaking the flex layout.</p>
+
+  <h2>Notifications sent</h2>
+  <table>
+    <tr><th>Event</th><th>Sent to</th><th>Type</th></tr>
+    <tr><td>Plan created (assigned employees)</td><td>Each assigned employee's user</td><td><code>plan_assigned</code></td></tr>
+  </table>
 </div>
 
 </div><!-- end #content -->
