@@ -69,11 +69,14 @@ class BasicKnowledgeTrendController extends Controller
 
     public function show(BasicKnowledgeTrend $trend)
     {
+        $trend->load('media');
+
         return view('admin.basic-knowledge.show', compact('trend'));
     }
 
     public function edit(BasicKnowledgeTrend $trend)
     {
+        $trend->load('media');
         $categories = Category::orderBy('name')->get();
 
         return view('admin.basic-knowledge.edit', compact('trend', 'categories'));

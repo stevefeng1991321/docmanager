@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\TrendMedia;
 
 class ScienceTechTrend extends Model
 {
@@ -19,4 +20,9 @@ class ScienceTechTrend extends Model
     protected $casts = [
         'year' => 'integer',
     ];
+
+    public function media()
+    {
+        return $this->morphMany(TrendMedia::class, 'mediable')->orderBy('sort_order')->orderBy('id');
+    }
 }

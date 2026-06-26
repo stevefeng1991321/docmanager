@@ -69,11 +69,15 @@ class ScienceTechTrendController extends Controller
 
     public function show(ScienceTechTrend $trend)
     {
+        $trend->load('media');
+
         return view('admin.science-tech.show', compact('trend'));
     }
 
     public function edit(ScienceTechTrend $trend)
     {
+        $trend->load('media');
+
         return view('admin.science-tech.edit', compact('trend'));
     }
 

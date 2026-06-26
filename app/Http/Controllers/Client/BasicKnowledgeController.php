@@ -46,6 +46,8 @@ class BasicKnowledgeController extends Controller
     {
         abort_unless($trend->status === 'published', 404);
 
+        $trend->load('media');
+
         return view('basic-knowledge.show', compact('trend'));
     }
 }

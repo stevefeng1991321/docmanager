@@ -41,6 +41,8 @@ class ScienceTechController extends Controller
             abort(404);
         }
 
+        $trend->load('media');
+
         return view('science-tech.show', compact('trend'));
     }
 }

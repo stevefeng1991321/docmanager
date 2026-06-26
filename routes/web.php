@@ -165,6 +165,7 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::put('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'update'])->name('science-tech.update');
     Route::delete('science-tech/{trend}',           [Admin\ScienceTechTrendController::class, 'destroy'])->name('science-tech.destroy');
     Route::get('science-tech/{trend}',              [Admin\ScienceTechTrendController::class, 'show'])->name('science-tech.show');
+    Route::post('science-tech/{trend}/media',       [Admin\TrendMediaController::class, 'storeScienceTech'])->name('science-tech.media.store');
 
     // Basic Knowledge
     Route::get('basic-knowledge',                      [Admin\BasicKnowledgeTrendController::class, 'index'])->name('basic-knowledge.index');
@@ -174,6 +175,11 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::put('basic-knowledge/{trend}',              [Admin\BasicKnowledgeTrendController::class, 'update'])->name('basic-knowledge.update');
     Route::delete('basic-knowledge/{trend}',           [Admin\BasicKnowledgeTrendController::class, 'destroy'])->name('basic-knowledge.destroy');
     Route::get('basic-knowledge/{trend}',              [Admin\BasicKnowledgeTrendController::class, 'show'])->name('basic-knowledge.show');
+    Route::post('basic-knowledge/{trend}/media',       [Admin\TrendMediaController::class, 'storeBasicKnowledge'])->name('basic-knowledge.media.store');
+
+    // Trend Media (update / delete — type-agnostic)
+    Route::post('trend-media/{trendMedia}',            [Admin\TrendMediaController::class, 'update'])->name('trend-media.update');
+    Route::delete('trend-media/{trendMedia}',          [Admin\TrendMediaController::class, 'destroy'])->name('trend-media.destroy');
 
     // Problems & Reference Solutions — static routes before {problem} wildcard
     Route::get('problems',                    [Admin\ProblemController::class, 'index'])->name('problems.index');
