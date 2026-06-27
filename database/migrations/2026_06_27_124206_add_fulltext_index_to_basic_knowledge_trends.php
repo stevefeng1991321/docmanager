@@ -12,17 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('basic_knowledge_trends', function (Blueprint $table) {
-            //
+            $table->fullText(['title', 'summary', 'content'], 'bkt_fulltext');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('basic_knowledge_trends', function (Blueprint $table) {
-            //
+            $table->dropFullText('bkt_fulltext');
         });
     }
 };

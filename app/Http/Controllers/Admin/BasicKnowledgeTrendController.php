@@ -19,10 +19,15 @@ class BasicKnowledgeTrendController extends Controller
         $query = BasicKnowledgeTrend::query();
 
         if ($q) {
-            $query->where(function ($sub) use ($q) {
-                $sub->where('title',   'like', "%{$q}%")
-                    ->orWhere('summary', 'like', "%{$q}%");
-            });
+            if (mb_strlen($q) >= 3) {
+                $query->whereFullText(['title', 'summary', 'content'], $q);
+            } else {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('title',   'like', "%{$q}%")
+                        ->orWhere('summary', 'like', "%{$q}%")
+                        ->orWhere('content', 'like', "%{$q}%");
+                });
+            }
         }
 
         if ($status)      { $query->where('status', $status); }
