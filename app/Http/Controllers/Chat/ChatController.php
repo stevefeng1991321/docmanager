@@ -14,7 +14,7 @@ class ChatController extends Controller
         $user = $request->user();
 
         $conversations = $user->conversations()
-            ->with('reads')
+            ->with(['reads', 'userOne', 'userTwo', 'participants'])
             ->get()
             ->sortByDesc(fn (Conversation $c) => $c->last_message_at ?? $c->created_at)
             ->map(fn (Conversation $c) => $c->toListItem($user->id))

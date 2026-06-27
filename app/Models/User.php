@@ -79,8 +79,14 @@ class User extends Authenticatable
 
     public function conversations()
     {
-        return Conversation::where('user_one_id', $this->id)
-            ->orWhere('user_two_id', $this->id);
+        return Conversation::where(function ($q) {
+            $q->where('type', 'direct')
+              ->where(fn ($w) => $w->where('user_one_id', $this->id)
+                                   ->orWhere('user_two_id', $this->id));
+        })->orWhere(function ($q) {
+            $q->where('type', 'group')
+              ->whereHas('participants', fn ($p) => $p->where('user_id', $this->id));
+        });
     }
 
     public function employee()

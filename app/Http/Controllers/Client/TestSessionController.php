@@ -76,8 +76,14 @@ class TestSessionController extends Controller
 
     private function finalizeSubmission(TestInvite $invite, array $answers): void
     {
+        $totalScore  = 0;
+        $maxScore    = 0;
+        $needsReview = false;
+
         foreach ($invite->test->problems as $problem) {
-            $code = $answers[$problem->id] ?? '';
+            $points    = (int) $problem->pivot->points;
+            $maxScore += $points;
+            $code      = $answers[$problem->id] ?? '';
 
             [$score, $feedback] = $code !== ''
                 ? $this->autoGrade($problem, $code)
@@ -87,12 +93,24 @@ class TestSessionController extends Controller
                 ['problem_id' => $problem->id],
                 ['code' => $code, 'score' => $score, 'feedback' => $feedback]
             );
+
+            if ($score === null) {
+                $needsReview = true;
+            } else {
+                $totalScore += $score;
+            }
         }
 
-        $invite->update([
-            'status'       => 'submitted',
-            'submitted_at' => now(),
-        ]);
+        $update = ['status' => 'submitted', 'submitted_at' => now()];
+
+        if (!$needsReview) {
+            $update['status']      = 'graded';
+            $update['total_score'] = $totalScore;
+            $update['max_score']   = $maxScore;
+            $update['graded_at']   = now();
+        }
+
+        $invite->update($update);
     }
 
     /**
