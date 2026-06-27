@@ -13,7 +13,14 @@
     @endphp
     <style>
         [x-cloak] { display: none !important; }
-        :root { --sb-bg:{{ $adminTheme['sb_bg'] }};--primary:{{ $adminTheme['primary'] }};--primary-dk:{{ $adminTheme['primary_dk'] }}; }
+        :root {
+            --sb-bg:         {{ $adminTheme['sb_bg'] }};
+            --primary:       {{ $adminTheme['primary'] }};
+            --primary-dk:    {{ $adminTheme['primary_dk'] }};
+            --primary-lt:    {{ $adminTheme['primary_lt'] }};
+            --primary-mlt:   {{ $adminTheme['primary_mlt'] }};
+            --primary-border:{{ $adminTheme['primary_border'] }};
+        }
         .nav-scroll::-webkit-scrollbar { width: 4px; }
         .nav-scroll::-webkit-scrollbar-track { background: transparent; }
         .nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
@@ -25,6 +32,21 @@
         .nav-link:hover svg,.nav-link-active svg{color:#fff}
         .btn-primary{background:var(--primary);color:#fff;transition:background .15s}
         .btn-primary:hover{background:var(--primary-dk)}
+
+        /* ── Map hardcoded blue Tailwind classes to theme variables ── */
+        main .bg-blue-600,main .bg-blue-700{background-color:var(--primary)!important}
+        main .hover\:bg-blue-600:hover,main .hover\:bg-blue-700:hover{background-color:var(--primary-dk)!important}
+        main .text-blue-600,main .text-blue-700{color:var(--primary)!important}
+        main .text-blue-800{color:var(--primary-dk)!important}
+        main .hover\:text-blue-700:hover,main .hover\:text-blue-800:hover{color:var(--primary-dk)!important}
+        main .border-blue-600,main .border-blue-500{border-color:var(--primary)!important}
+        main .border-blue-400,main .border-blue-300{border-color:var(--primary-border)!important}
+        main .border-blue-200{border-color:var(--primary-mlt)!important}
+        main .bg-blue-50{background-color:var(--primary-lt)!important}
+        main .bg-blue-100{background-color:var(--primary-mlt)!important}
+        main .ring-blue-500,main .ring-blue-200{--tw-ring-color:var(--primary-border)!important}
+        main .focus\:ring-blue-500:focus{--tw-ring-color:var(--primary)!important}
+        main .accent-blue-600{accent-color:var(--primary)!important}
     </style>
     @stack('head')
 </head>

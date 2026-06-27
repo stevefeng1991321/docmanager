@@ -10,7 +10,7 @@
         {{-- Appearance --}}
         <h3 class="font-semibold text-gray-800">Appearance</h3>
         <div>
-            <p class="text-xs text-gray-500 mb-3">Choose a colour theme for the admin panel sidebar.</p>
+            <p class="text-xs text-gray-500 mb-3">Choose a colour theme for the admin panel.</p>
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                 @foreach($themes as $key => $t)
                 @php $sel = ($settings['admin_theme'] ?? 'default') === $key; @endphp
@@ -130,17 +130,30 @@
 </div>
 
 @push('scripts')
+@php
+$themesJson = collect(config('admin_themes'))->map(fn($t) => [
+    'sb_bg'          => $t['sb_bg'],
+    'primary'        => $t['primary'],
+    'primary_dk'     => $t['primary_dk'],
+    'primary_lt'     => $t['primary_lt'],
+    'primary_mlt'    => $t['primary_mlt'],
+    'primary_border' => $t['primary_border'],
+]);
+@endphp
 <script>
 (function () {
-    var themes = @json(collect(config('admin_themes'))->map(fn($t) => ['sb_bg' => $t['sb_bg'], 'primary' => $t['primary'], 'primary_dk' => $t['primary_dk']]));
+    var themes = @json($themesJson);
     document.querySelectorAll('input[name="admin_theme"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
             var t = themes[this.value];
             if (!t) return;
             var root = document.documentElement;
-            root.style.setProperty('--sb-bg', t.sb_bg);
-            root.style.setProperty('--primary', t.primary);
-            root.style.setProperty('--primary-dk', t.primary_dk);
+            root.style.setProperty('--sb-bg',          t.sb_bg);
+            root.style.setProperty('--primary',         t.primary);
+            root.style.setProperty('--primary-dk',      t.primary_dk);
+            root.style.setProperty('--primary-lt',      t.primary_lt);
+            root.style.setProperty('--primary-mlt',     t.primary_mlt);
+            root.style.setProperty('--primary-border',  t.primary_border);
         });
     });
 })();
