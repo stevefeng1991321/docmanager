@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
         $this->call(VRFBInnovativeTechnologySeeder::class);
         $this->call(VRFBBuildPreparationSeeder::class);
         $this->call(PlanWorkReportKnowledgeSeeder::class);
+        $this->call(HeatResistantPaintKnowledgeSeeder::class);
 
         $this->command->info('Admin account: username=admin  password=Admin@1234');
         $this->command->warn('Change the admin password after first login!');
