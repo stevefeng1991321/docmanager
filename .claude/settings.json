@@ -48,7 +48,9 @@
       "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/guide?ref=main\")",
       "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/config?ref=main\")",
       "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/plugins?ref=main\")",
-      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/changes?ref=main\")"
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/changes?ref=main\")",
+      "Bash(grep -rn \"cdn\\\\.\" resources/ public/ --include=\"*.blade.php\" --include=\"*.js\" --include=\"*.css\" -l)",
+      "Bash(grep -rn \"fonts\\\\.googleapis\\\\|fonts\\\\.gstatic\\\\|cdnjs\\\\|jsdelivr\\\\|unpkg\\\\.com\\\\|stackpath\\\\|bootstrapcdn\" resources/ --include=\"*.blade.php\" -l)"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"

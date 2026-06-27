@@ -1412,6 +1412,95 @@ A retinol daytime product without SPF would accelerate retinol photodegradation 
 MD,
             ],
 
+            [
+                'title'   => 'Airbrush-Compatible Professional Foundation Milk: Ultra-Low Viscosity Precision Spray Application',
+                'summary' => 'A professional-grade foundation milk engineered for airbrush compressor delivery — ultra-low viscosity (50–500 mPa·s), sub-micron pigment dispersion, and no film formers that would clog 0.2–0.4 mm nozzles — producing flawless, seamless coverage for film, television, and editorial makeup.',
+                'tags'    => ['airbrush foundation', 'professional makeup', 'spray foundation', 'film makeup', 'ultra-low viscosity', 'HD makeup'],
+                'content' => <<<MD
+# Airbrush-Compatible Professional Foundation Milk: Ultra-Low Viscosity Precision Spray Application
+
+Airbrush foundation represents the professional end of the liquid foundation spectrum — used in film and television production, editorial fashion photography, bridal makeup, and high-end salon services. The technical requirements for airbrush-compatible formulas are fundamentally different from standard liquid foundations: the formula must pass through a nozzle orifice of 0.2 – 0.4 mm at 10 – 30 psi air pressure without clogging, spattering, or producing a non-uniform spray pattern, while still delivering the coverage, finish, and durability expected of professional makeup.
+
+## Concept Overview
+
+| Parameter | Specification |
+|---|---|
+| Product type | Water- or silicone-based ultra-low-viscosity emulsion |
+| Coverage | Sheer to full (buildable by passes) |
+| Finish | Flawless, seamless — imperceptible on camera |
+| Application | Airbrush compressor; gravity or siphon feed |
+| Nozzle compatibility | 0.2 – 0.4 mm nozzle; 10 – 30 psi |
+| Viscosity | 50 – 500 mPa·s (water-like) |
+
+## Rheological Requirements: The Key Difference
+
+Standard liquid foundation viscosity: 2 000 – 20 000 mPa·s
+Airbrush foundation viscosity: **50 – 500 mPa·s** — approaching water (1 mPa·s)
+
+To achieve this:
+- **No conventional thickeners**: Carbomers, HEC, xanthan gum excluded — these raise viscosity and cause nozzle clogging
+- **Low-molecular-weight emulsifiers**: PEG-7 glyceryl cocoate; polysorbate-20 (low viscosity contribution)
+- **Silicone-based formulas**: Cyclopentasiloxane + isododecane + dimethicone (< 20 cSt) — silicone carrier evaporates rapidly; very low native viscosity
+- **Water-based formulas**: Distilled water + propanediol + glycerin 3 % max (higher glycerin raises viscosity)
+
+## Pigment Dispersion: Sub-Micron for Nozzle Compatibility
+
+Pigment particle size is critical: particles larger than the nozzle orifice will clog:
+- **Required particle size**: D₉₀ ≤ 5 µm (90 % of particles below 5 µm); ideally D₅₀ ≤ 1 µm
+- **Surface treatment**: Pigments must be fully deflocculated; any agglomerates → immediate nozzle block
+- **Dispersant**: Hydroxypropyl methylcellulose (HPMC) at 0.1 % (very low; just enough for deflocculation without viscosity penalty)
+- **Pigment load**: 5 – 12 % total (lower than conventional foundation; buildable via multiple passes)
+- **Milling**: Triple-roll mill or bead mill (0.3 mm ZrO₂ beads) to sub-micron distribution; quality control by laser diffraction (Malvern Mastersizer)
+
+## Two Base System Types
+
+### 1. Water-Based Airbrush Foundation
+- **Pros**: Washes out with water; safer for sensitive skin; no solvent odour
+- **Cons**: Higher surface tension (nozzle beading); slower dry-down; not waterproof
+- **Base**: Deionised water 80 %; propanediol 5 %; glycerin 3 %; witch hazel 5 % (fast-evaporating; improves spray atomisation)
+- **Finish**: Natural; adjustable
+
+### 2. Silicone-Based Airbrush Foundation
+- **Pros**: Waterproof; transfer-resistant; camera-perfect finish; silicone evaporates fast
+- **Cons**: Requires solvent-resistant airbrush; harder to clean; not for sensitive skin
+- **Base**: Cyclopentasiloxane 60 %; isododecane 20 %; dimethicone (2 cSt) 10 %
+- **Film former**: Trimethylsiloxysilicate 3 % (dissolved; provides waterproof wear)
+- **Finish**: Flawless matte; zero texture; HD-perfect
+
+## HD and 4K Camera Performance
+
+Airbrush foundation was developed in response to HD television production demands:
+- Standard foundation has visible texture under HD camera at distances < 2 m from lens
+- Airbrush deposits an ultra-thin, hyper-uniform film (10 – 30 µm; vs. 80 – 120 µm for brush application)
+- Thin film = no cakey appearance; skin texture visible but complexion evened
+- **No shimmer or large pearls**: All pearlescent particles excluded (appear as individual sparkles on 4K camera)
+- **SPF exclusion**: TiO₂ at high concentration causes white flashback on flash photography; airbrush foundations often SPF-free for professional use
+
+## Application Technique Variables
+
+| Variable | Effect |
+|---|---|
+| Distance from skin | 15 – 25 cm = even coverage; > 30 cm = splattering |
+| Air pressure | 10 psi = fine mist / sheer; 25 psi = heavier coverage |
+| Number of passes | Each pass adds ~10 % coverage; 5 passes = near full |
+| Nozzle size | 0.2 mm = sheer, fine; 0.4 mm = faster coverage |
+
+## Maintenance and Hygiene
+
+Professional airbrush systems require strict hygiene:
+- **Daily cleaning**: Flush with airbrush cleaner (isopropanol-based) after each use
+- **Microbial risk**: Airbrush compressor and cup are reused; contamination risk for clients
+- **Preservative**: Phenoxyethanol 0.8 % + ethylhexylglycerin 0.15 % (robust preservation; handles repeated opening/exposure)
+
+## Reference Products
+
+- **Temptu Pro Dura Foundation**: Industry standard silicone airbrush; film/TV benchmark
+- **Dinair Professional Airbrush Foundation**: Water-based; professional bridal and salon
+- **Luminess Air Silk Airbrush Foundation**: Consumer-grade airbrush; water-based system
+- **RCMA Foundation**: Film makeup traditional; comparable ultra-thin application
+MD,
+            ],
+
         ];
 
         foreach ($entries as $entry) {
