@@ -339,6 +339,51 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         }
         return response()->file($file, ['Content-Type' => 'text/html']);
     })->name('help.laravel.doc');
+
+    // Tailwind CSS offline documentation viewer
+    Route::get('help/tailwind', function () {
+        $available = file_exists(base_path('documentation/tailwind/index.html'));
+        return view('admin.help.tailwind', compact('available'));
+    })->name('help.tailwind');
+
+    // Serve the Tailwind CSS offline HTML file
+    Route::get('help/tailwind/doc', function () {
+        $file = base_path('documentation/tailwind/index.html');
+        if (! file_exists($file)) {
+            abort(404);
+        }
+        return response()->file($file, ['Content-Type' => 'text/html']);
+    })->name('help.tailwind.doc');
+
+    // Alpine.js offline documentation viewer
+    Route::get('help/alpine', function () {
+        $available = file_exists(base_path('documentation/alpine/index.html'));
+        return view('admin.help.alpine', compact('available'));
+    })->name('help.alpine');
+
+    // Serve the Alpine.js offline HTML file
+    Route::get('help/alpine/doc', function () {
+        $file = base_path('documentation/alpine/index.html');
+        if (! file_exists($file)) {
+            abort(404);
+        }
+        return response()->file($file, ['Content-Type' => 'text/html']);
+    })->name('help.alpine.doc');
+
+    // Flowbite offline documentation viewer
+    Route::get('help/flowbite', function () {
+        $available = file_exists(base_path('documentation/flowbite/index.html'));
+        return view('admin.help.flowbite', compact('available'));
+    })->name('help.flowbite');
+
+    // Serve the Flowbite offline HTML file
+    Route::get('help/flowbite/doc', function () {
+        $file = base_path('documentation/flowbite/index.html');
+        if (! file_exists($file)) {
+            abort(404);
+        }
+        return response()->file($file, ['Content-Type' => 'text/html']);
+    })->name('help.flowbite.doc');
 });
 
 require __DIR__.'/auth.php';
