@@ -20,4 +20,10 @@ class BasicKnowledgeTrend extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function getReadingTimeAttribute(): int
+    {
+        $words = str_word_count(strip_tags($this->content ?? ''));
+        return max(1, (int) ceil($words / 200));
+    }
 }

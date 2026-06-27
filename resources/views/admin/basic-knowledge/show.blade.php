@@ -42,7 +42,7 @@
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium {{ $badge }}">
                     {{ ucfirst($trend->status) }}
                 </span>
-                <span class="text-xs text-gray-400 ml-auto">Added {{ $trend->created_at->format('F j, Y') }}</span>
+                <span class="text-xs text-gray-400 ml-auto">Added {{ $trend->created_at->format('F j, Y') }} · ~{{ $trend->reading_time }} min read</span>
             </div>
 
             {{-- Title --}}

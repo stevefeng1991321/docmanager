@@ -16,18 +16,21 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $stats = Cache::remember('dashboard.stats', 300, function () {
+        $stats = Cache::remember('dashboard.stats.v2', 300, function () {
             return [
-                'total_documents' => Resource::count(),
-                'published'       => Resource::where('status', 'published')->count(),
-                'pending_review'  => Resource::where('status', 'pending_review')->count(),
-                'total_users'     => User::where('status', 'active')->count(),
-                'pending_users'   => User::where('status', 'pending')->count(),
-                'storage_bytes'   => Resource::sum('file_size'),
-                'downloads_today' => DB::table('download_logs')
-                                        ->whereDate('created_at', today())
-                                        ->count(),
-                'failed_jobs'     => DB::table('failed_jobs')->count(),
+                'total_documents'    => Resource::count(),
+                'uploads_this_week'  => Resource::whereNull('deleted_at')
+                                            ->where('created_at', '>=', now()->startOfWeek())
+                                            ->count(),
+                'published'          => Resource::where('status', 'published')->count(),
+                'pending_review'     => Resource::where('status', 'pending_review')->count(),
+                'total_users'        => User::where('status', 'active')->count(),
+                'pending_users'      => User::where('status', 'pending')->count(),
+                'storage_bytes'      => Resource::sum('file_size'),
+                'downloads_today'    => DB::table('download_logs')
+                                            ->whereDate('created_at', today())
+                                            ->count(),
+                'failed_jobs'        => DB::table('failed_jobs')->count(),
             ];
         });
 

@@ -4,16 +4,21 @@
 @section('content')
 
 {{-- Stat cards --}}
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
     @php
+        $storageBytes = $stats['storage_bytes'] ?? 0;
+        $storageFmt   = $storageBytes >= 1073741824
+            ? number_format($storageBytes / 1073741824, 2) . ' GB'
+            : number_format($storageBytes / 1048576, 1) . ' MB';
         $cards = [
-            ['label' => 'Total Documents', 'value' => number_format($stats['total_documents']), 'color' => 'blue',   'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-            ['label' => 'Active Users',    'value' => number_format($stats['total_users']),     'color' => 'green',  'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-            ['label' => 'Downloads Today', 'value' => number_format($stats['downloads_today']), 'color' => 'purple', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'],
-            ['label' => 'Storage Used',    'value' => number_format($stats['storage_bytes'] / 1048576, 1) . ' MB', 'color' => 'yellow', 'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4'],
-            ['label' => 'Failed Jobs',     'value' => number_format($stats['failed_jobs']),     'color' => $stats['failed_jobs'] > 0 ? 'red' : 'gray', 'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+            ['label' => 'Total Documents',    'value' => number_format($stats['total_documents']),   'color' => 'blue',   'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+            ['label' => 'Uploaded This Week', 'value' => number_format($stats['uploads_this_week']), 'color' => 'indigo', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'],
+            ['label' => 'Active Users',        'value' => number_format($stats['total_users']),       'color' => 'green',  'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
+            ['label' => 'Downloads Today',     'value' => number_format($stats['downloads_today']),   'color' => 'purple', 'icon' => 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'],
+            ['label' => 'Storage Used',        'value' => $storageFmt,                               'color' => 'yellow', 'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4'],
+            ['label' => 'Failed Jobs',         'value' => number_format($stats['failed_jobs']),       'color' => $stats['failed_jobs'] > 0 ? 'red' : 'gray', 'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
         ];
-        $colors = ['blue' => 'bg-blue-50 text-blue-700', 'green' => 'bg-green-50 text-green-700', 'purple' => 'bg-purple-50 text-purple-700', 'yellow' => 'bg-yellow-50 text-yellow-700', 'red' => 'bg-red-50 text-red-700', 'gray' => 'bg-gray-50 text-gray-500'];
+        $colors = ['blue' => 'bg-blue-50 text-blue-700', 'indigo' => 'bg-indigo-50 text-indigo-700', 'green' => 'bg-green-50 text-green-700', 'purple' => 'bg-purple-50 text-purple-700', 'yellow' => 'bg-yellow-50 text-yellow-700', 'red' => 'bg-red-50 text-red-700', 'gray' => 'bg-gray-50 text-gray-500'];
     @endphp
 
     @foreach($cards as $card)

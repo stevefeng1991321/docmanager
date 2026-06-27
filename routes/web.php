@@ -171,6 +171,7 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::get('basic-knowledge',                      [Admin\BasicKnowledgeTrendController::class, 'index'])->name('basic-knowledge.index');
     Route::get('basic-knowledge/create',               [Admin\BasicKnowledgeTrendController::class, 'create'])->name('basic-knowledge.create');
     Route::post('basic-knowledge',                     [Admin\BasicKnowledgeTrendController::class, 'store'])->name('basic-knowledge.store');
+    Route::post('basic-knowledge/bulk-action',         [Admin\BasicKnowledgeTrendController::class, 'bulkAction'])->name('basic-knowledge.bulk-action');
     Route::get('basic-knowledge/{trend}/edit',         [Admin\BasicKnowledgeTrendController::class, 'edit'])->name('basic-knowledge.edit');
     Route::put('basic-knowledge/{trend}',              [Admin\BasicKnowledgeTrendController::class, 'update'])->name('basic-knowledge.update');
     Route::delete('basic-knowledge/{trend}',           [Admin\BasicKnowledgeTrendController::class, 'destroy'])->name('basic-knowledge.destroy');

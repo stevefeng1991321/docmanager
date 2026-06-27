@@ -54,10 +54,15 @@ class BasicKnowledgeController extends Controller
         $trend->load('media');
 
         $related = BasicKnowledgeTrend::where('status', 'published')
-            ->where('category_id', $trend->category_id)
             ->where('id', '!=', $trend->id)
+            ->where(function ($q) use ($trend) {
+                $q->where('category_id', $trend->category_id);
+                foreach ((array) ($trend->tags ?? []) as $tag) {
+                    $q->orWhereJsonContains('tags', $tag);
+                }
+            })
             ->latest()
-            ->limit(4)
+            ->limit(5)
             ->get();
 
         return view('basic-knowledge.show', compact('trend', 'related'));

@@ -23,6 +23,7 @@
                     {{ $trend->category->name }}
                 </a>
                 <span class="text-xs text-gray-400">Added {{ $trend->created_at->format('F j, Y') }}</span>
+                <span class="text-xs text-gray-400">· ~{{ $trend->reading_time }} min read</span>
             </div>
 
             {{-- Title --}}
