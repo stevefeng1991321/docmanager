@@ -133,8 +133,9 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
     Route::patch('documents/{document}/unlock', [Admin\DocumentController::class, 'unlock'])->name('documents.unlock');
     Route::patch('documents/{document}/approve',  [Admin\DocumentController::class, 'approve'])->name('documents.approve');
     Route::patch('documents/{document}/reject',   [Admin\DocumentController::class, 'reject'])->name('documents.reject');
-    Route::patch('documents/{document}/archive',  [Admin\DocumentController::class, 'archive'])->name('documents.archive');
-    Route::patch('documents/{document}/unarchive',[Admin\DocumentController::class, 'unarchive'])->name('documents.unarchive');
+    Route::patch('documents/{document}/archive',       [Admin\DocumentController::class, 'archive'])->name('documents.archive');
+    Route::patch('documents/{document}/unarchive',     [Admin\DocumentController::class, 'unarchive'])->name('documents.unarchive');
+    Route::patch('documents/{document}/mark-reviewed', [Admin\DocumentController::class, 'markReviewed'])->name('documents.mark-reviewed');
 
     // Bulk actions
     Route::post('documents/bulk/approve',          [Admin\DocumentController::class, 'bulkApprove'])->name('documents.bulk-approve');

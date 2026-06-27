@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Auth;
 class SettingController extends Controller
 {
     private array $defaults = [
-        'max_upload_mb'           => 50,
-        'share_link_expiry_hours' => 24,
-        'lockout_attempts'        => 5,
-        'lockout_minutes'         => 15,
-        'trash_retention_days'    => 30,
-        'password_complexity'     => 'standard',
+        'max_upload_mb'            => 50,
+        'share_link_expiry_hours'  => 24,
+        'lockout_attempts'         => 5,
+        'lockout_minutes'          => 15,
+        'trash_retention_days'     => 30,
+        'document_stale_months'    => 6,
+        'password_complexity'      => 'standard',
     ];
 
     public function index()
@@ -43,6 +44,7 @@ class SettingController extends Controller
             'lockout_attempts'        => ['required', 'integer', 'min:3', 'max:20'],
             'lockout_minutes'         => ['required', 'integer', 'min:1'],
             'trash_retention_days'    => ['required', 'integer', 'min:1'],
+            'document_stale_months'   => ['required', 'integer', 'min:1', 'max:60'],
             'password_complexity'     => ['required', 'in:' . implode(',', array_keys(PasswordPolicy::LEVELS))],
             'admin_theme'             => ['required', 'in:' . implode(',', array_keys(config('admin_themes')))],
         ]);

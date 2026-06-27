@@ -126,9 +126,16 @@
                         <td class="px-4 py-3 text-gray-500 text-xs uppercase">{{ pathinfo($doc->original_filename, PATHINFO_EXTENSION) }}</td>
                         <td class="px-4 py-3 text-gray-500">{{ $doc->category?->name ?? '—' }}</td>
                         <td class="px-4 py-3">
-                            <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $badge[$doc->status] ?? '' }}">
-                                {{ ucfirst(str_replace('_',' ',$doc->status)) }}
-                            </span>
+                            <div class="flex flex-col gap-1">
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $badge[$doc->status] ?? '' }}">
+                                    {{ ucfirst(str_replace('_',' ',$doc->status)) }}
+                                </span>
+                                @if($doc->isStale($staleMonths))
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                        Review Due
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-4 py-3 text-gray-500">{{ $doc->uploader?->name ?? '—' }}</td>
                         <td class="px-4 py-3 text-gray-400">{{ $doc->created_at->format('d M Y') }}</td>

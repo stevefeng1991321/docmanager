@@ -26,4 +26,9 @@ class BasicKnowledgeTrend extends Model
         $words = str_word_count(strip_tags($this->content ?? ''));
         return max(1, (int) ceil($words / 200));
     }
+
+    public function recentlyViewed()
+    {
+        return $this->morphMany(RecentlyViewed::class, 'viewable');
+    }
 }

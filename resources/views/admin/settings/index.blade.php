@@ -115,11 +115,20 @@
         </div>
 
         <h3 class="font-semibold text-gray-800 pt-2">Retention</h3>
-        <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Trash Retention (days)</label>
-            <input type="number" name="trash_retention_days" min="1"
-                   value="{{ $settings['trash_retention_days'] ?? 30 }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Trash Retention (days)</label>
+                <input type="number" name="trash_retention_days" min="1"
+                       value="{{ $settings['trash_retention_days'] ?? 30 }}"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Document Stale Period (months)</label>
+                <input type="number" name="document_stale_months" min="1" max="60"
+                       value="{{ $settings['document_stale_months'] ?? 6 }}"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <p class="text-xs text-gray-400 mt-1">Flag published docs not updated within this period.</p>
+            </div>
         </div>
 
         <button type="submit" class="px-6 py-2.5 btn-primary text-sm font-semibold rounded-lg">

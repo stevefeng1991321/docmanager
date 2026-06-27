@@ -210,6 +210,34 @@
             </a>
         </div>
 
+        {{-- Content Review --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+            <h3 class="font-semibold text-gray-800 mb-3">Content Review</h3>
+            @if($document->isStale($staleMonths))
+                <div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg mb-3">
+                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-xs text-amber-800">
+                        This document hasn't been updated or reviewed in over {{ $staleMonths }} months.
+                        Review the content and click below to reset the clock.
+                    </p>
+                </div>
+            @else
+                @php $baseline = $document->reviewed_at ?? $document->updated_at; @endphp
+                <p class="text-xs text-gray-400 mb-3">
+                    Last reviewed {{ $baseline?->diffForHumans() ?? 'never' }}.
+                    Review due after {{ $staleMonths }} months.
+                </p>
+            @endif
+            <form action="{{ route('admin.documents.mark-reviewed', $document) }}" method="POST">
+                @csrf @method('PATCH')
+                <button class="w-full px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition">
+                    Mark as Reviewed
+                </button>
+            </form>
+        </div>
+
         {{-- Danger zone --}}
         <div class="bg-white rounded-xl shadow-sm border border-red-100 p-5">
             <h3 class="font-semibold text-red-700 mb-3">Danger Zone</h3>

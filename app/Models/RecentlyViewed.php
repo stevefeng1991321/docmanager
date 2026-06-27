@@ -8,7 +8,7 @@ class RecentlyViewed extends Model
 {
     protected $table = 'recently_viewed';
     public $timestamps = false;
-    protected $fillable = ['user_id', 'resource_id', 'viewed_at'];
+    protected $fillable = ['user_id', 'viewable_type', 'viewable_id', 'viewed_at'];
 
     protected function casts(): array
     {
@@ -16,5 +16,25 @@ class RecentlyViewed extends Model
     }
 
     public function user()     { return $this->belongsTo(User::class); }
-    public function resource() { return $this->belongsTo(Resource::class); }
+    public function viewable() { return $this->morphTo(); }
+
+    public static function record(int $userId, string $type, int $itemId, int $cap = 10): void
+    {
+        static::updateOrCreate(
+            ['user_id' => $userId, 'viewable_type' => $type, 'viewable_id' => $itemId],
+            ['viewed_at' => now()]
+        );
+
+        // Trim to cap: keep the most-recent $cap rows, delete anything older
+        $keep = static::where('user_id', $userId)
+            ->orderByDesc('viewed_at')
+            ->limit($cap)
+            ->pluck('id');
+
+        if ($keep->isNotEmpty()) {
+            static::where('user_id', $userId)
+                ->whereNotIn('id', $keep)
+                ->delete();
+        }
+    }
 }

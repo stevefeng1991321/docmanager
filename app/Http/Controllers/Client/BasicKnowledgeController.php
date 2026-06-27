@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Models\BasicKnowledgeTrend;
 use App\Models\Category;
+use App\Models\RecentlyViewed;
 use Illuminate\Http\Request;
 
 class BasicKnowledgeController extends Controller
@@ -50,6 +51,10 @@ class BasicKnowledgeController extends Controller
     public function show(BasicKnowledgeTrend $trend)
     {
         abort_unless($trend->status === 'published', 404);
+
+        if (auth()->id()) {
+            RecentlyViewed::record(auth()->id(), BasicKnowledgeTrend::class, $trend->id);
+        }
 
         $trend->load('media');
 

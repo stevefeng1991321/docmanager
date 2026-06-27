@@ -14,15 +14,22 @@ class Resource extends Model
         'title', 'description', 'original_filename', 'stored_filename',
         'file_path', 'file_type', 'file_size', 'file_hash', 'content',
         'category_id', 'uploaded_by', 'status',
-        'locked_by', 'locked_at', 'download_count', 'expires_at',
+        'locked_by', 'locked_at', 'download_count', 'expires_at', 'reviewed_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'locked_at'  => 'datetime',
-            'expires_at' => 'datetime',
+            'locked_at'   => 'datetime',
+            'expires_at'  => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
+    }
+
+    public function isStale(int $months): bool
+    {
+        $baseline = $this->reviewed_at ?? $this->updated_at;
+        return $baseline !== null && $baseline->lt(now()->subMonths($months));
     }
 
     public function isLocked(): bool
@@ -67,7 +74,7 @@ class Resource extends Model
     public function tags()           { return $this->belongsToMany(Tag::class, 'resource_tags'); }
     public function accessLogs()     { return $this->hasMany(DocumentAccessLog::class); }
     public function favorites()      { return $this->hasMany(Favorite::class); }
-    public function recentlyViewed() { return $this->hasMany(RecentlyViewed::class); }
+    public function recentlyViewed() { return $this->morphMany(RecentlyViewed::class, 'viewable'); }
     public function readingLists()   { return $this->belongsToMany(ReadingList::class, 'reading_list_items')->withPivot('sort_order', 'added_at'); }
     public function bookmarks()      { return $this->hasMany(Bookmark::class); }
     public function ratings()        { return $this->hasMany(DocumentRating::class); }

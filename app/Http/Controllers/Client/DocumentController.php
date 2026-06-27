@@ -18,11 +18,9 @@ class DocumentController extends Controller
     {
         abort_if(!$resource->isPublished(), 404);
 
-        // Record in recently viewed
-        RecentlyViewed::updateOrCreate(
-            ['user_id' => auth()->id(), 'resource_id' => $resource->id],
-            ['viewed_at' => now()]
-        );
+        if (auth()->id()) {
+            RecentlyViewed::record(auth()->id(), Resource::class, $resource->id);
+        }
 
         $resource->load(['category', 'tags', 'versions', 'ratings']);
         $userRating  = $resource->ratings()->where('user_id', auth()->id())->first();

@@ -52,11 +52,25 @@
 @endif
 
 @if($stats['pending_review'] > 0)
-    <div class="mb-6 flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
+    <div class="mb-4 flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
         <span class="text-sm font-medium text-blue-800">
             <strong>{{ $stats['pending_review'] }}</strong> document(s) awaiting review
         </span>
         <a href="{{ route('admin.documents.index', ['status' => 'pending_review']) }}" class="text-sm font-semibold text-blue-700 hover:underline">Review →</a>
+    </div>
+@endif
+
+@if($stats['stale_documents'] > 0)
+    <div class="mb-6 flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm font-medium text-amber-800">
+                <strong>{{ $stats['stale_documents'] }}</strong> published document(s) haven't been updated or reviewed in over {{ \App\Models\Setting::get('document_stale_months', 6) }} months.
+            </span>
+        </div>
+        <a href="{{ route('admin.documents.index') }}" class="text-sm font-semibold text-amber-700 hover:underline flex-shrink-0">View →</a>
     </div>
 @endif
 

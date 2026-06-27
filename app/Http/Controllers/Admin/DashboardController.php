@@ -16,7 +16,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $stats = Cache::remember('dashboard.stats.v2', 300, function () {
+        $staleMonths = (int) \App\Models\Setting::get('document_stale_months', 6);
+        $staleCutoff = now()->subMonths($staleMonths);
+
+        $stats = Cache::remember('dashboard.stats.v2', 300, function () use ($staleCutoff) {
             return [
                 'total_documents'    => Resource::count(),
                 'uploads_this_week'  => Resource::whereNull('deleted_at')
@@ -31,6 +34,12 @@ class DashboardController extends Controller
                                             ->whereDate('created_at', today())
                                             ->count(),
                 'failed_jobs'        => DB::table('failed_jobs')->count(),
+                'stale_documents'    => Resource::where('status', 'published')
+                                            ->where(function ($q) use ($staleCutoff) {
+                                                $q->where(fn($q2) => $q2->whereNull('reviewed_at')->where('updated_at', '<', $staleCutoff))
+                                                  ->orWhere('reviewed_at', '<', $staleCutoff);
+                                            })
+                                            ->count(),
             ];
         });
 

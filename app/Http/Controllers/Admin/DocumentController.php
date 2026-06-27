@@ -38,10 +38,11 @@ class DocumentController extends Controller
         $perPage    = in_array((int) $request->input('per_page'), config('pagination.per_page_options'))
             ? (int) $request->input('per_page')
             : config('pagination.default_per_page');
-        $documents  = $query->paginate($perPage)->withQueryString();
-        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
+        $documents   = $query->paginate($perPage)->withQueryString();
+        $categories  = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
+        $staleMonths = (int) \App\Models\Setting::get('document_stale_months', 6);
 
-        return view('admin.documents.index', compact('documents', 'categories', 'sort'));
+        return view('admin.documents.index', compact('documents', 'categories', 'sort', 'staleMonths'));
     }
 
     public function create()
@@ -134,9 +135,17 @@ class DocumentController extends Controller
     public function edit(Resource $document)
     {
         $document->load('tags', 'category', 'versions.uploader');
-        $categories = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
-        $tags       = Tag::orderBy('name')->get();
-        return view('admin.documents.edit', compact('document', 'categories', 'tags'));
+        $categories  = Category::with('children')->whereNull('parent_id')->orderBy('name')->get();
+        $tags        = Tag::orderBy('name')->get();
+        $staleMonths = (int) \App\Models\Setting::get('document_stale_months', 6);
+        return view('admin.documents.edit', compact('document', 'categories', 'tags', 'staleMonths'));
+    }
+
+    public function markReviewed(Resource $document)
+    {
+        $document->update(['reviewed_at' => now()]);
+        AuditLog::record('document.reviewed', $document->id, ['title' => $document->title]);
+        return back()->with('message', 'Document marked as reviewed. Review clock reset.');
     }
 
     public function update(UpdateDocumentRequest $request, Resource $document)
