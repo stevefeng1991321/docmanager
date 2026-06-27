@@ -16,6 +16,7 @@ class SettingController extends Controller
         'lockout_minutes'         => 15,
         'trash_retention_days'    => 30,
         'password_complexity'     => 'standard',
+        'admin_theme'             => 'default',
     ];
 
     public function index()
@@ -23,8 +24,9 @@ class SettingController extends Controller
         $saved    = Setting::allKeyed();
         $settings = array_merge($this->defaults, $saved);
         $passwordLevels = PasswordPolicy::LEVELS;
+        $themes = config('admin_themes');
 
-        return view('admin.settings.index', compact('settings', 'passwordLevels'));
+        return view('admin.settings.index', compact('settings', 'passwordLevels', 'themes'));
     }
 
     public function update(Request $request)
@@ -36,6 +38,7 @@ class SettingController extends Controller
             'lockout_minutes'         => ['required', 'integer', 'min:1'],
             'trash_retention_days'    => ['required', 'integer', 'min:1'],
             'password_complexity'     => ['required', 'in:' . implode(',', array_keys(PasswordPolicy::LEVELS))],
+            'admin_theme'             => ['required', 'in:' . implode(',', array_keys(config('admin_themes')))],
         ]);
 
         Setting::setMany($validated);

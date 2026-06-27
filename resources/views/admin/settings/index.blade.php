@@ -6,6 +6,46 @@
 
     <form method="POST" action="{{ route('admin.settings.update') }}" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
         @csrf @method('PUT')
+
+        {{-- Appearance --}}
+        <h3 class="font-semibold text-gray-800">Appearance</h3>
+        <div>
+            <p class="text-xs text-gray-500 mb-3">Choose a colour theme for the admin panel sidebar.</p>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                @foreach($themes as $key => $t)
+                @php $sel = ($settings['admin_theme'] ?? 'default') === $key; @endphp
+                <label class="cursor-pointer group relative block">
+                    <input type="radio" name="admin_theme" value="{{ $key }}" @checked($sel) class="sr-only">
+                    <div class="rounded-xl overflow-hidden h-14 flex transition"
+                         style="border:{{ $sel ? '2px solid '.$t['primary'] : '1px solid #e5e7eb' }}">
+                        {{-- Mini sidebar --}}
+                        <div class="w-8 flex-shrink-0 flex flex-col justify-center gap-1 px-1.5"
+                             style="background:{{ $t['sb_bg'] }}">
+                            <div class="h-1.5 rounded-sm" style="background:{{ $t['primary'] }}"></div>
+                            <div class="h-1 rounded-sm" style="background:rgba(255,255,255,.15)"></div>
+                            <div class="h-1 rounded-sm" style="background:rgba(255,255,255,.1)"></div>
+                            <div class="h-1 rounded-sm" style="background:rgba(255,255,255,.1)"></div>
+                        </div>
+                        {{-- Mini content --}}
+                        <div class="flex-1 bg-gray-50 flex flex-col justify-center gap-1 px-2">
+                            <div class="h-1.5 rounded-full bg-gray-200 w-3/4"></div>
+                            <div class="h-1 rounded-full bg-gray-100 w-full"></div>
+                            <div class="h-1 rounded-full bg-gray-100 w-4/5"></div>
+                        </div>
+                    </div>
+                    @if($sel)
+                    <div class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] leading-none font-bold"
+                         style="background:{{ $t['primary'] }}">✓</div>
+                    @endif
+                    <p class="text-center text-[11px] mt-1.5 font-medium {{ $sel ? '' : 'text-gray-500' }}"
+                       style="{{ $sel ? 'color:'.$t['primary'] : '' }}">{{ $t['name'] }}</p>
+                </label>
+                @endforeach
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
         <h3 class="font-semibold text-gray-800">Upload Limits</h3>
 
         <div class="grid grid-cols-2 gap-4">
@@ -82,10 +122,28 @@
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
         </div>
 
-        <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
+        <button type="submit" class="px-6 py-2.5 btn-primary text-sm font-semibold rounded-lg">
             Save Settings
         </button>
     </form>
 
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var themes = @json(collect(config('admin_themes'))->map(fn($t) => ['sb_bg' => $t['sb_bg'], 'primary' => $t['primary'], 'primary_dk' => $t['primary_dk']]));
+    document.querySelectorAll('input[name="admin_theme"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            var t = themes[this.value];
+            if (!t) return;
+            var root = document.documentElement;
+            root.style.setProperty('--sb-bg', t.sb_bg);
+            root.style.setProperty('--primary', t.primary);
+            root.style.setProperty('--primary-dk', t.primary_dk);
+        });
+    });
+})();
+</script>
+@endpush
 @endsection

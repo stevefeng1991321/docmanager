@@ -6,12 +6,25 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin — {{ config('app.name') }} — @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @php
+        $adminThemes  = config('admin_themes');
+        $adminThemeKey = \App\Models\Setting::get('admin_theme', 'default');
+        $adminTheme    = $adminThemes[$adminThemeKey] ?? $adminThemes['default'];
+    @endphp
     <style>
         [x-cloak] { display: none !important; }
+        :root { --sb-bg:{{ $adminTheme['sb_bg'] }};--primary:{{ $adminTheme['primary'] }};--primary-dk:{{ $adminTheme['primary_dk'] }}; }
         .nav-scroll::-webkit-scrollbar { width: 4px; }
         .nav-scroll::-webkit-scrollbar-track { background: transparent; }
         .nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 99px; }
         .nav-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.15); }
+        .nav-link{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;transition:color .1s,background .1s;color:rgba(255,255,255,.5)}
+        .nav-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+        .nav-link-active{background:var(--primary) !important;color:#fff !important}
+        .nav-link svg{flex-shrink:0;color:rgba(255,255,255,.3)}
+        .nav-link:hover svg,.nav-link-active svg{color:#fff}
+        .btn-primary{background:var(--primary);color:#fff;transition:background .15s}
+        .btn-primary:hover{background:var(--primary-dk)}
     </style>
     @stack('head')
 </head>
@@ -32,20 +45,20 @@
     <aside class="fixed inset-y-0 left-0 z-40 w-60 flex flex-col
                   transform transition-transform duration-200 ease-in-out
                   lg:relative lg:translate-x-0 lg:z-auto lg:flex-shrink-0"
-           style="background:#0d1117;"
+           style="background:var(--sb-bg)"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
 
         {{-- Logo --}}
         <div class="h-14 flex items-center px-4 flex-shrink-0" style="border-bottom:1px solid rgba(255,255,255,.06)">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
-                <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/40">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg" style="background:var(--primary)">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
                 <span class="font-semibold text-white text-sm tracking-tight truncate">DocManager</span>
-                <span class="ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 border border-blue-500/20 flex-shrink-0">Admin</span>
+                <span class="ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded bg-white/10 text-white/60 border border-white/10 flex-shrink-0">Admin</span>
             </a>
         </div>
 
@@ -151,13 +164,8 @@
                                    if (e.sender_id !== {{ auth()->id() }}) unread++;
                                });
                            "
-                           class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-100
-                                  {{ $active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white' }}"
-                           style="{{ $active ? '' : 'hover:background:rgba(255,255,255,.05)' }}"
-                           :style="!{{ $active ? 'true' : 'false' }} ? 'background:transparent' : ''"
-                           @mouseenter="if (!{{ $active ? 'true' : 'false' }}) $el.style.background='rgba(255,255,255,.05)'"
-                           @mouseleave="if (!{{ $active ? 'true' : 'false' }}) $el.style.background='transparent'">
-                            <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-white' : 'text-gray-500' }}"
+                           class="nav-link {{ $active ? 'nav-link-active' : '' }}">
+                            <svg class="w-4 h-4"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                             </svg>
@@ -172,9 +180,8 @@
                         <a href="{{ $itemHref }}"
                            @click="sidebarOpen = false"
                            @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
-                           class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-100
-                                  {{ $active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5' }}">
-                            <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-white' : 'text-gray-500' }}"
+                           class="nav-link {{ $active ? 'nav-link-active' : '' }}">
+                            <svg class="w-4 h-4"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                             </svg>
@@ -200,7 +207,7 @@
         {{-- User footer --}}
         <div class="flex-shrink-0 p-2.5" style="border-top:1px solid rgba(255,255,255,.06)">
             <div class="flex items-center gap-2.5 px-2 py-2 rounded-md group">
-                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-semibold uppercase text-white text-xs flex-shrink-0 shadow">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-semibold uppercase text-white text-xs flex-shrink-0 shadow" style="background:linear-gradient(135deg,var(--primary),var(--primary-dk))">
                     {{ substr(auth()->user()->name, 0, 1) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -237,7 +244,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('home') }}"
-                   class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-600 transition-colors whitespace-nowrap">
+                   class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors whitespace-nowrap">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
