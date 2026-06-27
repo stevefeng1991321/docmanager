@@ -14,6 +14,12 @@
     @php
         $navAvatar = auth()->user()->preferences?->avatar;
         $navUnread = auth()->user()->notifications()->where('is_read', false)->count();
+        $navChatUnread = \App\Models\Conversation::forUser(auth()->id())
+            ->whereHas('participants', fn($q) => $q->where('user_id', auth()->id())
+                ->where(fn($q2) => $q2->whereNull('last_read_at')
+                    ->orWhereColumn('last_read_at', '<', 'conversations.last_message_at')))
+            ->whereNotNull('last_message_at')
+            ->count();
     @endphp
     <nav class="bg-white border-b border-gray-200 shadow-sm" x-data="{ mobileOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,6 +64,19 @@
                         @endif
                     </a>
 
+                    {{-- Chat --}}
+                    <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-blue-600" title="Messages">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        @if($navChatUnread > 0)
+                            <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                                {{ $navChatUnread > 9 ? '9+' : $navChatUnread }}
+                            </span>
+                        @endif
+                    </a>
+
                     {{-- User dropdown (desktop md+) --}}
                     <div x-data="{ open: false }" class="relative hidden md:block">
                         <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 font-medium">
@@ -80,6 +99,12 @@
                             <a href="{{ route('work-reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Work Reports</a>
                             <a href="{{ route('attendance.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Attendance</a>
                             <a href="{{ route('plans.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Plans</a>
+                            <a href="{{ route('chat.index') }}" class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Messages
+                                @if($navChatUnread > 0)
+                                    <span class="min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center px-1">{{ $navChatUnread }}</span>
+                                @endif
+                            </a>
                             <a href="{{ route('reading-lists.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Reading Lists</a>
                             <a href="{{ route('history.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Recently Viewed</a>
                             <hr class="my-1 border-gray-100">
@@ -160,6 +185,12 @@
                     <a href="{{ route('work-reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Work Reports</a>
                     <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Attendance</a>
                     <a href="{{ route('plans.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">My Plans</a>
+                    <a href="{{ route('chat.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                        Messages
+                        @if($navChatUnread > 0)
+                            <span class="ml-auto min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center px-1">{{ $navChatUnread }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('reading-lists.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Reading Lists</a>
                     <a href="{{ route('history.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Recently Viewed</a>
                     <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>

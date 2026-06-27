@@ -93,6 +93,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/plans',                    [\App\Http\Controllers\Client\PlanController::class, 'index'])->name('plans.index');
     Route::get('/plans/{plan}',             [\App\Http\Controllers\Client\PlanController::class, 'show'])->name('plans.show');
     Route::post('/plans/{plan}/comments',   [\App\Http\Controllers\Client\PlanController::class, 'storeComment'])->name('plans.comments.store');
+
+    // Chat — static routes MUST come before {conversation} wildcard
+    Route::get('/chat',                                          [Client\ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/users',                                    [Client\ChatController::class, 'users'])->name('chat.users');
+    Route::post('/chat/start',                                   [Client\ChatController::class, 'start'])->name('chat.start');
+    Route::get('/chat/{conversation}/messages',                  [Client\ChatController::class, 'apiMessages'])->name('chat.messages');
+    Route::post('/chat/{conversation}/messages',                 [Client\ChatController::class, 'apiSend'])->name('chat.send');
+    Route::post('/chat/{conversation}/read',                     [Client\ChatController::class, 'apiRead'])->name('chat.read');
+    Route::get('/chat/{conversation}',                           [Client\ChatController::class, 'show'])->name('chat.show');
 });
 
 // Public share link (no auth required)

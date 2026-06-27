@@ -28,4 +28,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Search
     Route::get('search', Api\SearchController::class)->name('api.search');
+
+    // Chat — conversations & messages
+    Route::get('users',                                                    [Api\ConversationController::class, 'users']);
+    Route::get('conversations',                                            [Api\ConversationController::class, 'index']);
+    Route::post('conversations',                                           [Api\ConversationController::class, 'store']);
+    Route::get('conversations/{conversation}/messages',                    [Api\MessageController::class, 'index']);
+    Route::post('conversations/{conversation}/messages',                   [Api\MessageController::class, 'store']);
+    Route::post('conversations/{conversation}/read',                       [Api\MessageController::class, 'read']);
 });
