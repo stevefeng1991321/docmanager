@@ -12,6 +12,7 @@
 
             <div>
                 <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">File Type</h3>
+                <p class="text-xs text-gray-400 mb-1.5">Documents only</p>
                 @foreach (['pdf','docx','xlsx','pptx','txt','png','jpg'] as $ft)
                 <label class="flex items-center gap-2 py-0.5 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
                     <input type="radio" name="type" value="{{ $ft }}" {{ $type === $ft ? 'checked' : '' }}
@@ -243,7 +244,6 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
             @forelse ($results as $doc)
             @php
-                // Highlight full phrase AND individual words (>= 3 chars) for better snippet coverage
                 $hl = function(string $text) use ($query): string {
                     if (!$query) return e($text);
                     $words   = array_filter(explode(' ', $query), fn($w) => mb_strlen($w) >= 3);
@@ -251,14 +251,25 @@
                     $pattern = '/(' . implode('|', $terms) . ')/iu';
                     return preg_replace($pattern, '<mark class="bg-yellow-100 text-yellow-800 rounded px-0.5">$1</mark>', e($text));
                 };
-                $similarity = $scores[$doc->id] ?? null;
-                $snippet    = $snippets[$doc->id] ?? null;
+                $similarity = $scores[$doc->_key] ?? null;
+                $snippet    = $snippets[$doc->_key] ?? null;
+                $isDoc      = $doc->_type === 'document';
+                $url        = $isDoc
+                    ? route('documents.show', $doc->id)
+                    : route('basic-knowledge.show', $doc->id);
             @endphp
-            <a href="{{ route('documents.show', $doc) }}"
-               class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
+            <a href="{{ $url }}" class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
+                        {{-- Result type badge --}}
+                        @if($isDoc)
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100 flex-shrink-0">Doc</span>
+                        @else
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-600 border border-indigo-100 flex-shrink-0">Knowledge</span>
+                        @endif
+
                         <p class="font-semibold text-gray-800 text-sm">{!! $hl($doc->title) !!}</p>
+
                         @if($similarity !== null)
                         <span class="text-xs font-medium border px-2 py-0.5 rounded-full flex-shrink-0
                             {{ $mode === 'hybrid' ? 'text-teal-700 bg-teal-50 border-teal-100' : 'text-purple-700 bg-purple-50 border-purple-100' }}">
@@ -266,28 +277,36 @@
                         </span>
                         @endif
                     </div>
+
                     @if($snippet)
                     <p class="text-xs text-gray-500 mt-1 line-clamp-2">{!! $hl($snippet) !!}</p>
-                    @elseif($doc->description)
+                    @elseif($isDoc && $doc->description)
                     <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{!! $hl($doc->description) !!}</p>
+                    @elseif(!$isDoc && $doc->summary)
+                    <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{!! $hl($doc->summary) !!}</p>
                     @endif
+
                     <div class="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
                         <span>{{ $doc->category?->name ?? 'Uncategorised' }}</span>
+                        @if($isDoc)
                         <span>{{ number_format($doc->download_count) }} downloads</span>
+                        @endif
                         <span>{{ $doc->created_at->format('Y-m-d') }}</span>
-                        @if($doc->ratings_avg_rating)
+                        @if($isDoc && $doc->ratings_avg_rating)
                         <span class="text-yellow-500">&#9733; {{ number_format($doc->ratings_avg_rating, 1) }}</span>
                         @endif
                     </div>
                 </div>
+                @if($isDoc)
                 <span class="flex-shrink-0 text-xs text-gray-400 uppercase font-mono bg-gray-100 px-2 py-0.5 rounded">
                     {{ $doc->file_type }}
                 </span>
+                @endif
             </a>
             @empty
             <div class="px-5 py-10 text-center text-gray-400 text-sm">
                 <p class="text-3xl mb-2">&#128269;</p>
-                <p>No documents match your search.</p>
+                <p>No results found for "<strong class="text-gray-600">{{ $query }}</strong>".</p>
                 @if($mode === 'ai')
                 <p class="mt-1">Try switching to <strong>Keyword</strong> mode, or make sure documents have extractable content.</p>
                 @else
@@ -399,6 +418,7 @@ function searchAutocomplete(initialTerm) {
 
             <div>
                 <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">File Type</h3>
+                <p class="text-xs text-gray-400 mb-1.5">Documents only</p>
                 @foreach (['pdf','docx','xlsx','pptx','txt','png','jpg'] as $ft)
                 <label class="flex items-center gap-2 py-1 text-sm text-gray-700 cursor-pointer hover:text-blue-600">
                     <input type="radio" name="type" value="{{ $ft }}" {{ $type === $ft ? 'checked' : '' }}
