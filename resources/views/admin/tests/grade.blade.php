@@ -21,38 +21,11 @@
         </div>
     </div>
 
-    @php
-        $autoGradedCount = 0;
-        $needsReviewCount = 0;
-        foreach ($invite->test->problems as $p) {
-            $a = $answersByProblem->get($p->id);
-            $a && $a->score !== null ? $autoGradedCount++ : $needsReviewCount++;
-        }
-    @endphp
-
-    @if($autoGradedCount > 0)
-    <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 flex items-center gap-2">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        <span><strong>{{ $autoGradedCount }}</strong> of {{ $invite->test->problems->count() }} problems were auto-graded.
-        @if($needsReviewCount > 0)
-            <strong>{{ $needsReviewCount }}</strong> {{ Str::plural('problem', $needsReviewCount) }} need{{ $needsReviewCount === 1 ? 's' : '' }} manual review.
-        @else
-            All scores are confirmed — save to finalise.
-        @endif
-        </span>
-    </div>
-    @endif
-
     <form method="POST" action="{{ route('admin.test-invites.grade.store', $invite) }}" class="space-y-5">
         @csrf @method('PUT')
 
         @foreach($invite->test->problems as $problem)
-            @php
-                $answer       = $answersByProblem->get($problem->id);
-                $isAutoGraded = $answer && $answer->score !== null;
-                $hasAnswer    = $answer && $answer->code !== '';
-                $hasTestCases = $problem->function_name && !empty($problem->test_cases);
-            @endphp
+            @php $answer = $answersByProblem->get($problem->id); @endphp
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                     <div>
@@ -62,15 +35,6 @@
                             {{ match($problem->difficulty) { 'easy' => 'bg-green-100 text-green-700', 'medium' => 'bg-yellow-100 text-yellow-700', 'hard' => 'bg-red-100 text-red-700' } }}">
                             {{ $problem->difficulty }}
                         </span>
-                        @if($isAutoGraded)
-                            <span class="text-xs px-1.5 py-0.5 rounded font-medium bg-blue-100 text-blue-700 ml-2">Auto-graded</span>
-                        @elseif(!$hasAnswer)
-                            <span class="text-xs px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-500 ml-2">No answer</span>
-                        @elseif(!$hasTestCases)
-                            <span class="text-xs px-1.5 py-0.5 rounded font-medium bg-yellow-100 text-yellow-700 ml-2">Manual review</span>
-                        @else
-                            <span class="text-xs px-1.5 py-0.5 rounded font-medium bg-orange-100 text-orange-700 ml-2">Grading error</span>
-                        @endif
                     </div>
                 </div>
                 <div class="px-5 py-3 text-sm text-gray-600 border-b border-gray-50">{{ $problem->description }}</div>

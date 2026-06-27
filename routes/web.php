@@ -75,8 +75,6 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/chat/conversations/{conversation}/messages', [Chat\MessageController::class, 'store'])->name('chat.messages.store');
     Route::post('/chat/conversations/{conversation}/delivered', [Chat\ConversationController::class, 'markDelivered'])->name('chat.conversations.delivered');
     Route::post('/chat/conversations/{conversation}/read', [Chat\ConversationController::class, 'markRead'])->name('chat.conversations.read');
-    Route::post('/chat/conversations/{conversation}/participants', [Chat\ParticipantController::class, 'store'])->name('chat.participants.store');
-    Route::delete('/chat/conversations/{conversation}/participants/{user}', [Chat\ParticipantController::class, 'destroy'])->name('chat.participants.destroy');
 
     // Work Reports — static routes before {workReport} wildcard
     Route::get('/work-reports',                 [Client\WorkReportController::class, 'index'])->name('work-reports.index');

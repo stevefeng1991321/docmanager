@@ -14,11 +14,6 @@ class MessageController extends Controller
     public function store(Request $request, Conversation $conversation)
     {
         $user = $request->user();
-
-        if ($conversation->isGroup()) {
-            $conversation->load('participants');
-        }
-
         abort_unless($conversation->involves($user->id), 403);
 
         $validated = $request->validate([
@@ -32,24 +27,23 @@ class MessageController extends Controller
 
         $conversation->update(['last_message_at' => $message->created_at]);
 
-        $recipientIds = $conversation->isDirect()
-            ? [$conversation->otherUser($user->id)->id]
-            : $conversation->participants->where('id', '!=', $user->id)->pluck('id')->all();
+        $recipientId = $conversation->otherUser($user->id)->id;
 
         try {
-            event(new MessageSent($message->load('sender'), $recipientIds));
+            event(new MessageSent($message->load('sender'), $recipientId));
         } catch (Throwable $e) {
+            // The message is already saved; a broadcast outage should not fail the send.
             Log::warning('Chat broadcast failed for MessageSent: ' . $e->getMessage());
         }
 
         return response()->json([
-            'id'          => $message->id,
-            'sender_id'   => $message->sender_id,
-            'sender_name' => $user->name,
-            'body'        => $message->body,
-            'is_mine'     => true,
-            'status'      => 'sent',
-            'created_at'  => $message->created_at->toIso8601String(),
+            'id'         => $message->id,
+            'sender_id'  => $message->sender_id,
+            'sender_name'=> $user->name,
+            'body'       => $message->body,
+            'is_mine'    => true,
+            'status'     => 'sent',
+            'created_at' => $message->created_at->toIso8601String(),
         ]);
     }
 }
