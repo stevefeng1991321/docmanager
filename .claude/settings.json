@@ -42,7 +42,13 @@
       "Bash(chmod +x /tmp/check_imports.sh)",
       "Bash(/tmp/check_imports.sh)",
       "Bash(grep -A 2 -B 2 '$sc = \\\\[' resources/views/admin/attendance/leaves.blade.php)",
-      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/themesberg/flowbite/contents/content?ref=main\")"
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/themesberg/flowbite/contents/content?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/guide?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/config?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/plugins?ref=main\")",
+      "Bash(curl -s --ssl-no-revoke -H \"User-Agent: DocManager/1.0\" -H \"Accept: application/vnd.github.v3+json\" \"https://api.github.com/repos/vitejs/vite/contents/docs/changes?ref=main\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"

@@ -102,7 +102,7 @@
                             ['route' => 'admin.help.tailwind',            'label' => 'Tailwind CSS', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
                             ['route' => 'admin.help.alpine',              'label' => 'Alpine.js',   'icon' => 'M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'],
                             ['route' => 'admin.help.flowbite',            'label' => 'Flowbite', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
-                            ['href' => 'https://vitejs.dev/guide/',       'label' => 'Vite',        'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                            ['route' => 'admin.help.vite',               'label' => 'Vite',        'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
                         ],
                     ],
                     [

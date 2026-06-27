@@ -384,6 +384,21 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         }
         return response()->file($file, ['Content-Type' => 'text/html']);
     })->name('help.flowbite.doc');
+
+    // Vite offline documentation viewer
+    Route::get('help/vite', function () {
+        $available = file_exists(base_path('documentation/vite/index.html'));
+        return view('admin.help.vite', compact('available'));
+    })->name('help.vite');
+
+    // Serve the Vite offline HTML file
+    Route::get('help/vite/doc', function () {
+        $file = base_path('documentation/vite/index.html');
+        if (! file_exists($file)) {
+            abort(404);
+        }
+        return response()->file($file, ['Content-Type' => 'text/html']);
+    })->name('help.vite.doc');
 });
 
 require __DIR__.'/auth.php';

@@ -5,10 +5,10 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-class BuildAlpineOfflineDocs extends Command
+class BuildViteOfflineDocs extends Command
 {
-    protected $signature   = 'docs:build-alpine-offline {--branch=main : The branch that was imported}';
-    protected $description = 'Convert Alpine.js markdown docs into a single offline HTML file';
+    protected $signature   = 'docs:build-vite-offline {--branch=main : The branch that was imported}';
+    protected $description = 'Convert Vite markdown docs into a single offline HTML file';
 
     private string $branch;
     private string $sourceDir;
@@ -16,17 +16,16 @@ class BuildAlpineOfflineDocs extends Command
     public function handle(): int
     {
         $this->branch    = $this->option('branch');
-        $this->sourceDir = storage_path("app/private/documents/alpine-docs/{$this->branch}");
+        $this->sourceDir = storage_path("app/private/documents/vite-docs/{$this->branch}");
 
         if (! is_dir($this->sourceDir)) {
             $this->error("Source not found: {$this->sourceDir}");
-            $this->error('Run php artisan docs:import-alpine first.');
+            $this->error('Run php artisan docs:import-vite first.');
             return self::FAILURE;
         }
 
         $this->info('Converting markdown files…');
 
-        // Collect all .md files recursively; key = relative path without extension
         $mdFiles = $this->collectFiles($this->sourceDir);
         $bar     = $this->output->createProgressBar(count($mdFiles));
         $pages   = [];
@@ -41,9 +40,9 @@ class BuildAlpineOfflineDocs extends Command
 
         $nav = $this->buildNav(array_keys($pages));
 
-        $this->info('Generating documentation/alpine/index.html…');
+        $this->info('Generating documentation/vite/index.html…');
 
-        $outDir  = base_path('documentation/alpine');
+        $outDir  = base_path('documentation/vite');
         $outFile = "{$outDir}/index.html";
         @mkdir($outDir, 0755, true);
 
@@ -84,7 +83,7 @@ class BuildAlpineOfflineDocs extends Command
     }
 
     // -------------------------------------------------------------------------
-    // Navigation — keys mirror the file paths: "essentials/installation" etc.
+    // Navigation
     // -------------------------------------------------------------------------
 
     private function buildNav(array $available): array
@@ -107,7 +106,6 @@ class BuildAlpineOfflineDocs extends Command
             }
         }
 
-        // Anything not in the known structure
         $extra = [];
         foreach ($available as $key) {
             if (! isset($used[$key])) {
@@ -126,87 +124,93 @@ class BuildAlpineOfflineDocs extends Command
     private function navStructure(): array
     {
         return [
-            'Getting Started' => [
-                'Welcome'        => 'start-here',
-                'Upgrade Guide'  => 'upgrade-guide',
+            'Guide' => [
+                'Introduction'              => 'guide/index',
+                'Why Vite?'                 => 'guide/why',
+                'Getting Started'           => 'guide/index',
+                'Features'                  => 'guide/features',
+                'CLI'                       => 'guide/cli',
+                'Using Plugins'             => 'guide/using-plugins',
+                'Dep Pre-Bundling'          => 'guide/dep-pre-bundling',
+                'Static Asset Handling'     => 'guide/assets',
+                'Building for Production'   => 'guide/build',
+                'Deploying a Static Site'   => 'guide/static-deploy',
+                'Env Variables & Modes'     => 'guide/env-and-mode',
+                'Server-Side Rendering'     => 'guide/ssr',
+                'Backend Integration'       => 'guide/backend-integration',
+                'Performance'               => 'guide/performance',
+                'Philosophy'                => 'guide/philosophy',
+                'Troubleshooting'           => 'guide/troubleshooting',
+                'Migration from v4'         => 'guide/migration',
             ],
-            'Essentials' => [
-                'Installation'   => 'essentials/installation',
-                'State'          => 'essentials/state',
-                'Templating'     => 'essentials/templating',
-                'Events'         => 'essentials/events',
-                'Lifecycle'      => 'essentials/lifecycle',
+            'APIs' => [
+                'Plugin API'                => 'guide/api-plugin',
+                'HMR API'                   => 'guide/api-hmr',
+                'JavaScript API'            => 'guide/api-javascript',
+                'Environment API'           => 'guide/api-environment',
+                'Environment Instances'     => 'guide/api-environment-instances',
+                'Environment Frameworks'    => 'guide/api-environment-frameworks',
+                'Environment Plugins'       => 'guide/api-environment-plugins',
+                'Environment Runtimes'      => 'guide/api-environment-runtimes',
             ],
-            'Directives' => [
-                'x-data'         => 'directives/data',
-                'x-bind'         => 'directives/bind',
-                'x-on'           => 'directives/on',
-                'x-text'         => 'directives/text',
-                'x-html'         => 'directives/html',
-                'x-model'        => 'directives/model',
-                'x-modelable'    => 'directives/modelable',
-                'x-for'          => 'directives/for',
-                'x-transition'   => 'directives/transition',
-                'x-effect'       => 'directives/effect',
-                'x-ignore'       => 'directives/ignore',
-                'x-ref'          => 'directives/ref',
-                'x-cloak'        => 'directives/cloak',
-                'x-teleport'     => 'directives/teleport',
-                'x-if'           => 'directives/if',
-                'x-id'           => 'directives/id',
-                'x-show'         => 'directives/show',
-                'x-init'         => 'directives/init',
+            'Config Reference' => [
+                'Configuring Vite'          => 'config/index',
+                'Shared Options'            => 'config/shared-options',
+                'Server Options'            => 'config/server-options',
+                'Build Options'             => 'config/build-options',
+                'Preview Options'           => 'config/preview-options',
+                'Dep Optimization Options'  => 'config/dep-optimization-options',
+                'SSR Options'               => 'config/ssr-options',
+                'Worker Options'            => 'config/worker-options',
             ],
-            'Magics' => [
-                '$el'            => 'magics/el',
-                '$refs'          => 'magics/refs',
-                '$store'         => 'magics/store',
-                '$watch'         => 'magics/watch',
-                '$dispatch'      => 'magics/dispatch',
-                '$nextTick'      => 'magics/nextTick',
-                '$root'          => 'magics/root',
-                '$data'          => 'magics/data',
-                '$id'            => 'magics/id',
+            'Breaking Changes' => [
+                'Changes Overview'              => 'changes/index',
+                'hotUpdate Hook'                => 'changes/hotupdate-hook',
+                'Per-environment APIs'          => 'changes/per-environment-apis',
+                'Shared Plugins During Build'   => 'changes/shared-plugins-during-build',
+                'SSR Using ModuleRunner'        => 'changes/ssr-using-modulerunner',
+                'this.environment in Hooks'     => 'changes/this-environment-in-hooks',
             ],
-            'Globals' => [
-                'Alpine.data'    => 'globals/alpine-data',
-                'Alpine.store'   => 'globals/alpine-store',
-                'Alpine.bind'    => 'globals/alpine-bind',
-            ],
-            'Plugins' => [
-                'Mask'           => 'plugins/mask',
-                'Intersect'      => 'plugins/intersect',
-                'Persist'        => 'plugins/persist',
-                'Focus'          => 'plugins/focus',
-                'Collapse'       => 'plugins/collapse',
-                'Morph'          => 'plugins/morph',
-                'Anchor'         => 'plugins/anchor',
-                'Resize'         => 'plugins/resize',
-                'Sort'           => 'plugins/sort',
-            ],
-            'Advanced' => [
-                'Extending Alpine' => 'advanced/extending',
-                'Async Alpine'     => 'advanced/async',
-                'Reactivity API'   => 'advanced/reactivity',
-                'CSP'              => 'advanced/csp',
+            'Resources' => [
+                'Plugins'           => 'plugins/index',
+                'Releases'          => 'releases',
+                'Acknowledgements'  => 'acknowledgements',
+                'Team'              => 'team',
             ],
         ];
     }
 
     // -------------------------------------------------------------------------
-    // Markdown → HTML
+    // Markdown → HTML (handles VitePress custom containers)
     // -------------------------------------------------------------------------
 
     private function convertMarkdown(string $markdown): string
     {
+        // Strip YAML frontmatter
         $markdown = preg_replace('/\A---\s*\n.*?\n---\s*\n/s', '', $markdown);
 
-        $html = Str::markdown($markdown, [
+        // Remove code-include directives: <<< @/path/to/file
+        $markdown = preg_replace('/^<<<\s+@\S+[^\n]*$/m', '', $markdown);
+
+        // VitePress custom containers → blockquote-like HTML before Str::markdown
+        $markdown = preg_replace_callback(
+            '/^:::\s*(tip|info|warning|danger|details)([^\n]*)\n(.*?)^:::\s*$/ms',
+            function ($m) {
+                $type    = strtolower($m[1]);
+                $title   = trim($m[2]) ?: ucfirst($type);
+                $content = trim($m[3]);
+                $cls     = in_array($type, ['warning', 'danger']) ? 'vp-warning' : 'vp-info';
+                return "<div class=\"{$cls}\"><strong>{$title}</strong>\n\n{$content}\n\n</div>\n\n";
+            },
+            $markdown
+        );
+
+        $html = Str::markdown(trim($markdown), [
             'html_input'         => 'allow',
             'allow_unsafe_links' => false,
         ]);
 
-        // External links open in new tab
+        // External links in new tab
         $html = preg_replace_callback('/<a href="([^"]+)"/', function ($m) {
             $href = $m[1];
             if (str_starts_with($href, 'http') || str_starts_with($href, 'mailto')) {
@@ -237,7 +241,7 @@ class BuildAlpineOfflineDocs extends Command
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Alpine.js — Offline Documentation</title>
+<title>Vite — Offline Documentation</title>
 <style>{$css}</style>
 </head>
 <body>
@@ -245,7 +249,7 @@ class BuildAlpineOfflineDocs extends Command
 
 <div id="sidebar">
   <div id="sidebar-header">
-    <div class="logo"><span>🏔️</span> Alpine.js</div>
+    <div class="logo"><span>⚡</span> Vite</div>
     <div class="sub">{$branch} &nbsp;·&nbsp; offline · {$ts}</div>
   </div>
   <div id="sidebar-search">
@@ -314,7 +318,6 @@ HTML;
             foreach ($items as $title => $key) {
                 $sk    = htmlspecialchars($key);
                 $st    = htmlspecialchars($title);
-                $eKey  = htmlspecialchars(rawurlencode($key));
                 $html .= "<div class=\"nav-item\" onclick=\"show('{$sk}')\" data-key=\"{$sk}\">{$st}</div>";
             }
         }
@@ -339,7 +342,7 @@ HTML;
                 return $key;
             }
         }
-        return 'start-here';
+        return 'guide/index';
     }
 
     private function css(): string
@@ -380,6 +383,10 @@ p{color:#cbd5e1;margin-bottom:.75rem;font-size:.9rem}
 ul,ol{color:#cbd5e1;padding-left:1.4rem;margin-bottom:.75rem;font-size:.9rem}
 li{margin-bottom:.25rem}
 blockquote{border-left:3px solid var(--border);padding:.5rem 1rem;margin:1rem 0;color:var(--muted);font-size:.9rem}
+.vp-info{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);border-radius:8px;padding:.8rem 1rem;margin:1rem 0;font-size:.85rem;color:#c7d2fe}
+.vp-info strong{display:block;margin-bottom:.3rem;color:#818cf8}
+.vp-warning{background:#3b1a00;border:1px solid #92400e;border-radius:8px;padding:.8rem 1rem;margin:1rem 0;font-size:.85rem;color:#fde68a}
+.vp-warning strong{display:block;margin-bottom:.3rem;color:#fbbf24}
 table{width:100%;border-collapse:collapse;font-size:.82rem;margin:1rem 0;display:block;overflow-x:auto}
 th{text-align:left;padding:6px 10px;background:#162032;color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
 td{padding:7px 10px;border-bottom:1px solid #1e293b;vertical-align:top;color:#cbd5e1}
