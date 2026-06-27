@@ -157,5 +157,38 @@
     </div>
     @endif
 
+    {{-- Related entries --}}
+    @if($related->isNotEmpty())
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-gray-700">More in {{ $trend->category->name }}</h2>
+            <a href="{{ route('admin.basic-knowledge.index', ['category_id' => $trend->category_id]) }}"
+               class="text-xs text-blue-600 hover:underline">Browse all →</a>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+            @foreach($related as $entry)
+            <a href="{{ route('admin.basic-knowledge.show', $entry) }}"
+               class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:border-blue-200 hover:shadow transition flex flex-col gap-1.5">
+                <div class="flex items-center gap-2">
+                    @php
+                        $rb = match($entry->status) {
+                            'published' => 'bg-green-100 text-green-700',
+                            'archived'  => 'bg-amber-100 text-amber-700',
+                            default     => 'bg-gray-100 text-gray-500',
+                        };
+                    @endphp
+                    <span class="px-1.5 py-0.5 rounded text-xs font-medium {{ $rb }}">{{ ucfirst($entry->status) }}</span>
+                </div>
+                <h3 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">{{ $entry->title }}</h3>
+                @if($entry->summary)
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">{{ $entry->summary }}</p>
+                @endif
+                <span class="text-xs text-gray-400 mt-auto">{{ $entry->created_at->format('M j, Y') }}</span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
 </div>
 @endsection

@@ -142,13 +142,35 @@
     </div>
     @endif
 
-    {{-- Browse more in category --}}
+    {{-- Related entries --}}
+    @if($related->isNotEmpty())
+    <div>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-semibold text-gray-800">More in {{ $trend->category->name }}</h2>
+            <a href="{{ route('basic-knowledge.index', ['category_id' => $trend->category_id]) }}"
+               class="text-xs text-indigo-600 hover:underline">Browse all →</a>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+            @foreach($related as $entry)
+            <a href="{{ route('basic-knowledge.show', $entry) }}"
+               class="bg-white rounded-xl border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-sm transition flex flex-col gap-1.5">
+                <h3 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2">{{ $entry->title }}</h3>
+                @if($entry->summary)
+                    <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">{{ $entry->summary }}</p>
+                @endif
+                <span class="text-xs text-gray-400 mt-auto">{{ $entry->created_at->format('M j, Y') }}</span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @else
     <div class="text-sm">
         <a href="{{ route('basic-knowledge.index', ['category_id' => $trend->category_id]) }}"
            class="text-indigo-600 hover:underline">
             Browse more in {{ $trend->category->name }} →
         </a>
     </div>
+    @endif
 
 </div>
 @endsection

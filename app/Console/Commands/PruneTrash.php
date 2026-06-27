@@ -14,7 +14,7 @@ class PruneTrash extends Command
 
     public function handle(): int
     {
-        $days     = (int) config('app.trash_retention_days', 30);
+        $days     = (int) \App\Models\Setting::get('trash_retention_days', 30);
         $cutoff   = now()->subDays($days);
         $isDryRun = $this->option('dry-run');
 

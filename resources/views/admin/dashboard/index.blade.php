@@ -55,6 +55,59 @@
     </div>
 @endif
 
+{{-- Knowledge Base overview --}}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-gray-700">Knowledge Base</h3>
+        <a href="{{ route('admin.basic-knowledge.index') }}" class="text-xs font-semibold text-blue-600 hover:underline">View all →</a>
+    </div>
+    <div class="grid grid-cols-3 gap-4 mb-4">
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Total Entries</p>
+            <p class="text-xl font-bold text-gray-900">{{ number_format($knowledgeStats['total']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Published</p>
+            <p class="text-xl font-bold text-green-600">{{ number_format($knowledgeStats['published']) }}</p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Draft</p>
+            <p class="text-xl font-bold text-gray-400">{{ number_format($knowledgeStats['draft']) }}</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+        {{-- By category --}}
+        @if($knowledgeStats['by_category']->isNotEmpty())
+        <div>
+            <p class="text-xs font-medium text-gray-500 mb-2">Published by Category</p>
+            <div class="space-y-1.5">
+                @foreach($knowledgeStats['by_category'] as $cat)
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">{{ $cat->name }}</span>
+                    <span class="text-xs font-semibold text-indigo-600">{{ $cat->count }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+        {{-- Recently added --}}
+        @if($knowledgeStats['recent']->isNotEmpty())
+        <div>
+            <p class="text-xs font-medium text-gray-500 mb-2">Recently Added</p>
+            <div class="space-y-1.5">
+                @foreach($knowledgeStats['recent'] as $entry)
+                <div class="flex items-start justify-between gap-2 text-sm">
+                    <a href="{{ route('admin.basic-knowledge.show', $entry) }}"
+                       class="text-gray-700 hover:text-blue-600 transition truncate">{{ $entry->title }}</a>
+                    <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">{{ $entry->created_at->format('d M') }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
+
 {{-- Employees overview --}}
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
     <div class="flex items-center justify-between mb-4">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BasicKnowledgeTrend;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Resource;
@@ -79,6 +80,27 @@ class DashboardController extends Controller
             ];
         });
 
+        $knowledgeStats = Cache::remember('dashboard.knowledge_stats', 300, function () {
+            return [
+                'total'       => BasicKnowledgeTrend::count(),
+                'published'   => BasicKnowledgeTrend::where('status', 'published')->count(),
+                'draft'       => BasicKnowledgeTrend::where('status', 'draft')->count(),
+                'by_category' => DB::table('basic_knowledge_trends')
+                    ->join('categories', 'basic_knowledge_trends.category_id', '=', 'categories.id')
+                    ->selectRaw('categories.name, COUNT(*) as count')
+                    ->where('basic_knowledge_trends.status', 'published')
+                    ->groupBy('categories.id', 'categories.name')
+                    ->orderByDesc('count')
+                    ->limit(6)
+                    ->get(),
+                'recent' => BasicKnowledgeTrend::with('category')
+                    ->where('status', 'published')
+                    ->latest()
+                    ->take(4)
+                    ->get(),
+            ];
+        });
+
         $workReportStats = Cache::remember('dashboard.work_report_stats', 300, function () {
             return [
                 'total'            => WorkReport::count(),
@@ -92,7 +114,8 @@ class DashboardController extends Controller
         });
 
         return view('admin.dashboard.index', compact(
-            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend', 'employeeStats', 'workReportStats'
+            'stats', 'recentDocuments', 'topDownloaded', 'uploadTrend', 'topSearches', 'downloadTrend',
+            'employeeStats', 'workReportStats', 'knowledgeStats'
         ));
     }
 }

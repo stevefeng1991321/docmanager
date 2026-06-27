@@ -53,6 +53,13 @@ class BasicKnowledgeController extends Controller
 
         $trend->load('media');
 
-        return view('basic-knowledge.show', compact('trend'));
+        $related = BasicKnowledgeTrend::where('status', 'published')
+            ->where('category_id', $trend->category_id)
+            ->where('id', '!=', $trend->id)
+            ->latest()
+            ->limit(4)
+            ->get();
+
+        return view('basic-knowledge.show', compact('trend', 'related'));
     }
 }
