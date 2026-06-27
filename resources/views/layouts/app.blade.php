@@ -45,24 +45,6 @@
                 {{-- Right nav --}}
                 <div class="flex items-center gap-2 sm:gap-3">
 
-                    {{-- Messages --}}
-                    <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-blue-600"
-                       x-data="{ unread: 0 }"
-                       x-init="
-                           fetch('{{ route('chat.unread-count') }}').then(r => r.json()).then(d => unread = d.unread_count);
-                           window.Echo?.private('App.Models.User.{{ auth()->id() }}').listen('.message.sent', e => {
-                               if (e.sender_id !== {{ auth()->id() }}) unread++;
-                           });
-                       ">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        <span x-show="unread > 0" x-cloak
-                              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"
-                              x-text="unread > 9 ? '9+' : unread"></span>
-                    </a>
-
                     {{-- Notifications --}}
                     <a href="{{ route('notifications.index') }}" class="relative text-gray-500 hover:text-blue-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +154,6 @@
                 {{-- Nav links --}}
                 <nav class="space-y-0.5">
                     <a href="{{ route('home') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Browse Documents</a>
-                    <a href="{{ route('chat.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Messages</a>
                     <a href="{{ route('science-tech.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Science &amp; Technology</a>
                     <a href="{{ route('basic-knowledge.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Basic Knowledge</a>
                     <a href="{{ route('favorites.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Favorites</a>
