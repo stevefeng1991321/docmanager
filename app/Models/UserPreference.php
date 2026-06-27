@@ -8,6 +8,7 @@ class UserPreference extends Model
 {
     protected $fillable = [
         'user_id', 'display_name', 'avatar', 'view_mode', 'items_per_page',
+        'admin_theme',
         'notify_file_uploaded', 'notify_version_updated',
         'notify_access_denied', 'notify_doc_approved', 'notify_account_activated',
     ];

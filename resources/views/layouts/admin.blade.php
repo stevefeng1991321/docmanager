@@ -7,8 +7,9 @@
     <title>Admin — {{ config('app.name') }} — @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php
-        $adminThemes  = config('admin_themes');
-        $adminThemeKey = \App\Models\Setting::get('admin_theme', 'default');
+        $adminThemes   = config('admin_themes');
+        $adminThemeKey = auth()->user()?->preferences?->admin_theme
+                      ?? \App\Models\Setting::get('admin_theme', 'default');
         $adminTheme    = $adminThemes[$adminThemeKey] ?? $adminThemes['default'];
     @endphp
     <style>

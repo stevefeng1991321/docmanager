@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\UserPreference;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SettingController extends Controller
 {
@@ -16,13 +18,17 @@ class SettingController extends Controller
         'lockout_minutes'         => 15,
         'trash_retention_days'    => 30,
         'password_complexity'     => 'standard',
-        'admin_theme'             => 'default',
     ];
 
     public function index()
     {
         $saved    = Setting::allKeyed();
         $settings = array_merge($this->defaults, $saved);
+
+        // Load this admin's personal theme (fall back to global setting, then 'default')
+        $userTheme = Auth::user()->preferences?->admin_theme;
+        $settings['admin_theme'] = $userTheme ?? Setting::get('admin_theme', 'default');
+
         $passwordLevels = PasswordPolicy::LEVELS;
         $themes = config('admin_themes');
 
@@ -41,6 +47,14 @@ class SettingController extends Controller
             'admin_theme'             => ['required', 'in:' . implode(',', array_keys(config('admin_themes')))],
         ]);
 
+        // Save theme to this admin's user_preferences (per-user)
+        UserPreference::updateOrCreate(
+            ['user_id' => Auth::id()],
+            ['admin_theme' => $validated['admin_theme']]
+        );
+
+        // Save remaining global settings
+        unset($validated['admin_theme']);
         Setting::setMany($validated);
 
         return back()->with('message', 'Settings saved.');
