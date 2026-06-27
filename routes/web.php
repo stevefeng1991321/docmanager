@@ -322,15 +322,8 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
         Route::delete('backup/{filename}',              [Admin\DatabaseBackupController::class, 'destroy'])->name('backup.destroy');
     });
 
-    // Documentation
-    Route::get('help/{path?}', function ($path = 'index.html') {
-        $docRoot = realpath(base_path('documentation'));
-        $file    = realpath(base_path('documentation/' . ltrim($path, '/')));
-        if (!$file || !str_starts_with($file, $docRoot)) {
-            abort(404);
-        }
-        return response()->file($file);
-    })->where('path', '.*')->name('help');
+    // Project documentation (native Blade view — no external files)
+    Route::get('help', fn() => view('admin.help.index'))->name('help');
 });
 
 require __DIR__.'/auth.php';

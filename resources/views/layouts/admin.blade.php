@@ -95,6 +95,17 @@
                         ],
                     ],
                     [
+                        'label' => 'Help & Documentation',
+                        'items' => [
+                            ['route' => 'admin.help',  'label' => 'Project Docs', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+                            ['href' => 'https://laravel.com/docs',        'label' => 'Laravel',      'icon' => 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                            ['href' => 'https://tailwindcss.com/docs',    'label' => 'Tailwind CSS', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
+                            ['href' => 'https://alpinejs.dev/start-here', 'label' => 'Alpine.js',   'icon' => 'M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'],
+                            ['href' => 'https://flowbite.com/docs/getting-started/introduction/', 'label' => 'Flowbite', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
+                            ['href' => 'https://vitejs.dev/guide/',       'label' => 'Vite',        'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                        ],
+                    ],
+                    [
                         'label' => 'System',
                         'items' => [
                             ['route' => 'admin.audit-logs.index', 'label' => 'Audit Logs',   'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
@@ -114,18 +125,20 @@
                        style="color:rgba(255,255,255,.28)">{{ $group['label'] }}</p>
                     <div class="space-y-0.5">
                     @foreach ($group['items'] as $item)
-                        @if(!Route::has($item['route']))
+                        @if(empty($item['href']) && !Route::has($item['route'] ?? ''))
                             @continue
                         @endif
                         @php
-                            $active = request()->routeIs(
+                            $isExternal = !empty($item['href']);
+                            $itemHref   = $isExternal ? $item['href'] : route($item['route']);
+                            $active     = !$isExternal && request()->routeIs(
                                 rtrim(preg_replace('/\.(index|show|edit|create)$/', '', $item['route']), '.') . '.*'
                             );
                         @endphp
 
                         @if(!empty($item['live_badge']))
                         {{-- Messages: live unread badge via Alpine --}}
-                        <a href="{{ route($item['route']) }}"
+                        <a href="{{ $itemHref }}"
                            @click="sidebarOpen = false"
                            x-data="{ unread: 0 }"
                            x-init="
@@ -152,8 +165,9 @@
 
                         @else
                         {{-- Regular nav item --}}
-                        <a href="{{ route($item['route']) }}"
+                        <a href="{{ $itemHref }}"
                            @click="sidebarOpen = false"
+                           @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
                            class="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors duration-100
                                   {{ $active ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5' }}">
                             <svg class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-white' : 'text-gray-500' }}"
@@ -161,11 +175,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                             </svg>
                             <span class="truncate">{{ $item['label'] }}</span>
-                            @if($item['route'] === 'admin.users.index' && $pendingCount > 0)
+                            @php $itemRoute = $item['route'] ?? null; @endphp
+                            @if($itemRoute === 'admin.users.index' && $pendingCount > 0)
                                 <span class="ml-auto text-[10px] font-semibold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $pendingCount }}</span>
-                            @elseif($item['route'] === 'admin.account-requests.index' && $pendingRequestsCount > 0)
+                            @elseif($itemRoute === 'admin.account-requests.index' && $pendingRequestsCount > 0)
                                 <span class="ml-auto text-[10px] font-semibold bg-amber-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $pendingRequestsCount }}</span>
-                            @elseif($item['route'] === 'admin.jobs.index' && $failedJobs > 0)
+                            @elseif($itemRoute === 'admin.jobs.index' && $failedJobs > 0)
                                 <span class="ml-auto text-[10px] font-semibold bg-yellow-500 text-white rounded-full px-1.5 py-0.5 leading-none">{{ $failedJobs }}</span>
                             @endif
                         </a>
