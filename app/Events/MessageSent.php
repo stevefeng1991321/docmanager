@@ -13,16 +13,20 @@ class MessageSent implements ShouldBroadcastNow
 {
     use InteractsWithSockets, SerializesModels;
 
-    public function __construct(public Message $message, public int $recipientId)
+    /** @param int[] $recipientIds */
+    public function __construct(public Message $message, public array $recipientIds)
     {
     }
 
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('conversation.' . $this->message->conversation_id),
-            new PrivateChannel('App.Models.User.' . $this->recipientId),
-        ];
+        $channels = [new PrivateChannel('conversation.' . $this->message->conversation_id)];
+
+        foreach ($this->recipientIds as $id) {
+            $channels[] = new PrivateChannel('App.Models.User.' . $id);
+        }
+
+        return $channels;
     }
 
     public function broadcastAs(): string
