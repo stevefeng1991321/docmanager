@@ -98,7 +98,7 @@
                         'label' => 'Help & Documentation',
                         'items' => [
                             ['route' => 'admin.help',  'label' => 'Project Docs', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
-                            ['href' => 'https://laravel.com/docs',        'label' => 'Laravel',      'icon' => 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                            ['route' => 'admin.help.laravel',             'label' => 'Laravel',      'icon' => 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                             ['href' => 'https://tailwindcss.com/docs',    'label' => 'Tailwind CSS', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01'],
                             ['href' => 'https://alpinejs.dev/start-here', 'label' => 'Alpine.js',   'icon' => 'M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5'],
                             ['href' => 'https://flowbite.com/docs/getting-started/introduction/', 'label' => 'Flowbite', 'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
@@ -131,8 +131,12 @@
                         @php
                             $isExternal = !empty($item['href']);
                             $itemHref   = $isExternal ? $item['href'] : route($item['route']);
-                            $active     = !$isExternal && request()->routeIs(
-                                rtrim(preg_replace('/\.(index|show|edit|create)$/', '', $item['route']), '.') . '.*'
+                            $stripped   = preg_replace('/\.(index|show|edit|create)$/', '', $item['route'] ?? '');
+                            $isResource = $stripped !== ($item['route'] ?? '');
+                            $active     = !$isExternal && (
+                                $isResource
+                                    ? request()->routeIs(rtrim($stripped, '.') . '.*')
+                                    : request()->routeIs($item['route'] ?? '')
                             );
                         @endphp
 

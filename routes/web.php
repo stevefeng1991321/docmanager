@@ -324,6 +324,21 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     // Project documentation (native Blade view — no external files)
     Route::get('help', fn() => view('admin.help.index'))->name('help');
+
+    // Laravel offline documentation viewer
+    Route::get('help/laravel', function () {
+        $available = file_exists(base_path('documentation/laravel/index.html'));
+        return view('admin.help.laravel', compact('available'));
+    })->name('help.laravel');
+
+    // Serve the Laravel offline HTML file (single known path, no traversal risk)
+    Route::get('help/laravel/doc', function () {
+        $file = base_path('documentation/laravel/index.html');
+        if (! file_exists($file)) {
+            abort(404);
+        }
+        return response()->file($file, ['Content-Type' => 'text/html']);
+    })->name('help.laravel.doc');
 });
 
 require __DIR__.'/auth.php';
