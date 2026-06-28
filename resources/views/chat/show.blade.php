@@ -14,6 +14,7 @@
 <div
     x-data="chatApp()"
     x-init="init()"
+    @chat:new-message.window="onExternalMessage($event.detail)"
     class="flex bg-white rounded-xl border border-gray-200 overflow-hidden"
     style="height: calc(100vh - 10rem);"
 >
@@ -121,7 +122,7 @@
             <template x-for="msg in messages" :key="msg.id ?? msg._tempId">
                 <div
                     class="flex items-end gap-2"
-                    :class="msg.sender_id == currentUserId ? 'flex-row-reverse' : 'flex-row'"
+                    :class="msg.sender_id == currentUserId ? 'justify-end' : 'justify-start'"
                 >
                     {{-- Avatar (others only) --}}
                     <template x-if="msg.sender_id != currentUserId">
@@ -287,12 +288,12 @@ $initialConvs = $conversations->map(function($c) use ($authId) {
 @endphp
 <script>
 function chatApp() {
-    const CONV_ID           = {{ $conversation->id }};
-    const CURRENT_USER      = {{ auth()->id() }};
-    const CURRENT_INITIAL   = {{ json_encode(strtoupper(substr(auth()->user()->name, 0, 1))) }};
-    const CACHE_KEY         = 'chat_msg_' + CONV_ID;
-    const PENDING_KEY       = 'chat_pend_' + CONV_ID;
-    const INITIAL_CONVS     = @json($initialConvs);
+    const CONV_ID         = {{ $conversation->id }};
+    const CURRENT_USER    = {{ auth()->id() }};
+    const CURRENT_INITIAL = @json(strtoupper(substr(auth()->user()->name, 0, 1)));
+    const CACHE_KEY       = 'chat_msg_' + CONV_ID;
+    const PENDING_KEY     = 'chat_pend_' + CONV_ID;
+    const INITIAL_CONVS   = @json($initialConvs);
 
     return {
         // State
@@ -354,22 +355,26 @@ function chatApp() {
         subscribeEcho() {
             window.Echo.private('conversation.' + CONV_ID)
                 .listen('.message.sent', (e) => {
-                    // Skip if already confirmed (optimistic insert replaced by server response)
-                    if (!this.messages.find(m => m.id === e.id)) {
-                        this.messages.push(e);
-                        this.cacheMessages();
+                    // Own messages are handled by optimistic UI + API response.
+                    // Pushing the Echo event too causes duplicate keys in x-for (wrapping bug).
+                    if (e.sender_id === CURRENT_USER) return;
 
-                        // Update left panel last message
-                        const conv = this.conversations.find(c => c.id === e.conversation_id);
-                        if (conv) {
-                            conv.last_message    = e.body;
-                            conv.last_message_at = e.created_at;
-                            if (e.sender_id !== CURRENT_USER) conv.unread_count = (conv.unread_count || 0) + 1;
-                        }
+                    // Dedup — shouldn't happen for others, but guard anyway
+                    if (this.messages.find(m => m.id === e.id)) return;
 
-                        if (e.sender_id !== CURRENT_USER) this.markRead();
-                        this.$nextTick(() => this.scrollBottom());
+                    this.messages.push(e);
+                    this.cacheMessages();
+
+                    // Update left panel
+                    const conv = this.conversations.find(c => c.id === e.conversation_id);
+                    if (conv) {
+                        conv.last_message    = e.body;
+                        conv.last_message_at = e.created_at;
+                        conv.unread_count    = (conv.unread_count || 0) + 1;
                     }
+
+                    this.markRead();
+                    this.$nextTick(() => this.scrollBottom());
                 })
                 .listen('.message.read', (e) => {
                     if (e.user_id !== CURRENT_USER) {
@@ -408,6 +413,14 @@ function chatApp() {
                 type: 'text',
                 pending: !this.isOnline,
             });
+
+            // Optimistically update left panel preview
+            const conv = this.conversations.find(c => c.id === CONV_ID);
+            if (conv) {
+                conv.last_message    = body;
+                conv.last_message_at = new Date().toISOString();
+            }
+
             this.$nextTick(() => this.scrollBottom());
 
             if (!this.isOnline) {
@@ -419,15 +432,38 @@ function chatApp() {
 
             try {
                 const res = await axios.post('/chat/' + CONV_ID + '/messages', { body });
-                // Replace optimistic message with the confirmed one from server
                 const idx = this.messages.findIndex(m => m._tempId === tempId);
-                if (idx !== -1) this.messages.splice(idx, 1, { ...res.data, sender_initial: CURRENT_INITIAL });
-                this.cacheMessages();
+                if (idx !== -1) {
+                    this.messages.splice(idx, 1, {
+                        id:             res.data.id,
+                        sender_id:      res.data.sender_id,
+                        sender_initial: CURRENT_INITIAL,
+                        body:           res.data.body,
+                        created_at:     res.data.created_at,
+                        type:           'text',
+                        deleted:        false,
+                        pending:        false,
+                    });
+                    // Confirm left panel with server timestamp
+                    if (conv) conv.last_message_at = res.data.created_at;
+                    this.cacheMessages();
+                }
             } catch(e) {
-                // Mark as failed and restore compose box
                 const idx = this.messages.findIndex(m => m._tempId === tempId);
                 if (idx !== -1) this.messages[idx].failed = true;
                 this.newMessage = body;
+            }
+        },
+
+        // Update left panel when a message arrives in a DIFFERENT conversation
+        // (dispatched by chatNotify() in the layout via the personal Echo channel)
+        onExternalMessage(e) {
+            if (e.conversation_id === CONV_ID) return;
+            const conv = this.conversations.find(c => c.id === e.conversation_id);
+            if (conv) {
+                conv.last_message    = e.body;
+                conv.last_message_at = new Date().toISOString();
+                conv.unread_count    = (conv.unread_count || 0) + 1;
             }
         },
 

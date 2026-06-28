@@ -64,18 +64,48 @@
                         @endif
                     </a>
 
-                    {{-- Chat --}}
-                    <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-blue-600" title="Messages">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        @if($navChatUnread > 0)
-                            <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                {{ $navChatUnread > 9 ? '9+' : $navChatUnread }}
-                            </span>
-                        @endif
-                    </a>
+                    {{-- Chat (with live notification badge + toasts) --}}
+                    <div x-data="chatNotify()" x-init="init()" class="relative">
+                        <a href="{{ route('chat.index') }}" class="relative text-gray-500 hover:text-blue-600 block" title="Messages">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <template x-if="badge > 0">
+                                <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"
+                                      x-text="badge > 9 ? '9+' : badge"></span>
+                            </template>
+                        </a>
+
+                        {{-- Toast stack (fixed, bottom-right) --}}
+                        <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+                            <template x-for="t in toasts" :key="t.id">
+                                <a :href="'/chat/' + t.conversation_id"
+                                   @click="dismiss(t.id)"
+                                   class="pointer-events-auto flex items-start gap-3 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-xl w-72 hover:bg-gray-800 transition cursor-pointer"
+                                   x-transition:enter="transition ease-out duration-300"
+                                   x-transition:enter-start="opacity-0 translate-y-4"
+                                   x-transition:enter-end="opacity-100 translate-y-0"
+                                   x-transition:leave="transition ease-in duration-200"
+                                   x-transition:leave-start="opacity-100 translate-y-0"
+                                   x-transition:leave-end="opacity-0 translate-y-4"
+                                >
+                                    <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0"
+                                         x-text="t.sender_name.charAt(0).toUpperCase()"></div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold leading-tight" x-text="t.sender_name"></p>
+                                        <p class="text-xs text-gray-300 truncate mt-0.5" x-text="t.body"></p>
+                                    </div>
+                                    <button @click.prevent.stop="dismiss(t.id)"
+                                            class="text-gray-400 hover:text-white flex-shrink-0 mt-0.5 -mr-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
 
                     {{-- User dropdown (desktop md+) --}}
                     <div x-data="{ open: false }" class="relative hidden md:block">
@@ -229,5 +259,46 @@
     </footer>
 
     @stack('scripts')
+
+    <script>
+    function chatNotify() {
+        return {
+            badge: {{ (int) $navChatUnread }},
+            toasts: [],
+            _seq: 0,
+            _seen: new Set(),
+
+            init() {
+                if (!window.Echo) return;
+                const ch = window.Echo.private('user.{{ auth()->id() }}');
+                ch.stopListening('.new.message');
+                ch.listen('.new.message', (e) => {
+                    // Deduplicate — guard against double delivery or double registration
+                    if (e.message_id && this._seen.has(e.message_id)) return;
+                    if (e.message_id) this._seen.add(e.message_id);
+
+                    // suppress toast if already viewing that conversation
+                    if (window.location.pathname === '/chat/' + e.conversation_id) return;
+
+                    this.badge++;
+                    const id = ++this._seq;
+                    this.toasts.push({
+                        id,
+                        conversation_id: e.conversation_id,
+                        sender_name: e.sender_name,
+                        body: e.body,
+                    });
+                    setTimeout(() => this.dismiss(id), 5000);
+                    // Let other page components (e.g. chat index list) react
+                    window.dispatchEvent(new CustomEvent('chat:new-message', { detail: e }));
+                });
+            },
+
+            dismiss(id) {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            },
+        };
+    }
+    </script>
 </body>
 </html>

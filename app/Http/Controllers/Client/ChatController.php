@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Events\MessageRead;
 use App\Events\MessageSent;
+use App\Events\NewMessageNotification;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\User;
@@ -159,6 +160,12 @@ class ChatController extends Controller
         $conversation->update(['last_message_at' => now()]);
 
         MessageSent::dispatch($message);
+
+        // Notify every other participant on their personal channel (works even when off the chat page)
+        $conversation->participants()
+            ->where('user_id', '!=', auth()->id())
+            ->pluck('user_id')
+            ->each(fn($uid) => NewMessageNotification::dispatch($message, $uid));
 
         return response()->json([
             'id'         => $message->id,
