@@ -11,6 +11,56 @@ Self-hosted document management system built with **Laravel 12**.
 
 ---
 
+## Features
+
+### Document Management
+- Upload, version, and organise files (PDF, Word, Excel, images, zip, …)
+- Category and tag taxonomy with hierarchical categories
+- Full-text search — offline TF-IDF index, no external search engine required
+- Favorites, reading lists, download history, saved searches
+- Soft-delete with configurable trash retention; version history with restore
+- Share links with optional password and expiry
+- Document ratings and comments
+
+### Real-Time Chat
+- WhatsApp-style conversations — private and group chats
+- Message types: text, images, files
+- Reply-to with inline media preview (thumbnail for images, filename for files)
+- Edit and delete messages (broadcast to all participants in real time)
+- Typing indicators, online presence dot, read receipts (✓ / ✓✓)
+- Mute individual conversations
+- Group management: rename, add/remove members, leave group
+- In-conversation message search
+- **Offline mode**: messages queued to `localStorage` while disconnected, flushed automatically on reconnect; cached messages load instantly from local storage on page open
+
+### Internationalisation (i18n)
+- English and Chinese (Simplified) — full translation of all client and admin views
+- Language switcher in the top navigation (globe icon)
+- Per-user locale preference persisted to the database; falls back to session then app default
+- **Offline-safe**: translations are baked into the page HTML (`window.LANG`) at render time — no network request needed to change language
+
+### HR & Productivity
+- Employee directory with departments, positions, and linked user accounts
+- Work reports (daily / weekly / monthly) with approval workflow
+- Attendance tracking with check-in / check-out and admin manual entry
+- Project registry
+- Science & Technology and Basic Knowledge article libraries
+- Tests and quizzes with a question bank, time limits, and scoring
+
+### Administration
+- Role-based access: Admin, Editor, Viewer
+- Account request flow — users submit requests, admins approve or reject
+- Audit log and activity log with CSV export
+- Storage management with per-user quotas
+- Queue job monitor and failed-job retry
+- Backup & restore with optional scheduled backups
+- Search index management (rebuild, per-document re-index)
+- Document comparison (diff view)
+- Admin notifications with optional pin-as-announcement
+- Two-factor authentication (TOTP + recovery codes) for all users
+
+---
+
 ## Prerequisites
 
 | Requirement | Version |
@@ -96,7 +146,7 @@ composer run dev
 | `vite` | `npm run dev` — Tailwind + Alpine HMR |
 | `reverb` | `php artisan reverb:start` on port 8080 — real-time chat |
 
-### Offline mode (no npm, no internet)
+### Production / no-npm
 
 ```bash
 # Build assets once (while online)
@@ -108,9 +158,10 @@ rm -f public/hot
 # Start Laravel and the chat WebSocket server
 php artisan serve --host=0.0.0.0 --port=8000
 php artisan reverb:start
+php artisan queue:work
 ```
 
-> In production, keep `reverb:start` running under a process manager (e.g. Supervisor) and proxy WebSocket upgrades on the Reverb port through your reverse proxy. Without it, chat falls back to save-only — messages still send, but live delivery/presence won't update until the page is reloaded.
+> In production, run `reverb:start` and `queue:work` under a process manager (e.g. Supervisor). Proxy WebSocket upgrades on the Reverb port through your reverse proxy (Nginx example in `documentation/project/index.html`).
 
 > All fonts and assets are self-hosted. No CDN dependencies.
 
@@ -123,11 +174,27 @@ php artisan reverb:start
 | `DB_CONNECTION` | `mysql` | Change to `sqlite` for zero-config local dev |
 | `QUEUE_CONNECTION` | `database` | Use `redis` in production |
 | `APP_URL` | `http://localhost` | Set to `http://127.0.0.1:8000` when using `artisan serve` |
+| `APP_LOCALE` | `en` | Default locale (`en` or `zh`) |
 | `SHARE_LINK_EXPIRY_HOURS` | `24` | Share link lifetime |
 | `TRASH_RETENTION_DAYS` | `30` | Days before soft-deleted docs are purged |
 | `BROADCAST_CONNECTION` | `reverb` | Chat real-time transport — self-hosted, no third-party broadcaster |
 | `REVERB_APP_ID` / `REVERB_APP_KEY` / `REVERB_APP_SECRET` | generated on install | Reverb app credentials — see `php artisan reverb:install` |
 | `REVERB_HOST` / `REVERB_PORT` / `REVERB_SCHEME` | `localhost` / `8080` / `http` | Where the Reverb WebSocket server listens; matched by `VITE_REVERB_*` for the browser client |
+
+---
+
+## Internationalisation
+
+Supported locales: **`en`** (English), **`zh`** (Chinese Simplified).
+
+The active locale is resolved in this priority order:
+1. `users.locale` column (per-user preference, persisted across sessions)
+2. `locale` session key (set by the language switcher)
+3. `APP_LOCALE` in `.env`
+
+Users switch language via the globe icon (🌐) in the top navigation. The choice is saved immediately to their account if logged in.
+
+To add a new locale, create `lang/<code>/` with the same file structure as `lang/en/` and add the code to `App\Http\Middleware\SetLocale::SUPPORTED`.
 
 ---
 
@@ -149,6 +216,19 @@ php artisan reverb:start            # Start the WebSocket server (required for l
 ```
 
 All maintenance commands accept `--dry-run` to preview what would change without modifying anything.
+
+---
+
+## Chat — Offline Behaviour
+
+| Scenario | Behaviour |
+|---|---|
+| WebSocket drops, HTTP works | Yellow "Reconnecting…" banner; text messages still send via HTTP |
+| Fully offline (`navigator.onLine = false`) | Red "Offline" banner; messages queued in `localStorage`; optimistic ⏳ indicator shown |
+| Back online | Queued messages flushed in order; banner clears automatically |
+| Page reload while offline | Last 100 messages load instantly from `localStorage` cache |
+| File/image send while offline | Immediate "Files cannot be sent while offline" error — files are never queued |
+| Failed queue flush | Failed items stay as ❌ retry buttons; successfully sent items are removed from queue |
 
 ---
 
