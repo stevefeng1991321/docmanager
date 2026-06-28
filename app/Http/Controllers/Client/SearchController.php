@@ -425,33 +425,18 @@ class SearchController extends Controller
     private function buildSnippets($results, string $query): array
     {
         $snippets = [];
-        $results  = collect($results);
 
-        $docIds = $results->where('_type', 'document')->pluck('id')->toArray();
-        $kbIds  = $results->where('_type', 'knowledge')->pluck('id')->toArray();
-
-        if (!empty($docIds)) {
-            Resource::whereIn('id', $docIds)
-                ->selectRaw('id, description, SUBSTRING(content, 1, 600) AS content_preview')
-                ->get()
-                ->each(function ($row) use ($query, &$snippets) {
-                    $source = mb_strlen((string)$row->description) > 20
-                        ? (string)$row->description
-                        : (string)($row->content_preview ?? '');
-                    $snippets[self::DOC_PREFIX . $row->id] = $this->extractSnippet($source, $query);
-                });
-        }
-
-        if (!empty($kbIds)) {
-            BasicKnowledgeTrend::whereIn('id', $kbIds)
-                ->selectRaw('id, summary, SUBSTRING(content, 1, 600) AS content_preview')
-                ->get()
-                ->each(function ($row) use ($query, &$snippets) {
-                    $source = mb_strlen((string)$row->summary) > 20
-                        ? (string)$row->summary
-                        : (string)($row->content_preview ?? '');
-                    $snippets[self::KB_PREFIX . $row->id] = $this->extractSnippet($source, $query);
-                });
+        foreach (collect($results) as $item) {
+            if ($item->_type === 'document') {
+                $source = mb_strlen((string)$item->description) > 20
+                    ? (string)$item->description
+                    : mb_substr((string)($item->content ?? ''), 0, 600);
+            } else {
+                $source = mb_strlen((string)$item->summary) > 20
+                    ? (string)$item->summary
+                    : mb_substr((string)($item->content ?? ''), 0, 600);
+            }
+            $snippets[$item->_key] = $this->extractSnippet($source, $query);
         }
 
         return $snippets;

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Resource;
+use App\Observers\ResourceObserver;
 use App\Support\PasswordPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -15,6 +17,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Resource::observe(ResourceObserver::class);
+
         // All Password::defaults() calls across the app pick up the admin-configured complexity level.
         Password::defaults(fn () => PasswordPolicy::rule());
 

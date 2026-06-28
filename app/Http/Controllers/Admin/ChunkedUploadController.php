@@ -103,6 +103,14 @@ class ChunkedUploadController extends Controller
         }
         fclose($out);
 
+        // MIME type validation against server-side allowlist
+        $detectedMime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpPath) ?: 'application/octet-stream';
+        if (!in_array($detectedMime, config('uploads.allowed_mimes', []), true)) {
+            @unlink($tmpPath);
+            $this->cleanChunkDir($dir);
+            return response()->json(['error' => "File type \"{$detectedMime}\" is not allowed."], 422);
+        }
+
         // Quota check
         $fileSize = filesize($tmpPath);
         if (auth()->user()->wouldExceedQuota($fileSize)) {
@@ -135,7 +143,7 @@ class ChunkedUploadController extends Controller
             'original_filename' => $request->original_name,
             'stored_filename'   => $storedName,
             'file_path'         => $finalPath,
-            'file_type'         => mime_content_type(Storage::disk('local')->path($finalPath)) ?: 'application/octet-stream',
+            'file_type'         => finfo_file(finfo_open(FILEINFO_MIME_TYPE), Storage::disk('local')->path($finalPath)) ?: 'application/octet-stream',
             'file_size'         => $fileSize,
             'file_hash'         => $hash,
             'category_id'       => $request->category_id,
@@ -211,6 +219,14 @@ class ChunkedUploadController extends Controller
         }
         fclose($out);
 
+        // MIME type validation against server-side allowlist
+        $detectedMime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmpPath) ?: 'application/octet-stream';
+        if (!in_array($detectedMime, config('uploads.allowed_mimes', []), true)) {
+            @unlink($tmpPath);
+            $this->cleanChunkDir($dir);
+            return response()->json(['error' => "File type \"{$detectedMime}\" is not allowed."], 422);
+        }
+
         $fileSize   = filesize($tmpPath);
         $hash       = hash_file('sha256', $tmpPath);
         $storedName = $tmpName;
@@ -240,7 +256,7 @@ class ChunkedUploadController extends Controller
             'file_size'         => $fileSize,
             'file_hash'         => $hash,
             'original_filename' => $request->original_name,
-            'file_type'         => mime_content_type(Storage::disk('local')->path($finalPath)) ?: 'application/octet-stream',
+            'file_type'         => finfo_file(finfo_open(FILEINFO_MIME_TYPE), Storage::disk('local')->path($finalPath)) ?: 'application/octet-stream',
         ]);
 
         AuditLog::record('document.version_uploaded', $resource->id, ['version' => $nextVersion]);

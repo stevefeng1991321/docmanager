@@ -136,6 +136,100 @@
         </button>
     </form>
 
+    {{-- QR Code Generator --}}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+         x-data="{
+             text: '',
+             size: '300',
+             svg: '',
+             loading: false,
+             error: '',
+             async generate() {
+                 if (!this.text.trim()) return;
+                 this.loading = true;
+                 this.error   = '';
+                 this.svg     = '';
+                 try {
+                     const res = await fetch('{{ route('admin.settings.qr') }}', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                         },
+                         body: JSON.stringify({ text: this.text, size: parseInt(this.size) }),
+                     });
+                     if (!res.ok) {
+                         const data = await res.json();
+                         this.error = data.message ?? 'Failed to generate QR code.';
+                     } else {
+                         const data = await res.json();
+                         this.svg = data.svg;
+                     }
+                 } catch (e) {
+                     this.error = 'Request failed.';
+                 } finally {
+                     this.loading = false;
+                 }
+             },
+             download() {
+                 if (!this.svg) return;
+                 const blob = new Blob([this.svg], { type: 'image/svg+xml' });
+                 const url  = URL.createObjectURL(blob);
+                 const a    = Object.assign(document.createElement('a'), { href: url, download: 'qrcode.svg' });
+                 a.click();
+                 URL.revokeObjectURL(url);
+             },
+         }">
+
+        <h3 class="font-semibold text-gray-800 mb-1">QR Code Generator</h3>
+        <p class="text-xs text-gray-500 mb-4">Generate a QR code from any text or URL.</p>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Text or URL</label>
+                <textarea x-model="text" rows="3" placeholder="Enter text, URL, or any string…"
+                          @keydown.meta.enter.prevent="generate()"
+                          @keydown.ctrl.enter.prevent="generate()"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            </div>
+
+            <div class="flex items-end gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Size (px)</label>
+                    <select x-model="size" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="150">150 — Small</option>
+                        <option value="300" selected>300 — Medium</option>
+                        <option value="450">450 — Large</option>
+                        <option value="600">600 — Extra large</option>
+                    </select>
+                </div>
+                <button type="button" @click="generate()"
+                        :disabled="!text.trim() || loading"
+                        class="px-5 py-2 btn-primary text-sm font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!loading">Generate</span>
+                    <span x-show="loading">Generating…</span>
+                </button>
+            </div>
+
+            <p x-show="error" x-text="error" class="text-xs text-red-500"></p>
+
+            <div x-show="svg" class="pt-2">
+                <div class="inline-block p-3 bg-white border border-gray-200 rounded-xl" x-html="svg"></div>
+                <div class="mt-3 flex gap-2">
+                    <button type="button" @click="download()"
+                            class="px-4 py-1.5 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">
+                        Download SVG
+                    </button>
+                    <button type="button" @click="svg = ''; text = ''"
+                            class="px-4 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
 @push('scripts')

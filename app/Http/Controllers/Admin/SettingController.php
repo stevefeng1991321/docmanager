@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\UserPreference;
 use App\Support\PasswordPolicy;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -60,5 +64,19 @@ class SettingController extends Controller
         Setting::setMany($validated);
 
         return back()->with('message', 'Settings saved.');
+    }
+
+    public function generateQr(Request $request)
+    {
+        $request->validate([
+            'text' => ['required', 'string', 'max:2000'],
+            'size' => ['nullable', 'integer', 'min:100', 'max:600'],
+        ]);
+
+        $size     = (int) $request->input('size', 300);
+        $renderer = new ImageRenderer(new RendererStyle($size), new SvgImageBackEnd());
+        $svg      = (new Writer($renderer))->writeString($request->input('text'));
+
+        return response()->json(['svg' => $svg]);
     }
 }

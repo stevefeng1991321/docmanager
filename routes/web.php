@@ -321,8 +321,9 @@ Route::middleware(['auth', 'active', 'role:admin,editor'])->prefix('admin')->nam
 
     // Settings (admin only)
     Route::middleware('role:admin')->group(function () {
-        Route::get('settings',  [Admin\SettingController::class, 'index'])->name('settings.index');
-        Route::put('settings',  [Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::get('settings',   [Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings',   [Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/qr', [Admin\SettingController::class, 'generateQr'])->name('settings.qr');
     });
 
     // Database Backup (admin only)

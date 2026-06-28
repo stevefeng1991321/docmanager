@@ -16,7 +16,12 @@ class StoreDocumentRequest extends FormRequest
         return [
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'file'        => ['required', 'file', 'max:' . (config('app.max_upload_size_mb', 50) * 1024)],
+            'file'        => [
+                'required',
+                'file',
+                'max:' . (config('uploads.max_size_mb', 50) * 1024),
+                'mimetypes:' . implode(',', config('uploads.allowed_mimes', [])),
+            ],
             'category_id' => ['nullable', 'exists:categories,id'],
             'tags'        => ['nullable', 'array'],
             'tags.*'      => ['exists:tags,id'],
