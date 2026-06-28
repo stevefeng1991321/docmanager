@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\MessageDeleted;
+use App\Events\MessageEdited;
 use App\Events\MessageRead;
 use App\Events\MessageSent;
 use App\Events\NewMessageNotification;
+use App\Events\UserTyping;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,28 +19,12 @@ use Illuminate\Validation\Rule;
 
 class ChatController extends Controller
 {
+    // ─── Views ───────────────────────────────────────────────────────────────
+
     public function index()
     {
         $conversations = $this->userConversations();
         return view('chat.index', compact('conversations'));
-    }
-
-    private function userConversations(): \Illuminate\Support\Collection
-    {
-        return Conversation::forUser(auth()->id())
-            ->with(['participants.user', 'latestMessage'])
-            ->orderByDesc('last_message_at')
-            ->get()
-            ->map(function ($conversation) {
-                $participant = $conversation->participants
-                    ->firstWhere('user_id', auth()->id());
-
-                $conversation->unread_count = $conversation->messages()
-                    ->when($participant?->last_read_at, fn($q, $dt) => $q->where('created_at', '>', $dt))
-                    ->count();
-
-                return $conversation;
-            });
     }
 
     public function show(Conversation $conversation)
@@ -45,18 +33,141 @@ class ChatController extends Controller
             ->where('user_id', auth()->id())
             ->whereNull('left_at')
             ->exists();
-
         abort_unless($isParticipant, 403);
 
         $conversation->load(['participants.user']);
-
         $conversations = $this->userConversations();
+
+        $myParticipant = $conversation->participants
+            ->firstWhere('user_id', auth()->id());
 
         return view('chat.show', [
             'conversation'  => $conversation,
             'conversations' => $conversations,
+            'isMuted'       => (bool) $myParticipant?->notifications_muted,
+            'myRole'        => $myParticipant?->role ?? 'member',
         ]);
     }
+
+    // ─── Messages ─────────────────────────────────────────────────────────────
+
+    public function apiMessages(Conversation $conversation, Request $request): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+
+        $messages = $conversation->messages()
+            ->with(['sender:id,name', 'replyTo.sender:id,name'])
+            ->withTrashed()
+            ->when($request->cursor, fn($q) => $q->where('id', '<', $request->cursor))
+            ->reorder('id', 'desc')
+            ->limit(50)
+            ->get()
+            ->reverse()
+            ->values();
+
+        $nextCursor = $messages->isNotEmpty() && $conversation->messages()->withTrashed()->where('id', '<', $messages->first()->id)->exists()
+            ? $messages->first()->id
+            : null;
+
+        $data = $messages->map(fn($msg) => $this->formatMessage($msg));
+
+        $readStatus = $conversation->participants()
+            ->where('user_id', '!=', auth()->id())
+            ->whereNotNull('last_read_at')
+            ->pluck('last_read_at', 'user_id')
+            ->map(fn($dt) => $dt->toISOString());
+
+        return response()->json([
+            'data'        => $data,
+            'next_cursor' => $nextCursor,
+            'read_status' => $readStatus,
+        ]);
+    }
+
+    public function apiSend(Request $request, Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        $request->validate([
+            'body'        => 'required|string|max:5000',
+            'reply_to_id' => 'nullable|integer|exists:messages,id',
+        ]);
+
+        $message = $conversation->messages()->create([
+            'sender_id'   => auth()->id(),
+            'type'        => 'text',
+            'body'        => $request->body,
+            'reply_to_id' => $request->reply_to_id,
+        ]);
+
+        $message->loadMissing(['sender', 'replyTo.sender']);
+        $conversation->update(['last_message_at' => now()]);
+        MessageSent::dispatch($message);
+
+        $conversation->participants()
+            ->where('user_id', '!=', auth()->id())
+            ->pluck('user_id')
+            ->each(fn($uid) => NewMessageNotification::dispatch($message, $uid));
+
+        return response()->json($this->formatMessage($message), 201);
+    }
+
+    public function apiDeleteMessage(Conversation $conversation, Message $message): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        abort_unless($message->conversation_id === $conversation->id, 404);
+        abort_unless($message->sender_id === auth()->id(), 403);
+
+        $message->delete();
+        MessageDeleted::dispatch($message);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function apiEditMessage(Request $request, Conversation $conversation, Message $message): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        abort_unless($message->conversation_id === $conversation->id, 404);
+        abort_unless($message->sender_id === auth()->id(), 403);
+        abort_if((bool) $message->deleted_at, 403);
+
+        $request->validate(['body' => 'required|string|max:5000']);
+
+        $message->update([
+            'body'      => $request->body,
+            'edited_at' => now(),
+        ]);
+
+        MessageEdited::dispatch($message);
+
+        return response()->json([
+            'id'        => $message->id,
+            'body'      => $message->body,
+            'edited_at' => $message->edited_at->toISOString(),
+        ]);
+    }
+
+    public function apiRead(Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+
+        $readAt = now();
+        $conversation->participants()
+            ->where('user_id', auth()->id())
+            ->update(['last_read_at' => $readAt]);
+
+        MessageRead::dispatch($conversation->id, auth()->id(), $readAt->toISOString());
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function apiTyping(Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        UserTyping::dispatch($conversation->id, auth()->id(), auth()->user()->name);
+        return response()->json(['ok' => true]);
+    }
+
+    // ─── Conversation management ───────────────────────────────────────────────
 
     public function start(Request $request): JsonResponse
     {
@@ -70,7 +181,7 @@ class ChatController extends Controller
         $myId = auth()->id();
 
         if ($request->type === 'private') {
-            $otherId = $request->user_ids[0];
+            $otherId  = $request->user_ids[0];
             $existing = Conversation::where('type', 'private')
                 ->whereHas('participants', fn($q) => $q->where('user_id', $myId))
                 ->whereHas('participants', fn($q) => $q->where('user_id', $otherId))
@@ -101,6 +212,75 @@ class ChatController extends Controller
         return response()->json(['id' => $conversation->id, 'existing' => false], 201);
     }
 
+    public function leaveGroup(Conversation $conversation): JsonResponse
+    {
+        abort_unless($conversation->type === 'group', 403);
+        $this->authorizeParticipant($conversation);
+
+        $conversation->participants()
+            ->where('user_id', auth()->id())
+            ->update(['left_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function toggleMute(Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+
+        $participant = $conversation->participants()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        $muted = !$participant->notifications_muted;
+        $participant->update(['notifications_muted' => $muted]);
+
+        return response()->json(['muted' => $muted]);
+    }
+
+    public function addMembers(Request $request, Conversation $conversation): JsonResponse
+    {
+        abort_unless($conversation->type === 'group', 403);
+        $this->authorizeGroupAdmin($conversation);
+
+        $request->validate([
+            'user_ids'   => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        foreach ($request->user_ids as $uid) {
+            $conversation->participants()->updateOrCreate(
+                ['user_id' => $uid],
+                ['role' => 'member', 'left_at' => null]
+            );
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function removeMember(Conversation $conversation, User $user): JsonResponse
+    {
+        abort_unless($conversation->type === 'group', 403);
+        $this->authorizeGroupAdmin($conversation);
+
+        $conversation->participants()
+            ->where('user_id', $user->id)
+            ->update(['left_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function renameGroup(Request $request, Conversation $conversation): JsonResponse
+    {
+        abort_unless($conversation->type === 'group', 403);
+        $this->authorizeGroupAdmin($conversation);
+
+        $request->validate(['name' => 'required|string|max:100']);
+        $conversation->update(['name' => $request->name]);
+
+        return response()->json(['ok' => true, 'name' => $conversation->name]);
+    }
+
     public function users(): JsonResponse
     {
         $users = User::where('id', '!=', auth()->id())
@@ -111,83 +291,46 @@ class ChatController extends Controller
         return response()->json($users);
     }
 
-    public function apiMessages(Conversation $conversation): JsonResponse
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    private function userConversations(): \Illuminate\Support\Collection
     {
-        $this->authorizeParticipant($conversation);
+        return Conversation::forUser(auth()->id())
+            ->with(['participants.user', 'latestMessage'])
+            ->orderByDesc('last_message_at')
+            ->get()
+            ->map(function ($conversation) {
+                $participant = $conversation->participants
+                    ->firstWhere('user_id', auth()->id());
 
-        $messages = $conversation->messages()
-            ->with('sender:id,name')
-            ->withTrashed()
-            ->cursorPaginate(50);
+                $conversation->unread_count = $conversation->messages()
+                    ->when($participant?->last_read_at, fn($q, $dt) => $q->where('created_at', '>', $dt))
+                    ->count();
 
-        $data = $messages->map(fn($msg) => [
+                return $conversation;
+            });
+    }
+
+    private function formatMessage(Message $msg): array
+    {
+        return [
             'id'             => $msg->id,
             'sender_id'      => $msg->sender_id,
             'sender_name'    => $msg->sender->name,
             'sender_initial' => strtoupper(substr($msg->sender->name, 0, 1)),
             'body'           => $msg->deleted_at ? null : $msg->body,
             'deleted'        => (bool) $msg->deleted_at,
+            'edited_at'      => $msg->edited_at?->toISOString(),
             'type'           => $msg->type,
             'reply_to_id'    => $msg->reply_to_id,
+            'reply_to'       => $msg->reply_to_id && $msg->replyTo ? [
+                'id'          => $msg->replyTo->id,
+                'body'        => $msg->replyTo->deleted_at ? null : $msg->replyTo->body,
+                'sender_name' => $msg->replyTo->sender?->name ?? 'Unknown',
+                'deleted'     => (bool) $msg->replyTo->deleted_at,
+            ] : null,
             'created_at'     => $msg->created_at->toISOString(),
-        ]);
-
-        $readStatus = $conversation->participants()
-            ->where('user_id', '!=', auth()->id())
-            ->whereNotNull('last_read_at')
-            ->pluck('last_read_at', 'user_id')
-            ->map(fn($dt) => $dt->toISOString());
-
-        return response()->json([
-            'data'        => $data,
-            'next_cursor' => $messages->nextCursor()?->encode(),
-            'read_status' => $readStatus,
-        ]);
-    }
-
-    public function apiSend(Request $request, Conversation $conversation): JsonResponse
-    {
-        $this->authorizeParticipant($conversation);
-
-        $request->validate(['body' => 'required|string|max:5000']);
-
-        $message = $conversation->messages()->create([
-            'sender_id' => auth()->id(),
-            'type'      => 'text',
-            'body'      => $request->body,
-        ]);
-
-        $conversation->update(['last_message_at' => now()]);
-
-        MessageSent::dispatch($message);
-
-        // Notify every other participant on their personal channel (works even when off the chat page)
-        $conversation->participants()
-            ->where('user_id', '!=', auth()->id())
-            ->pluck('user_id')
-            ->each(fn($uid) => NewMessageNotification::dispatch($message, $uid));
-
-        return response()->json([
-            'id'         => $message->id,
-            'sender_id'  => $message->sender_id,
-            'body'       => $message->body,
-            'created_at' => $message->created_at->toISOString(),
-        ], 201);
-    }
-
-    public function apiRead(Conversation $conversation): JsonResponse
-    {
-        $this->authorizeParticipant($conversation);
-
-        $readAt = now();
-
-        $conversation->participants()
-            ->where('user_id', auth()->id())
-            ->update(['last_read_at' => $readAt]);
-
-        MessageRead::dispatch($conversation->id, auth()->id(), $readAt->toISOString());
-
-        return response()->json(['ok' => true]);
+        ];
     }
 
     private function authorizeParticipant(Conversation $conversation): void
@@ -195,6 +338,18 @@ class ChatController extends Controller
         abort_unless(
             $conversation->participants()
                 ->where('user_id', auth()->id())
+                ->whereNull('left_at')
+                ->exists(),
+            403
+        );
+    }
+
+    private function authorizeGroupAdmin(Conversation $conversation): void
+    {
+        abort_unless(
+            $conversation->participants()
+                ->where('user_id', auth()->id())
+                ->whereIn('role', ['owner', 'admin'])
                 ->whereNull('left_at')
                 ->exists(),
             403

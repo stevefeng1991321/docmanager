@@ -12,11 +12,12 @@ class Message extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'conversation_id', 'sender_id', 'type', 'body', 'metadata', 'reply_to_id',
+        'conversation_id', 'sender_id', 'type', 'body', 'metadata', 'reply_to_id', 'edited_at',
     ];
 
     protected $casts = [
-        'metadata' => 'array',
+        'metadata'  => 'array',
+        'edited_at' => 'datetime',
     ];
 
     public function sender(): BelongsTo

@@ -95,13 +95,21 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/plans/{plan}/comments',   [\App\Http\Controllers\Client\PlanController::class, 'storeComment'])->name('plans.comments.store');
 
     // Chat — static routes MUST come before {conversation} wildcard
-    Route::get('/chat',                                          [Client\ChatController::class, 'index'])->name('chat.index');
-    Route::get('/chat/users',                                    [Client\ChatController::class, 'users'])->name('chat.users');
-    Route::post('/chat/start',                                   [Client\ChatController::class, 'start'])->name('chat.start');
-    Route::get('/chat/{conversation}/messages',                  [Client\ChatController::class, 'apiMessages'])->name('chat.messages');
-    Route::post('/chat/{conversation}/messages',                 [Client\ChatController::class, 'apiSend'])->name('chat.send');
-    Route::post('/chat/{conversation}/read',                     [Client\ChatController::class, 'apiRead'])->name('chat.read');
-    Route::get('/chat/{conversation}',                           [Client\ChatController::class, 'show'])->name('chat.show');
+    Route::get('/chat',                                                     [Client\ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/users',                                               [Client\ChatController::class, 'users'])->name('chat.users');
+    Route::post('/chat/start',                                              [Client\ChatController::class, 'start'])->name('chat.start');
+    Route::get('/chat/{conversation}/messages',                             [Client\ChatController::class, 'apiMessages'])->name('chat.messages');
+    Route::post('/chat/{conversation}/messages',                            [Client\ChatController::class, 'apiSend'])->name('chat.send');
+    Route::delete('/chat/{conversation}/messages/{message}',                [Client\ChatController::class, 'apiDeleteMessage'])->name('chat.messages.delete');
+    Route::patch('/chat/{conversation}/messages/{message}',                 [Client\ChatController::class, 'apiEditMessage'])->name('chat.messages.edit');
+    Route::post('/chat/{conversation}/read',                                [Client\ChatController::class, 'apiRead'])->name('chat.read');
+    Route::post('/chat/{conversation}/typing',                              [Client\ChatController::class, 'apiTyping'])->name('chat.typing');
+    Route::post('/chat/{conversation}/leave',                               [Client\ChatController::class, 'leaveGroup'])->name('chat.leave');
+    Route::patch('/chat/{conversation}/mute',                               [Client\ChatController::class, 'toggleMute'])->name('chat.mute');
+    Route::post('/chat/{conversation}/members',                             [Client\ChatController::class, 'addMembers'])->name('chat.members.add');
+    Route::delete('/chat/{conversation}/members/{user}',                    [Client\ChatController::class, 'removeMember'])->name('chat.members.remove');
+    Route::patch('/chat/{conversation}/name',                               [Client\ChatController::class, 'renameGroup'])->name('chat.rename');
+    Route::get('/chat/{conversation}',                                      [Client\ChatController::class, 'show'])->name('chat.show');
 });
 
 // Public share link (no auth required)
