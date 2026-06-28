@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Events\GroupUpdated;
 use App\Events\MessageDeleted;
 use App\Events\MessageEdited;
 use App\Events\MessageRead;
@@ -248,12 +249,17 @@ class ChatController extends Controller
             'user_ids.*' => 'exists:users,id',
         ]);
 
+        $addedUsers = [];
         foreach ($request->user_ids as $uid) {
             $conversation->participants()->updateOrCreate(
                 ['user_id' => $uid],
                 ['role' => 'member', 'left_at' => null]
             );
+            $user = User::find($uid);
+            if ($user) $addedUsers[] = ['user_id' => $uid, 'name' => $user->name, 'role' => 'member'];
         }
+
+        GroupUpdated::dispatch($conversation, 'members_added', ['users' => $addedUsers]);
 
         return response()->json(['ok' => true]);
     }
@@ -267,6 +273,8 @@ class ChatController extends Controller
             ->where('user_id', $user->id)
             ->update(['left_at' => now()]);
 
+        GroupUpdated::dispatch($conversation, 'member_removed', ['user_id' => $user->id]);
+
         return response()->json(['ok' => true]);
     }
 
@@ -277,6 +285,8 @@ class ChatController extends Controller
 
         $request->validate(['name' => 'required|string|max:100']);
         $conversation->update(['name' => $request->name]);
+
+        GroupUpdated::dispatch($conversation, 'renamed', ['name' => $conversation->name]);
 
         return response()->json(['ok' => true, 'name' => $conversation->name]);
     }

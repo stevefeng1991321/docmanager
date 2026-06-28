@@ -192,7 +192,8 @@
                         </template>
 
                         <div class="flex flex-col max-w-[68%]"
-                             :class="msg.sender_id == currentUserId ? 'items-end' : 'items-start'">
+                             :class="msg.sender_id == currentUserId ? 'items-end' : 'items-start'"
+                             :data-msg-id="msg.id">
 
                             {{-- Sender name (group) --}}
                             @if($conversation->type === 'group')
@@ -810,6 +811,26 @@ function chatApp() {
                         this.typingUsers = this.typingUsers.filter(n => n !== e.user_name);
                     }, 3000);
                     this.scrollBottom();
+                })
+                .listen('.group.updated', (e) => {
+                    if (e.type === 'renamed') {
+                        this.groupName = e.name;
+                        this.groupNewName = e.name;
+                        const conv = this.conversations.find(c => c.id === CONV_ID);
+                        if (conv) conv.name = e.name;
+                    } else if (e.type === 'members_added') {
+                        e.users.forEach(u => {
+                            if (!this.groupMembers.find(m => m.user_id === u.user_id)) {
+                                this.groupMembers.push(u);
+                                this.memberCount++;
+                            }
+                        });
+                    } else if (e.type === 'member_removed') {
+                        this.groupMembers = this.groupMembers.filter(m => m.user_id !== e.user_id);
+                        this.memberCount  = this.groupMembers.length;
+                        // If the current user was removed, redirect out
+                        if (e.user_id === CURRENT_USER) window.location.href = '/chat';
+                    }
                 });
 
             window.Echo.connector.pusher.connection.bind('connected',    () => { this.isConnected = true;  });

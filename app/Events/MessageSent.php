@@ -16,7 +16,7 @@ class MessageSent implements ShouldBroadcastNow
 
     public function __construct(public Message $message)
     {
-        $this->message->loadMissing('sender');
+        $this->message->loadMissing(['sender', 'replyTo.sender']);
     }
 
     public function broadcastOn(): array
@@ -40,6 +40,12 @@ class MessageSent implements ShouldBroadcastNow
             'type'                 => $this->message->type,
             'body'                 => $this->message->body,
             'reply_to_id'          => $this->message->reply_to_id,
+            'reply_to'             => $this->message->reply_to_id && $this->message->replyTo ? [
+                'id'          => $this->message->replyTo->id,
+                'body'        => $this->message->replyTo->deleted_at ? null : $this->message->replyTo->body,
+                'sender_name' => $this->message->replyTo->sender?->name ?? 'Unknown',
+                'deleted'     => (bool) $this->message->replyTo->deleted_at,
+            ] : null,
             'created_at'           => $this->message->created_at->toISOString(),
         ];
     }
