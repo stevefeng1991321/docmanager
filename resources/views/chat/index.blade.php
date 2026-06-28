@@ -79,14 +79,14 @@ $convData = $conversations->map(function($c) use ($authId) {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
         @keydown.escape.window="showNewChat = false"
     >
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4" @click.outside="showNewChat = false">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-2 sm:mx-4 max-h-[90svh] flex flex-col" @click.outside="showNewChat = false">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <h3 class="font-semibold text-gray-800">New Conversation</h3>
                 <button @click="showNewChat = false" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="p-5 space-y-4">
+            <div class="p-5 space-y-4 overflow-y-auto flex-1">
                 <div class="flex gap-2">
                     <button @click="newChatType = 'private'; selectedUsers = []"
                             :class="newChatType === 'private' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'"

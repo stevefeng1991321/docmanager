@@ -102,6 +102,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/chat/{conversation}/messages',                            [Client\ChatController::class, 'apiSend'])->name('chat.send');
     Route::delete('/chat/{conversation}/messages/{message}',                [Client\ChatController::class, 'apiDeleteMessage'])->name('chat.messages.delete');
     Route::patch('/chat/{conversation}/messages/{message}',                 [Client\ChatController::class, 'apiEditMessage'])->name('chat.messages.edit');
+    Route::get('/chat/{conversation}/search',                               [Client\ChatController::class, 'apiSearch'])->name('chat.search');
+    Route::post('/chat/{conversation}/upload',                              [Client\ChatController::class, 'apiUpload'])->name('chat.upload');
     Route::post('/chat/{conversation}/read',                                [Client\ChatController::class, 'apiRead'])->name('chat.read');
     Route::post('/chat/{conversation}/typing',                              [Client\ChatController::class, 'apiTyping'])->name('chat.typing');
     Route::post('/chat/{conversation}/leave',                               [Client\ChatController::class, 'leaveGroup'])->name('chat.leave');

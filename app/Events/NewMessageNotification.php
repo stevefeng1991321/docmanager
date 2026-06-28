@@ -36,7 +36,11 @@ class NewMessageNotification implements ShouldBroadcastNow
             'message_id'      => $this->message->id,
             'conversation_id' => $this->message->conversation_id,
             'sender_name'     => $this->message->sender->name,
-            'body'            => Str::limit($this->message->body, 80),
+            'body'            => match($this->message->type) {
+                'image' => '📷 Image',
+                'file'  => '📎 ' . ($this->message->metadata['filename'] ?? 'File'),
+                default => Str::limit($this->message->body ?? '', 80),
+            },
         ];
     }
 }

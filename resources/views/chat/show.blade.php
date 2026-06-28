@@ -11,16 +11,21 @@
     $participantIds = $conversation->participants->pluck('user_id')->toArray();
 @endphp
 
+<style>
+#chat-container { height: calc(100svh - 7rem); }
+@media (min-width: 768px) { #chat-container { height: calc(100vh - 10rem); } }
+</style>
+
 <div
+    id="chat-container"
     x-data="chatApp()"
     x-init="init()"
     @chat:new-message.window="onExternalMessage($event.detail)"
-    class="flex bg-white rounded-xl border border-gray-200 overflow-hidden"
-    style="height: calc(100vh - 10rem);"
+    class="flex bg-white md:rounded-xl md:border md:border-gray-200 overflow-hidden -mx-4 sm:-mx-6 md:mx-0"
 >
 
-    {{-- ─── Left Panel ──────────────────────────────────────────────────────── --}}
-    <div class="w-72 flex-shrink-0 border-r border-gray-200 flex flex-col">
+    {{-- ─── Left Panel (hidden on mobile, shown md+) ──────────────────────── --}}
+    <div class="hidden md:flex md:w-64 lg:w-72 flex-shrink-0 border-r border-gray-200 flex-col">
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <a href="{{ route('chat.index') }}" class="flex items-center gap-1.5 text-sm font-semibold text-gray-800 hover:text-blue-600 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -61,7 +66,11 @@
     <div class="flex-1 flex flex-col min-w-0">
 
         {{-- Header --}}
-        <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-3 flex-shrink-0">
+        <div class="px-3 md:px-4 py-3 border-b border-gray-100 flex items-center gap-2 md:gap-3 flex-shrink-0">
+            {{-- Mobile back button --}}
+            <a href="{{ route('chat.index') }}" class="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex-shrink-0 -ml-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
             <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700 text-sm flex-shrink-0">
                 {{ strtoupper(substr($chatName, 0, 1)) }}
             </div>
@@ -86,6 +95,11 @@
 
             {{-- Header actions --}}
             <div class="flex items-center gap-1 flex-shrink-0">
+                {{-- Search --}}
+                <button @click="toggleSearch()" :class="showSearch ? 'bg-gray-100 text-blue-600' : 'text-gray-500'"
+                        class="p-1.5 rounded-lg hover:bg-gray-100 transition" title="Search messages">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </button>
                 {{-- Mute toggle --}}
                 <button @click="toggleMute()" :title="isMuted ? 'Unmute notifications' : 'Mute notifications'"
                         class="p-1.5 rounded-lg hover:bg-gray-100 transition"
@@ -123,8 +137,43 @@
             Reconnecting to real-time server…
         </div>
 
+        {{-- Search panel --}}
+        <div x-show="showSearch" x-cloak class="flex-1 flex flex-col min-h-0 border-t border-gray-100">
+            <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2 flex-shrink-0 bg-gray-50">
+                <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input x-ref="searchInput" type="text" x-model="searchQuery"
+                       @input="runSearch()" @keydown.escape="closeSearch()"
+                       placeholder="Search in this conversation…"
+                       class="flex-1 text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-400">
+                <button @click="closeSearch()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-2">
+                <template x-if="searching">
+                    <div class="flex justify-center py-8"><div class="w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div></div>
+                </template>
+                <template x-if="!searching && searchQuery.length < 2">
+                    <p class="text-xs text-gray-400 text-center py-8">Type at least 2 characters to search</p>
+                </template>
+                <template x-if="!searching && searchQuery.length >= 2 && searchResults.length === 0">
+                    <p class="text-xs text-gray-400 text-center py-8">No messages found for "<span x-text="searchQuery"></span>"</p>
+                </template>
+                <template x-for="result in searchResults" :key="result.id">
+                    <button @click="goToMessage(result.id)"
+                            class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-gray-50 border border-gray-100 transition block">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-semibold text-gray-700" x-text="result.sender_name"></span>
+                            <span class="text-[10px] text-gray-400" x-text="formatTime(result.created_at)"></span>
+                        </div>
+                        <p class="text-sm text-gray-600 truncate" x-text="result.body"></p>
+                    </button>
+                </template>
+            </div>
+        </div>
+
         {{-- Message list --}}
-        <div x-ref="messageList" class="flex-1 overflow-y-auto px-4 py-4 space-y-2 relative">
+        <div x-ref="messageList" x-show="!showSearch" class="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-2 relative">
 
             {{-- Load more --}}
             <div class="flex justify-center pb-2">
@@ -158,9 +207,11 @@
                     {{-- Bubble + actions --}}
                     <div class="flex items-end gap-1" :class="msg.sender_id == currentUserId ? 'flex-row-reverse' : 'flex-row'">
 
-                        {{-- Action buttons (visible on group hover) --}}
+                        {{-- Action buttons: always visible on mobile, fade-in on hover on desktop --}}
                         <template x-if="!msg.deleted && !msg.pending">
-                            <div class="hidden group-hover/msg:flex flex-col gap-0.5 mb-1">
+                            <div class="flex flex-col gap-0.5 mb-1 transition-opacity duration-150
+                                        md:opacity-0 md:pointer-events-none
+                                        group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto">
                                 {{-- Reply --}}
                                 <button @click="setReply(msg)" title="Reply"
                                         class="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 shadow-sm">
@@ -191,7 +242,7 @@
                             </button>
                         </template>
 
-                        <div class="flex flex-col max-w-[68%]"
+                        <div class="flex flex-col max-w-[85%] sm:max-w-[75%] md:max-w-[68%]"
                              :class="msg.sender_id == currentUserId ? 'items-end' : 'items-start'"
                              :data-msg-id="msg.id">
 
@@ -232,14 +283,47 @@
                                              :class="msg.sender_id == currentUserId ? 'bg-blue-500 border-blue-300' : 'bg-gray-200 border-gray-400'"
                                              @click="scrollToMessage(msg.reply_to.id)">
                                             <p class="text-[10px] font-semibold opacity-80" x-text="msg.reply_to.sender_name"></p>
-                                            <p class="text-xs opacity-70 truncate" x-text="msg.reply_to.deleted ? 'Deleted message' : msg.reply_to.body"></p>
+                                            <template x-if="msg.reply_to.deleted">
+                                                <p class="text-xs opacity-70 italic">Deleted message</p>
+                                            </template>
+                                            <template x-if="!msg.reply_to.deleted && msg.reply_to.type === 'image'">
+                                                <div class="flex items-center gap-1.5 mt-0.5">
+                                                    <img :src="msg.reply_to.metadata?.url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                                                    <span class="text-xs opacity-70">Photo</span>
+                                                </div>
+                                            </template>
+                                            <template x-if="!msg.reply_to.deleted && msg.reply_to.type === 'file'">
+                                                <div class="flex items-center gap-1.5 mt-0.5">
+                                                    <svg class="w-4 h-4 opacity-70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    <span class="text-xs opacity-70 truncate" x-text="msg.reply_to.metadata?.filename || 'File'"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="!msg.reply_to.deleted && msg.reply_to.type !== 'image' && msg.reply_to.type !== 'file'">
+                                                <p class="text-xs opacity-70 truncate" x-text="msg.reply_to.body"></p>
+                                            </template>
                                         </div>
                                     </template>
 
                                     <template x-if="msg.deleted">
                                         <span class="italic">This message was deleted</span>
                                     </template>
-                                    <template x-if="!msg.deleted">
+                                    <template x-if="!msg.deleted && msg.type === 'image'">
+                                        <img :src="msg.metadata?.url" class="max-w-full rounded-lg max-h-56 object-cover cursor-pointer block" @click="window.open(msg.metadata.url, '_blank')">
+                                    </template>
+                                    <template x-if="!msg.deleted && msg.type === 'file'">
+                                        <a :href="msg.metadata?.url" target="_blank" rel="noopener"
+                                           class="flex items-center gap-2.5 hover:opacity-75 transition min-w-0 no-underline">
+                                            <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                 :class="msg.sender_id == currentUserId ? 'bg-blue-500' : 'bg-gray-200'">
+                                                <svg class="w-5 h-5" :class="msg.sender_id == currentUserId ? 'text-white' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium truncate" x-text="msg.metadata?.filename"></p>
+                                                <p class="text-[10px] opacity-70" x-text="msg.metadata ? formatFileSize(msg.metadata.size) : ''"></p>
+                                            </div>
+                                        </a>
+                                    </template>
+                                    <template x-if="!msg.deleted && msg.type !== 'image' && msg.type !== 'file'">
                                         <span x-text="msg.body"></span>
                                     </template>
                                 </div>
@@ -284,12 +368,36 @@
             </template>
         </div>
 
+        {{-- Error banner --}}
+        <div x-show="errorMsg" x-cloak
+             class="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center gap-2 flex-shrink-0">
+            <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            <span class="text-xs text-red-700 flex-1" x-text="errorMsg"></span>
+            <button @click="errorMsg = null" class="text-red-400 hover:text-red-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
         {{-- Reply preview bar --}}
         <template x-if="replyTo">
             <div class="px-4 py-2 border-t border-gray-100 bg-blue-50 flex items-center gap-2 flex-shrink-0">
                 <div class="flex-1 min-w-0">
                     <p class="text-[11px] font-semibold text-blue-700" x-text="'Replying to ' + replyTo.sender_name"></p>
-                    <p class="text-xs text-gray-500 truncate" x-text="replyTo.deleted ? 'Deleted message' : replyTo.body"></p>
+                    <template x-if="!replyTo.deleted && replyTo.type === 'image'">
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <img :src="replyTo.metadata?.url" class="w-8 h-8 rounded object-cover flex-shrink-0">
+                            <span class="text-xs text-gray-500">Photo</span>
+                        </div>
+                    </template>
+                    <template x-if="!replyTo.deleted && replyTo.type === 'file'">
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="text-xs text-gray-500 truncate" x-text="replyTo.metadata?.filename || 'File'"></span>
+                        </div>
+                    </template>
+                    <template x-if="replyTo.deleted || (replyTo.type !== 'image' && replyTo.type !== 'file')">
+                        <p class="text-xs text-gray-500 truncate" x-text="replyTo.deleted ? 'Deleted message' : replyTo.body"></p>
+                    </template>
                 </div>
                 <button @click="cancelReply()" class="text-gray-400 hover:text-gray-600 flex-shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -297,9 +405,45 @@
             </div>
         </template>
 
+        {{-- File preview bar --}}
+        <template x-if="selectedFile">
+            <div class="px-4 py-2 border-t border-gray-100 bg-gray-50 flex items-center gap-3 flex-shrink-0">
+                <template x-if="filePreviewUrl">
+                    <img :src="filePreviewUrl" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                </template>
+                <template x-if="!filePreviewUrl">
+                    <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                </template>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-700 truncate" x-text="selectedFile.name"></p>
+                    <p class="text-xs text-gray-400" x-text="formatFileSize(selectedFile.size)"></p>
+                </div>
+                <button @click="sendFile()" :disabled="uploading"
+                        class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition disabled:opacity-50 flex items-center gap-1.5">
+                    <template x-if="uploading">
+                        <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </template>
+                    <span x-text="uploading ? 'Uploading…' : 'Send'"></span>
+                </button>
+                <button @click="clearFile()" :disabled="uploading" class="text-gray-400 hover:text-gray-600 disabled:opacity-40">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </template>
+
         {{-- Compose area --}}
-        <div class="px-4 py-3 border-t border-gray-100 flex-shrink-0">
-            <div class="flex items-end gap-2">
+        <div class="px-3 md:px-4 py-3 border-t border-gray-100 flex-shrink-0">
+            <div class="flex items-end gap-1.5 md:gap-2">
+                {{-- File attachment --}}
+                <button @click="pickFile()" title="Attach file"
+                        class="w-9 h-9 md:w-9 md:h-9 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center flex-shrink-0 transition touch-manipulation">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                </button>
+                <input x-ref="fileInput" type="file" class="hidden"
+                       accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                       @change="onFileSelected($event)">
                 <textarea
                     x-model="newMessage"
                     @keydown.enter.prevent="if(!$event.shiftKey) sendMessage()"
@@ -310,7 +454,7 @@
                     style="min-height: 42px;"
                 ></textarea>
                 <button @click="sendMessage()" :disabled="!newMessage.trim()"
-                        class="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center flex-shrink-0 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        class="w-11 h-11 md:w-10 md:h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center flex-shrink-0 transition disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation">
                     <svg class="w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
             </div>
@@ -320,14 +464,14 @@
     {{-- ─── New Chat Modal ─────────────────────────────────────────────────── --}}
     <div x-show="showNewChat" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
          @keydown.escape.window="showNewChat = false">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4" @click.outside="showNewChat = false">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-2 sm:mx-4 max-h-[90svh] flex flex-col" @click.outside="showNewChat = false">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <h3 class="font-semibold text-gray-800">New Conversation</h3>
                 <button @click="showNewChat = false" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="p-5 space-y-4">
+            <div class="p-5 space-y-4 overflow-y-auto flex-1">
                 <div class="flex gap-2">
                     <button @click="newChatType = 'private'; selectedUsers = []"
                             :class="newChatType === 'private' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'"
@@ -374,7 +518,7 @@
     @if($conversation->type === 'group')
     <div x-show="showGroupPanel" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
          @keydown.escape.window="showGroupPanel = false">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[80vh] flex flex-col" @click.outside="showGroupPanel = false">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-2 sm:mx-4 max-h-[90svh] md:max-h-[80vh] flex flex-col" @click.outside="showGroupPanel = false">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
                 <h3 class="font-semibold text-gray-800">Group Settings</h3>
                 <button @click="showGroupPanel = false" class="text-gray-400 hover:text-gray-600">
@@ -528,6 +672,22 @@ function chatApp() {
         newMemberIds:   [],
         loadingGroupUsers: false,
 
+        // Error
+        errorMsg:       null,
+        _errorTimer:    null,
+
+        // Search
+        showSearch:     false,
+        searchQuery:    '',
+        searchResults:  [],
+        searching:      false,
+        _searchDebounce: null,
+
+        // File upload
+        selectedFile:   null,
+        filePreviewUrl: null,
+        uploading:      false,
+
         // New chat modal
         showNewChat:    false,
         newChatType:    'private',
@@ -629,6 +789,7 @@ function chatApp() {
                 const idx = this.messages.findIndex(m => m._tempId === tempId);
                 if (idx !== -1) this.messages[idx].failed = true;
                 this.newMessage = body;
+                this.showError('Message failed to send. Click the retry button to try again.');
             }
         },
 
@@ -654,7 +815,7 @@ function chatApp() {
                 await axios.delete('/chat/' + CONV_ID + '/messages/' + msg.id);
                 const idx = this.messages.findIndex(m => m.id === msg.id);
                 if (idx !== -1) { this.messages[idx].deleted = true; this.messages[idx].body = null; }
-            } catch(e) {}
+            } catch(e) { this.showError('Failed to delete message.'); }
         },
 
         startEdit(msg) {
@@ -675,13 +836,20 @@ function chatApp() {
                     this.messages[idx].edited_at = res.data.edited_at;
                 }
                 this.cancelEdit();
-            } catch(e) {}
+            } catch(e) { this.showError('Failed to save edit.'); }
         },
 
         // ─── Reply ───────────────────────────────────────────────────────────
 
         setReply(msg) {
-            this.replyTo = { id: msg.id, body: msg.body, sender_name: msg.sender_name || 'You', deleted: msg.deleted };
+            this.replyTo = {
+                id:          msg.id,
+                type:        msg.type,
+                body:        msg.body,
+                metadata:    msg.metadata,
+                sender_name: msg.sender_name || 'You',
+                deleted:     msg.deleted,
+            };
             this.$nextTick(() => document.querySelector('textarea').focus());
         },
 
@@ -910,6 +1078,110 @@ function chatApp() {
         formatMsgTime(iso) {
             if (!iso) return '';
             return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        },
+
+        formatFileSize(bytes) {
+            if (!bytes) return '';
+            if (bytes < 1024)        return bytes + ' B';
+            if (bytes < 1048576)     return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        },
+
+        // ─── Error toast ──────────────────────────────────────────────────────
+
+        showError(msg) {
+            this.errorMsg = msg;
+            clearTimeout(this._errorTimer);
+            this._errorTimer = setTimeout(() => { this.errorMsg = null; }, 5000);
+        },
+
+        // ─── Search ───────────────────────────────────────────────────────────
+
+        toggleSearch() {
+            this.showSearch = !this.showSearch;
+            if (this.showSearch) {
+                this.searchQuery = '';
+                this.searchResults = [];
+                this.$nextTick(() => this.$refs.searchInput?.focus());
+            }
+        },
+
+        closeSearch() {
+            this.showSearch = false;
+            this.searchQuery = '';
+            this.searchResults = [];
+        },
+
+        runSearch() {
+            clearTimeout(this._searchDebounce);
+            if (this.searchQuery.length < 2) { this.searchResults = []; return; }
+            this.searching = true;
+            this._searchDebounce = setTimeout(async () => {
+                try {
+                    const res = await axios.get('/chat/' + CONV_ID + '/search', { params: { q: this.searchQuery } });
+                    this.searchResults = res.data;
+                } catch(e) {}
+                this.searching = false;
+            }, 350);
+        },
+
+        goToMessage(id) {
+            this.closeSearch();
+            this.$nextTick(() => {
+                const el = document.querySelector('[data-msg-id="' + id + '"]');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        },
+
+        // ─── File upload ──────────────────────────────────────────────────────
+
+        pickFile() {
+            this.$refs.fileInput.value = '';
+            this.$refs.fileInput.click();
+        },
+
+        onFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            this.selectedFile = file;
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => { this.filePreviewUrl = e.target.result; };
+                reader.readAsDataURL(file);
+            } else {
+                this.filePreviewUrl = null;
+            }
+        },
+
+        clearFile() {
+            this.selectedFile = null;
+            this.filePreviewUrl = null;
+            if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+        },
+
+        async sendFile() {
+            if (!this.selectedFile || this.uploading) return;
+            this.uploading = true;
+            const fd = new FormData();
+            fd.append('file', this.selectedFile);
+            try {
+                const res = await axios.post('/chat/' + CONV_ID + '/upload', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+                this.messages.push({ ...res.data, pending: false });
+                this.cacheMessages();
+                this.clearFile();
+                this.scrollBottom();
+                const conv = this.conversations.find(c => c.id === CONV_ID);
+                if (conv) {
+                    conv.last_message    = res.data.type === 'image' ? '📷 Image' : '📎 ' + res.data.metadata?.filename;
+                    conv.last_message_at = res.data.created_at;
+                }
+            } catch(e) {
+                const msg = e.response?.data?.message || 'Failed to upload. Max 10 MB; allowed: images, PDF, Office, txt, zip.';
+                this.showError(msg);
+            }
+            this.uploading = false;
         },
 
         // ─── New chat modal ───────────────────────────────────────────────────

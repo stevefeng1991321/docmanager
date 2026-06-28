@@ -39,10 +39,17 @@ class MessageSent implements ShouldBroadcastNow
             'sender_initial'       => strtoupper(substr($this->message->sender->name, 0, 1)),
             'type'                 => $this->message->type,
             'body'                 => $this->message->body,
+            'metadata'             => $this->message->metadata
+                ? array_merge($this->message->metadata, ['url' => asset('storage/' . ($this->message->metadata['path'] ?? ''))])
+                : null,
             'reply_to_id'          => $this->message->reply_to_id,
             'reply_to'             => $this->message->reply_to_id && $this->message->replyTo ? [
                 'id'          => $this->message->replyTo->id,
+                'type'        => $this->message->replyTo->type,
                 'body'        => $this->message->replyTo->deleted_at ? null : $this->message->replyTo->body,
+                'metadata'    => (!$this->message->replyTo->deleted_at && $this->message->replyTo->metadata)
+                    ? array_merge($this->message->replyTo->metadata, ['url' => asset('storage/' . ($this->message->replyTo->metadata['path'] ?? ''))])
+                    : null,
                 'sender_name' => $this->message->replyTo->sender?->name ?? 'Unknown',
                 'deleted'     => (bool) $this->message->replyTo->deleted_at,
             ] : null,

@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ChatController extends Controller
@@ -291,6 +292,58 @@ class ChatController extends Controller
         return response()->json(['ok' => true, 'name' => $conversation->name]);
     }
 
+    public function apiSearch(Request $request, Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        $q = trim($request->string('q'));
+        if (strlen($q) < 2) return response()->json([]);
+
+        $messages = $conversation->messages()
+            ->with('sender:id,name')
+            ->whereNull('deleted_at')
+            ->where('body', 'like', '%' . $q . '%')
+            ->reorder('id', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(fn($m) => $this->formatMessage($m));
+
+        return response()->json($messages);
+    }
+
+    public function apiUpload(Request $request, Conversation $conversation): JsonResponse
+    {
+        $this->authorizeParticipant($conversation);
+        $request->validate(['file' => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,txt,zip']);
+
+        $file    = $request->file('file');
+        $mime    = $file->getMimeType();
+        $isImage = str_starts_with($mime, 'image/');
+        $path    = $file->store('chat', 'public');
+
+        $message = $conversation->messages()->create([
+            'sender_id' => auth()->id(),
+            'type'      => $isImage ? 'image' : 'file',
+            'body'      => null,
+            'metadata'  => [
+                'path'     => $path,
+                'filename' => $file->getClientOriginalName(),
+                'size'     => $file->getSize(),
+                'mime'     => $mime,
+            ],
+        ]);
+
+        $message->loadMissing(['sender', 'replyTo.sender']);
+        $conversation->update(['last_message_at' => now()]);
+        MessageSent::dispatch($message);
+
+        $conversation->participants()
+            ->where('user_id', '!=', auth()->id())
+            ->pluck('user_id')
+            ->each(fn($uid) => NewMessageNotification::dispatch($message, $uid));
+
+        return response()->json($this->formatMessage($message), 201);
+    }
+
     public function users(): JsonResponse
     {
         $users = User::where('id', '!=', auth()->id())
@@ -335,10 +388,17 @@ class ChatController extends Controller
             'reply_to_id'    => $msg->reply_to_id,
             'reply_to'       => $msg->reply_to_id && $msg->replyTo ? [
                 'id'          => $msg->replyTo->id,
+                'type'        => $msg->replyTo->type,
                 'body'        => $msg->replyTo->deleted_at ? null : $msg->replyTo->body,
+                'metadata'    => (!$msg->replyTo->deleted_at && $msg->replyTo->metadata)
+                    ? array_merge($msg->replyTo->metadata, ['url' => asset('storage/' . ($msg->replyTo->metadata['path'] ?? ''))])
+                    : null,
                 'sender_name' => $msg->replyTo->sender?->name ?? 'Unknown',
                 'deleted'     => (bool) $msg->replyTo->deleted_at,
             ] : null,
+            'metadata'       => $msg->metadata
+                ? array_merge($msg->metadata, ['url' => asset('storage/' . ($msg->metadata['path'] ?? ''))])
+                : null,
             'created_at'     => $msg->created_at->toISOString(),
         ];
     }
