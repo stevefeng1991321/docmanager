@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Upload Document')
+@section('title', __('documents.upload_heading'))
 
 @section('content')
 
@@ -9,8 +9,8 @@
 
         {{-- Title --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-500">*</span></label>
-            <input type="text" x-model="title" placeholder="Document title"
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('documents.title_label') }} <span class="text-red-500">*</span></label>
+            <input type="text" x-model="title" placeholder="{{ __('documents.title_placeholder') }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                    :class="{'border-red-400': errors.title}">
             <p x-show="errors.title" x-text="errors.title" class="mt-1 text-xs text-red-600"></p>
@@ -18,7 +18,7 @@
 
         {{-- Description --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.description') }}</label>
             <textarea x-model="description" rows="3"
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
@@ -47,7 +47,7 @@
 
         {{-- File picker --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">File <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('documents.file_label') }} <span class="text-red-500">*</span></label>
             <div class="border-2 border-dashed rounded-xl p-6 text-center transition cursor-pointer"
                  :class="file ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-blue-400'"
                  @dragover.prevent
@@ -86,24 +86,24 @@
         {{-- Category + Status --}}
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.category') }}</label>
                 <select x-model="categoryId" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     @include('admin.partials.category_options')
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.status') }}</label>
                 <select x-model="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <option value="draft">Draft</option>
-                    <option value="pending_review">Pending Review</option>
-                    <option value="published">Published</option>
+                    <option value="draft">{{ __('common.status_draft') }}</option>
+                    <option value="pending_review">{{ __('common.status_pending_review') }}</option>
+                    <option value="published">{{ __('common.status_published') }}</option>
                 </select>
             </div>
         </div>
 
         {{-- Tags --}}
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('common.tags') }}</label>
             <div class="flex flex-wrap gap-2">
                 @foreach($tags as $tag)
                     <label class="flex items-center gap-1.5 text-sm cursor-pointer select-none">
@@ -128,7 +128,7 @@
         </button>
         <a href="{{ route('admin.documents.index') }}"
            class="px-6 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition">
-            Cancel
+            {{ __('common.cancel') }}
         </a>
     </div>
 

@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Documents')
+@section('title', __('admin.documents.heading'))
 
 @section('content')
 
@@ -8,16 +8,16 @@
 {{-- Top bar: filters + upload --}}
 <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
     <form method="GET" class="flex flex-wrap gap-2">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title…"
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.documents.search_placeholder') }}"
                class="w-52 border border-gray-300 rounded-lg px-3 py-2 text-sm">
         <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">All Status</option>
+            <option value="">{{ __('common.all_status') }}</option>
             @foreach(['draft','pending_review','published','rejected','archived'] as $s)
                 <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
             @endforeach
         </select>
         <select name="category" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">All Categories</option>
+            <option value="">{{ __('admin.documents.filter_category') }}</option>
             @foreach($categories as $parent)
                 <option value="{{ $parent->id }}" @selected(request('category') == $parent->id)>{{ $parent->name }}</option>
                 @foreach($parent->children as $child)
@@ -33,9 +33,9 @@
             <option value="size_desc" @selected($sort === 'size_desc')>Largest File</option>
             <option value="downloads" @selected($sort === 'downloads')>Most Downloaded</option>
         </select>
-        <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Filter</button>
+        <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">{{ __('common.filter') }}</button>
         @if(request()->hasAny(['search','status','category','sort']))
-            <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
+            <a href="{{ route('admin.documents.index') }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">{{ __('common.clear') }}</a>
         @endif
     </form>
     <div class="flex gap-2">
@@ -98,13 +98,13 @@
                                :checked="selected.length === rowIds.length && rowIds.length > 0"
                                class="rounded border-gray-300 text-blue-600">
                     </th>
-                    <th class="px-4 py-3 text-left">Title</th>
-                    <th class="px-4 py-3 text-left">Type</th>
-                    <th class="px-4 py-3 text-left">Category</th>
-                    <th class="px-4 py-3 text-left">Status</th>
-                    <th class="px-4 py-3 text-left">Uploaded By</th>
-                    <th class="px-4 py-3 text-left">Date</th>
-                    <th class="px-4 py-3 text-left">Actions</th>
+                    <th class="px-4 py-3 text-left">{{ __('admin.documents.col_title') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('common.type') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('admin.documents.col_category') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('admin.documents.col_status') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('admin.documents.col_uploader') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('common.date') }}</th>
+                    <th class="px-4 py-3 text-left">{{ __('admin.documents.col_actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -141,22 +141,22 @@
                         <td class="px-4 py-3 text-gray-400">{{ $doc->created_at->format('d M Y') }}</td>
                         <td class="px-4 py-3">
                             <div class="flex gap-2 items-center">
-                                <a href="{{ route('admin.documents.edit', $doc) }}" class="text-blue-600 hover:underline text-xs">Edit</a>
+                                <a href="{{ route('admin.documents.edit', $doc) }}" class="text-blue-600 hover:underline text-xs">{{ __('admin.documents.edit_action') }}</a>
                                 @if($doc->status === 'pending_review')
                                     <form action="{{ route('admin.documents.approve', $doc) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
-                                        <button class="text-green-600 hover:underline text-xs">Approve</button>
+                                        <button class="text-green-600 hover:underline text-xs">{{ __('common.approve') }}</button>
                                     </form>
                                 @endif
                                 @if($doc->status === 'archived')
                                     <form action="{{ route('admin.documents.unarchive', $doc) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
-                                        <button class="text-slate-600 hover:underline text-xs">Unarchive</button>
+                                        <button class="text-slate-600 hover:underline text-xs">{{ __('common.restore') }}</button>
                                     </form>
                                 @elseif($doc->status !== 'draft')
                                     <form action="{{ route('admin.documents.archive', $doc) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
-                                        <button class="text-slate-500 hover:underline text-xs">Archive</button>
+                                        <button class="text-slate-500 hover:underline text-xs">{{ __('admin.documents.archive') }}</button>
                                     </form>
                                 @endif
                                 @if(!$doc->locked_by)
@@ -173,13 +173,13 @@
                                 <form action="{{ route('admin.documents.destroy', $doc) }}" method="POST"
                                       onsubmit="return confirm('Move to Trash?')">
                                     @csrf @method('DELETE')
-                                    <button class="text-red-500 hover:underline text-xs">Delete</button>
+                                    <button class="text-red-500 hover:underline text-xs">{{ __('admin.documents.delete_action') }}</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="px-6 py-12 text-center text-gray-400">No documents found.</td></tr>
+                    <tr><td colspan="8" class="px-6 py-12 text-center text-gray-400">{{ __('admin.documents.no_documents') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -194,7 +194,7 @@
                 @foreach(request()->except(['per_page', 'page']) as $key => $val)
                     <input type="hidden" name="{{ $key }}" value="{{ $val }}">
                 @endforeach
-                <label class="text-xs text-gray-500 whitespace-nowrap">Per page</label>
+                <label class="text-xs text-gray-500 whitespace-nowrap">{{ __('common.per_page') }}</label>
                 <select name="per_page" onchange="this.form.submit()"
                         class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
                     @foreach(config('pagination.per_page_options') as $n)
@@ -212,7 +212,7 @@
 <div x-show="rejectModal" x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" @click.stop>
-        <h3 class="font-semibold text-gray-800">Reject Selected Documents</h3>
+        <h3 class="font-semibold text-gray-800">{{ __('admin.documents.bulk_delete') }}</h3>
         <form method="POST" action="{{ route('admin.documents.bulk-reject') }}" @submit="attachIds($event)">
             @csrf
             <div class="space-y-3">
@@ -227,7 +227,7 @@
                 </button>
                 <button type="button" @click="rejectModal = false"
                         class="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
-                    Cancel
+                    {{ __('common.cancel') }}
                 </button>
             </div>
         </form>
@@ -238,7 +238,7 @@
 <div x-show="categoryModal" x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4" @click.stop>
-        <h3 class="font-semibold text-gray-800">Assign Category</h3>
+        <h3 class="font-semibold text-gray-800">{{ __('admin.documents.filter_category') }}</h3>
         <form method="POST" action="{{ route('admin.documents.bulk-assign-category') }}" @submit="attachIds($event)">
             @csrf
             <div class="space-y-3">
@@ -258,7 +258,7 @@
                 </button>
                 <button type="button" @click="categoryModal = false"
                         class="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
-                    Cancel
+                    {{ __('common.cancel') }}
                 </button>
             </div>
         </form>

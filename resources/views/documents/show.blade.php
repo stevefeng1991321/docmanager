@@ -13,7 +13,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Back
+            {{ __('common.back') }}
         </a>
 
         {{-- Header --}}
@@ -22,7 +22,7 @@
                 <div class="min-w-0 flex-1">
                     <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ $resource->title }}</h1>
                     <p class="text-sm text-gray-500 mt-1">
-                        {{ $resource->category?->name ?? 'Uncategorised' }}
+                        {{ $resource->category?->name ?? __('categories.all') }}
                         &middot; {{ number_format($resource->file_size / 1024) }} KB
                         &middot; {{ strtoupper($resource->file_type) }}
                         &middot; v{{ $resource->current_version }}
@@ -44,14 +44,14 @@
                     <form method="POST" action="{{ route('favorites.destroy', $resource) }}">
                         @csrf @method('DELETE')
                         <button class="px-3 py-1.5 border border-yellow-300 bg-yellow-50 text-yellow-700 text-xs font-medium rounded-lg hover:bg-yellow-100 transition">
-                            &#9733; Saved
+                            &#9733; {{ __('documents.remove_from_favorite') }}
                         </button>
                     </form>
                     @else
                     <form method="POST" action="{{ route('favorites.store', $resource) }}">
                         @csrf
                         <button class="px-3 py-1.5 border border-gray-200 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-50 transition">
-                            &#9733; Save
+                            &#9733; {{ __('documents.add_to_favorite') }}
                         </button>
                     </form>
                     @endif
@@ -65,7 +65,7 @@
                     @else
                     <a href="{{ route('documents.download', $resource) }}"
                        class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
-                        Download
+                        {{ __('documents.download') }}
                     </a>
                     @endif
                 </div>
@@ -95,7 +95,7 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center">
             <a href="{{ route('documents.preview', $resource) }}" target="_blank"
                class="inline-flex items-center gap-2 px-4 py-2 border border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium rounded-lg transition">
-                Open Preview
+                {{ __('documents.preview') }}
             </a>
         </div>
         @endif
@@ -103,7 +103,7 @@
         {{-- Rating --}}
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5"
              x-data="{ score: {{ $userRating?->rating ?? 0 }} }">
-            <h3 class="font-semibold text-gray-800 mb-3">Rate this Document</h3>
+            <h3 class="font-semibold text-gray-800 mb-3">{{ __('documents.rate_document') }}</h3>
             <form method="POST" action="{{ route('ratings.store', $resource) }}" class="space-y-3">
                 @csrf
                 <div class="flex gap-1">
@@ -114,11 +114,11 @@
                     @endfor
                     <input type="hidden" name="score" :value="score">
                 </div>
-                <textarea name="review" rows="2" placeholder="Optional review…"
+                <textarea name="review" rows="2" placeholder="{{ __('documents.add_comment') }}"
                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none">{{ $userRating?->review }}</textarea>
                 <button type="submit" :disabled="score === 0"
                         class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition">
-                    Submit Rating
+                    {{ __('common.submit') }}
                 </button>
             </form>
             @if($resource->ratings->count())
@@ -130,7 +130,7 @@
 
         {{-- Add to reading list --}}
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 class="font-semibold text-gray-800 mb-3">Add to Reading List</h3>
+            <h3 class="font-semibold text-gray-800 mb-3">{{ __('documents.read_later') }}</h3>
             @if(auth()->user()->readingLists()->count())
             <form method="POST" class="flex gap-2" id="add-to-list-form">
                 @csrf
@@ -142,7 +142,7 @@
                 </select>
                 <button type="submit" id="add-to-list-btn"
                         class="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition">
-                    Add
+                    {{ __('common.add') }}
                 </button>
             </form>
             <script>
@@ -174,9 +174,9 @@
     <aside class="hidden lg:block w-64 flex-shrink-0 space-y-4">
 
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-sm space-y-2">
-            <h3 class="font-semibold text-gray-700 mb-2">Details</h3>
+            <h3 class="font-semibold text-gray-700 mb-2">{{ __('documents.details_heading') }}</h3>
             <div class="flex justify-between text-gray-600">
-                <span class="text-gray-400">Version</span>
+                <span class="text-gray-400">{{ __('common.version') }}</span>
                 <span>v{{ $resource->current_version }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
@@ -184,25 +184,25 @@
                 <span>{{ number_format($resource->download_count) }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
-                <span class="text-gray-400">File size</span>
+                <span class="text-gray-400">{{ __('documents.file_size') }}</span>
                 <span>{{ number_format($resource->file_size / 1024) }} KB</span>
             </div>
             <div class="flex justify-between text-gray-600">
-                <span class="text-gray-400">Added</span>
+                <span class="text-gray-400">{{ __('common.added') }}</span>
                 <span>{{ $resource->created_at->format('Y-m-d') }}</span>
             </div>
         </div>
 
         {{-- Share link --}}
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <h3 class="font-semibold text-gray-700 text-sm mb-2">Share</h3>
+            <h3 class="font-semibold text-gray-700 text-sm mb-2">{{ __('documents.share') }}</h3>
             @if(session('share_url'))
             <div class="bg-gray-50 rounded-lg p-2 text-xs text-gray-600 break-all select-all">{{ session('share_url') }}</div>
             @else
             <form method="POST" action="{{ route('documents.share', $resource) }}">
                 @csrf
                 <button class="w-full px-3 py-1.5 border border-gray-200 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-50 transition">
-                    Generate Share Link
+                    {{ __('share.create_link') }}
                 </button>
             </form>
             @endif
@@ -211,7 +211,7 @@
         {{-- Version history --}}
         @if($resource->versions->count() > 1)
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <h3 class="font-semibold text-gray-700 text-sm mb-2">Versions</h3>
+            <h3 class="font-semibold text-gray-700 text-sm mb-2">{{ __('documents.version_history') }}</h3>
             <ul class="space-y-1">
                 @foreach($resource->versions->sortByDesc('version_number') as $ver)
                 <li class="flex justify-between text-xs text-gray-500">
@@ -226,7 +226,7 @@
         {{-- Related documents --}}
         @if($related->count())
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <h3 class="font-semibold text-gray-700 text-sm mb-3">Related Documents</h3>
+            <h3 class="font-semibold text-gray-700 text-sm mb-3">{{ __('documents.related') }}</h3>
             <ul class="space-y-2">
                 @foreach($related as $rel)
                 <li>

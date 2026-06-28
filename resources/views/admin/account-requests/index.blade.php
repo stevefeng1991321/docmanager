@@ -54,7 +54,7 @@ function copyResetUrl() {
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
-            <h2 class="font-semibold text-gray-800">Account Requests</h2>
+            <h2 class="font-semibold text-gray-800">{{ __('admin.account_requests.heading') }}</h2>
             <p class="text-sm text-gray-500 mt-0.5">{{ $requests->total() }} request(s)</p>
         </div>
         <form method="GET" class="flex gap-2">
@@ -68,9 +68,9 @@ function copyResetUrl() {
             <select name="status" onchange="this.form.submit()"
                     class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
                 <option value="">All Statuses</option>
-                <option value="pending"  {{ request('status') === 'pending'  ? 'selected' : '' }}>Pending</option>
-                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                <option value="pending"  {{ request('status') === 'pending'  ? 'selected' : '' }}>{{ __('admin.account_requests.pending') }}</option>
+                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ __('admin.account_requests.approved') }}</option>
+                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>{{ __('admin.account_requests.rejected') }}</option>
             </select>
         </form>
     </div>
@@ -79,12 +79,12 @@ function copyResetUrl() {
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-xs font-medium text-gray-500 uppercase">
                 <tr>
-                    <th class="px-6 py-3 text-left">User</th>
+                    <th class="px-6 py-3 text-left">{{ __('admin.account_requests.col_name') }}</th>
                     <th class="px-6 py-3 text-left">Type</th>
-                    <th class="px-6 py-3 text-left">Details</th>
-                    <th class="px-6 py-3 text-left">Status</th>
-                    <th class="px-6 py-3 text-left">Submitted</th>
-                    <th class="px-6 py-3 text-left">Actions</th>
+                    <th class="px-6 py-3 text-left">{{ __('admin.account_requests.detail_heading') }}</th>
+                    <th class="px-6 py-3 text-left">{{ __('admin.account_requests.col_status') }}</th>
+                    <th class="px-6 py-3 text-left">{{ __('admin.account_requests.col_submitted') }}</th>
+                    <th class="px-6 py-3 text-left">{{ __('admin.account_requests.col_actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -128,11 +128,11 @@ function copyResetUrl() {
                         </td>
                         <td class="px-6 py-3">
                             @if($req->status === 'pending')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">{{ __('admin.account_requests.pending') }}</span>
                             @elseif($req->status === 'approved')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ __('admin.account_requests.approved') }}</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Rejected</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{{ __('admin.account_requests.rejected') }}</span>
                             @endif
                         </td>
                         <td class="px-6 py-3 text-gray-400 text-xs">{{ $req->created_at->diffForHumans() }}</td>
@@ -143,12 +143,12 @@ function copyResetUrl() {
                                         <form action="{{ route('admin.account-requests.generate-reset-link', $req) }}" method="POST" class="inline">
                                             @csrf
                                             <button class="px-3 py-1 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg text-xs font-medium transition">
-                                                Generate Reset Link
+                                                {{ __('admin.account_requests.set_password') }}
                                             </button>
                                         </form>
                                         <button type="button" onclick="showRejectModal({{ $req->id }})"
                                                 class="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-xs font-medium transition">
-                                            Reject
+                                            {{ __('admin.account_requests.reject_action') }}
                                         </button>
                                     </div>
                                 @else
@@ -156,12 +156,12 @@ function copyResetUrl() {
                                         <form action="{{ route('admin.account-requests.approve', $req) }}" method="POST" class="inline">
                                             @csrf @method('PATCH')
                                             <button class="px-3 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-xs font-medium transition">
-                                                Approve
+                                                {{ __('admin.account_requests.approve_action') }}
                                             </button>
                                         </form>
                                         <button type="button" onclick="showRejectModal({{ $req->id }})"
                                                 class="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-xs font-medium transition">
-                                            Reject
+                                            {{ __('admin.account_requests.reject_action') }}
                                         </button>
                                     </div>
                                 @endif
@@ -175,7 +175,7 @@ function copyResetUrl() {
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No account requests.</td></tr>
+                    <tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">{{ __('admin.account_requests.no_requests') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -189,20 +189,20 @@ function copyResetUrl() {
 {{-- Reject modal --}}
 <div id="rejectModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-        <h3 class="font-semibold text-gray-900 mb-4">Reject Request</h3>
+        <h3 class="font-semibold text-gray-900 mb-4">{{ __('admin.account_requests.reject_action') }}</h3>
         <form id="rejectForm" method="POST" class="space-y-4">
             @csrf @method('PATCH')
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Note to user (optional)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.account_requests.rejection_reason') }}</label>
                 <textarea name="admin_note" rows="3"
                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')"
-                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">{{ __('common.cancel') }}</button>
                 <button type="submit"
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
-                    Reject
+                    {{ __('admin.account_requests.reject_button') }}
                 </button>
             </div>
         </form>

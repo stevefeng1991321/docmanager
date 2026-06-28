@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Saved Searches')
+@section('title', __('saved_searches.heading'))
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-5">
 
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-800">Saved Searches</h1>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('saved_searches.heading') }}</h1>
         <a href="{{ route('search') }}" class="text-sm text-blue-600 hover:underline">← Back to Search</a>
     </div>
 
@@ -15,7 +15,7 @@
 
     @if($searches->isEmpty())
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center text-gray-400 text-sm">
-        No saved searches yet. Run a search and click "Save Search" to save it here.
+        {{ __('saved_searches.empty') }} {{ __('saved_searches.empty_sub') }}
     </div>
     @else
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-100">
@@ -45,11 +45,11 @@
                            @keydown.escape="editing = false">
                     <button type="submit"
                             class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg">
-                        Save
+                        {{ __('common.save') }}
                     </button>
                     <button type="button" @click="editing = false"
                             class="px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-500 text-xs rounded-lg">
-                        Cancel
+                        {{ __('common.cancel') }}
                     </button>
                 </form>
 
@@ -57,11 +57,11 @@
                 <div x-show="!editing" class="flex items-center gap-3 flex-shrink-0">
                     <button @click="editing = true; $nextTick(() => $el.closest('.px-5').querySelector('input[name=name]').focus())"
                             class="text-xs text-gray-400 hover:text-gray-600">
-                        Rename
+                        {{ __('common.rename') }}
                     </button>
                     <form method="POST" action="{{ route('saved-searches.destroy', $search) }}">
                         @csrf @method('DELETE')
-                        <button class="text-xs text-red-400 hover:text-red-600">Remove</button>
+                        <button class="text-xs text-red-400 hover:text-red-600">{{ __('common.remove') }}</button>
                     </form>
                 </div>
 

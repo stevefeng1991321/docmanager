@@ -1,12 +1,12 @@
 @extends('layouts.app')
-@section('title', 'Work Reports')
+@section('title', __('work_reports.heading'))
 
 @section('content')
 <div class="space-y-5">
     <div class="flex items-center justify-between flex-wrap gap-3">
-        <h1 class="text-xl font-bold text-gray-800">Work Reports</h1>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('work_reports.heading') }}</h1>
         <a href="{{ route('work-reports.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            + New Report
+            + {{ __('work_reports.new_report') }}
         </a>
     </div>
 
@@ -14,7 +14,7 @@
     <div class="border-b border-gray-200 flex gap-1">
         <a href="{{ route('work-reports.index', array_merge(request()->except('tab', 'page'), ['tab' => 'mine'])) }}"
            class="px-3.5 py-2 text-sm font-medium border-b-2 transition {{ $tab === 'mine' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-            My Reports
+            {{ __('work_reports.my_reports') }}
         </a>
         <a href="{{ route('work-reports.index', array_merge(request()->except('tab', 'page'), ['tab' => 'team'])) }}"
            class="px-3.5 py-2 text-sm font-medium border-b-2 transition {{ $tab === 'team' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
@@ -28,13 +28,13 @@
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search title or notes…"
                class="w-56 border border-gray-300 rounded-lg px-3 py-2 text-sm">
         <select name="type" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">All Types</option>
+            <option value="">{{ __('work_reports.all_types') }}</option>
             @foreach(['daily','weekly','monthly'] as $t)
                 <option value="{{ $t }}" @selected(request('type') === $t)>{{ ucfirst($t) }}</option>
             @endforeach
         </select>
         <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">All Status</option>
+            <option value="">{{ __('common.all_status') }}</option>
             @foreach(['draft','submitted','under_review','approved','rejected'] as $s)
                 <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucwords(str_replace('_',' ',$s)) }}</option>
             @endforeach
@@ -47,9 +47,9 @@
         </select>
         <input type="date" name="date_from" value="{{ request('date_from') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
         <input type="date" name="date_to" value="{{ request('date_to') }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-        <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Filter</button>
+        <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">{{ __('common.filter') }}</button>
         @if(request()->hasAny(['search','type','status','project_id','date_from','date_to']))
-            <a href="{{ route('work-reports.index', ['tab' => $tab]) }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
+            <a href="{{ route('work-reports.index', ['tab' => $tab]) }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">{{ __('common.clear') }}</a>
         @endif
     </form>
 
@@ -57,14 +57,14 @@
         <table class="min-w-full divide-y divide-gray-100 text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Title</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.title') }}</th>
                     @if($tab === 'team')
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Employee</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.user') }}</th>
                     @endif
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Project</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.type') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.date') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('work_reports.project_label') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.status') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -95,7 +95,7 @@
                     @if(!$employee)
                         You don't have an employee profile linked to your account yet — contact an administrator.
                     @else
-                        No work reports found.
+                        {{ __('work_reports.empty') }}
                     @endif
                 </td></tr>
                 @endforelse

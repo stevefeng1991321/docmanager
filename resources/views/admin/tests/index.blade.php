@@ -5,12 +5,11 @@
 <div class="space-y-5">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-xl font-bold text-gray-800">Developer Tests</h1>
-            <p class="text-sm text-gray-500 mt-0.5">Build timed coding tests from the problem bank and invite candidates.</p>
+            <h1 class="text-xl font-bold text-gray-800">{{ __('admin.tests.heading') }}</h1>
         </div>
         <a href="{{ route('admin.tests.create') }}"
            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            + New Test
+            + {{ __('admin.tests.new_test') }}
         </a>
     </div>
 
@@ -18,12 +17,12 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                 <tr>
-                    <th class="px-4 py-2.5 text-left">Title</th>
-                    <th class="px-4 py-2.5 text-left">Status</th>
-                    <th class="px-4 py-2.5 text-left">Problems</th>
-                    <th class="px-4 py-2.5 text-left">Time Limit</th>
-                    <th class="px-4 py-2.5 text-left">Invites</th>
-                    <th class="px-4 py-2.5 text-left">Created</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.col_title') }}</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.col_status') }}</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.col_questions') }}</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.time_limit_label') }}</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.col_attempts') }}</th>
+                    <th class="px-4 py-2.5 text-left">{{ __('admin.tests.col_actions') }}</th>
                     <th class="px-4 py-2.5"></th>
                 </tr>
             </thead>
@@ -50,18 +49,18 @@
                     <td class="px-4 py-3 text-gray-600">{{ $test->invites_count }}</td>
                     <td class="px-4 py-3 text-gray-400">{{ $test->created_at->format('M j, Y') }}</td>
                     <td class="px-4 py-3 text-right">
-                        <a href="{{ route('admin.tests.edit', $test) }}" class="text-xs text-gray-500 hover:text-blue-600 mr-3">Edit</a>
+                        <a href="{{ route('admin.tests.edit', $test) }}" class="text-xs text-gray-500 hover:text-blue-600 mr-3">{{ __('admin.tests.edit_action') }}</a>
                         <form action="{{ route('admin.tests.destroy', $test) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Delete &quot;{{ $test->title }}&quot;? This removes all invites and submissions.')">
+                              onsubmit="return confirm('{{ __('admin.tests.confirm_delete', ['title' => '']) }}' + '{{ addslashes($test->title) }}' + '?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                            <button type="submit" class="text-xs text-red-500 hover:text-red-700">{{ __('admin.tests.delete_action') }}</button>
                         </form>
                     </td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="7" class="px-4 py-10 text-center text-gray-400">
-                        No tests yet. <a href="{{ route('admin.tests.create') }}" class="text-blue-600 hover:underline">Create your first one</a>.
+                        {{ __('admin.tests.no_tests') }}
                     </td>
                 </tr>
                 @endforelse

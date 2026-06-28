@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign In — {{ config('app.name') }}</title>
+    <title>{{ __('auth.sign_in') }} — {{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full flex items-center justify-center">
@@ -19,7 +19,7 @@
             </svg>
         </div>
         <h1 class="text-2xl font-bold text-gray-900">{{ config('app.name') }}</h1>
-        <p class="text-sm text-gray-500 mt-1">Sign in to your account</p>
+        <p class="text-sm text-gray-500 mt-1">{{ __('auth.sign_in') }}</p>
     </div>
 
     {{-- Status messages --}}
@@ -34,9 +34,10 @@
         @csrf
 
         <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.username_label') }}</label>
             <input id="username" type="text" name="username" value="{{ old('username') }}"
                    required autofocus autocomplete="username"
+                   placeholder="{{ __('auth.username_placeholder') }}"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('username') border-red-400 @else border-gray-300 @enderror">
             @error('username')
                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -44,9 +45,10 @@
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.password_label') }}</label>
             <input id="password" type="password" name="password"
                    required autocomplete="current-password"
+                   placeholder="{{ __('auth.password_placeholder') }}"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-400 @else border-gray-300 @enderror">
             @error('password')
                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
@@ -56,20 +58,20 @@
         <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-sm text-gray-600">
                 <input type="checkbox" name="remember" class="rounded border-gray-300 text-blue-600">
-                Remember me
+                {{ __('auth.remember_me') }}
             </label>
             <a href="{{ route('password.request') }}" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
         </div>
 
         <button type="submit"
                 class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            Sign In
+            {{ __('auth.sign_in_button') }}
         </button>
     </form>
 
     <p class="text-center text-sm text-gray-500 mt-6">
-        Don't have an account?
-        <a href="{{ route('register') }}" class="text-blue-600 hover:underline font-medium">Create one</a>
+        {{ __('auth.already_have_account') }}
+        <a href="{{ route('register') }}" class="text-blue-600 hover:underline font-medium">{{ __('auth.request_account') }}</a>
     </p>
 </div>
 

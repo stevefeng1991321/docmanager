@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'welcome'               => '欢迎回来，:name',
+    'welcome_sub'           => '以下是您的 DocManager 动态。',
+    'recent_documents'      => '最近文档',
+    'recent_activity'       => '最近活动',
+    'quick_access'          => '快捷入口',
+    'statistics'            => '统计数据',
+    'total_documents'       => '文档总数',
+    'my_uploads'            => '我的上传',
+    'my_favorites'          => '我的收藏',
+    'storage_used'          => '已用存储',
+    'browse_all'            => '浏览全部文档',
+    'no_recent'             => '暂无最近文档。',
+    'no_activity'           => '暂无近期活动。',
+    'view_all'              => '查看全部',
+    'uploaded_by'           => '由 :name 上传',
+    'viewed'                => '已查看',
+    'downloaded'            => '已下载',
+    'favorited'             => '已收藏',
+    'new_announcement'      => '新公告',
+    'announcements'         => '公告',
+    'pinned'                => '置顶',
+    'see_all_announcements' => '查看全部公告',
+];

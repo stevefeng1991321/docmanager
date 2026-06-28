@@ -7,27 +7,27 @@
     {{-- Header --}}
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
-            <h1 class="text-xl font-semibold text-gray-800">Document Comparison</h1>
+            <h1 class="text-xl font-semibold text-gray-800">{{ __('admin.compare.heading') }}</h1>
             <p class="text-sm text-gray-500 mt-0.5">
                 <a href="{{ route('admin.compare.index') }}" class="text-blue-600 hover:underline">Change selection</a>
             </p>
         </div>
         <div class="flex items-center gap-2 text-xs text-gray-500">
-            <span class="inline-block w-3 h-3 rounded-sm bg-red-100 border border-red-300"></span> Removed &nbsp;
-            <span class="inline-block w-3 h-3 rounded-sm bg-green-100 border border-green-300"></span> Added &nbsp;
-            <span class="inline-block w-3 h-3 rounded-sm bg-gray-50 border border-gray-200"></span> Unchanged
+            <span class="inline-block w-3 h-3 rounded-sm bg-red-100 border border-red-300"></span> {{ __('admin.compare.legend_removed') }} &nbsp;
+            <span class="inline-block w-3 h-3 rounded-sm bg-green-100 border border-green-300"></span> {{ __('admin.compare.legend_added') }} &nbsp;
+            <span class="inline-block w-3 h-3 rounded-sm bg-gray-50 border border-gray-200"></span> {{ __('common.unchanged') }}
         </div>
     </div>
 
     {{-- Document titles --}}
     <div class="grid grid-cols-2 gap-4">
         <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-            <p class="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-0.5">Document A</p>
+            <p class="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-0.5">{{ __('admin.compare.original') }}</p>
             <p class="text-sm font-medium text-gray-800 truncate">{{ $a->title }}</p>
             <p class="text-xs text-gray-500">ID #{{ $a->id }}</p>
         </div>
         <div class="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3">
-            <p class="text-xs font-semibold text-purple-500 uppercase tracking-wide mb-0.5">Document B</p>
+            <p class="text-xs font-semibold text-purple-500 uppercase tracking-wide mb-0.5">{{ __('admin.compare.modified') }}</p>
             <p class="text-sm font-medium text-gray-800 truncate">{{ $b->title }}</p>
             <p class="text-xs text-gray-500">ID #{{ $b->id }}</p>
         </div>
@@ -36,15 +36,15 @@
     {{-- Metadata comparison --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 class="text-sm font-semibold text-gray-700">Metadata</h2>
+            <h2 class="text-sm font-semibold text-gray-700">{{ __('common.details') }}</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wide">
-                        <th class="px-4 py-2.5 text-left w-36">Field</th>
-                        <th class="px-4 py-2.5 text-left">Document A</th>
-                        <th class="px-4 py-2.5 text-left">Document B</th>
+                        <th class="px-4 py-2.5 text-left w-36">{{ __('common.field') }}</th>
+                        <th class="px-4 py-2.5 text-left">{{ __('admin.compare.original') }}</th>
+                        <th class="px-4 py-2.5 text-left">{{ __('admin.compare.modified') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -77,7 +77,7 @@
     {{-- Content diff --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-gray-700">Extracted Text Content</h2>
+            <h2 class="text-sm font-semibold text-gray-700">{{ __('common.content') }}</h2>
             @php
                 $addedCount   = collect($textDiff)->where('type', 'added')->count();
                 $removedCount = collect($textDiff)->where('type', 'removed')->count();
@@ -92,7 +92,7 @@
 
         @if(empty($textDiff))
         <div class="px-5 py-8 text-center text-sm text-gray-400">
-            No extracted text available for either document.
+            {{ __('admin.compare.no_diff') }}
         </div>
         @else
         <div class="overflow-x-auto" x-data="{ collapsed: true }" x-cloak>
@@ -142,15 +142,15 @@
     <div class="flex items-center gap-3 pb-2">
         <a href="{{ route('admin.documents.edit', $a) }}"
            class="px-4 py-2 border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition">
-            Edit Document A
+            {{ __('common.edit') }} A
         </a>
         <a href="{{ route('admin.documents.edit', $b) }}"
            class="px-4 py-2 border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition">
-            Edit Document B
+            {{ __('common.edit') }} B
         </a>
         <a href="{{ route('admin.compare.show', [$b->id, $a->id]) }}"
            class="ml-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-            &#8646; Swap
+            {{ __('admin.compare.swap') }}
         </a>
     </div>
 

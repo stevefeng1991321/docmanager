@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>404</title>
+    <title>{{ __('errors.404_title') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -64,7 +64,7 @@
     <div class="row">
         <span class="code">404</span>
         <div class="divider"></div>
-        <span class="message">Page not found.</span>
+        <span class="message">{{ __('errors.404_message') }}</span>
     </div>
 
     <div class="actions">
@@ -73,9 +73,9 @@
                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 12H5M12 5l-7 7 7 7"/>
             </svg>
-            Go back
+            {{ __('errors.go_back') }}
         </a>
-        <a href="/" class="back">Home</a>
+        <a href="/" class="back">{{ __('errors.go_home') }}</a>
     </div>
 </body>
 </html>

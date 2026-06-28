@@ -641,7 +641,7 @@ function chatApp() {
         loadingMessages: true,
         loadingConvs:   false,
         isOnline:       navigator.onLine,
-        isConnected:    window.Echo?.connector?.pusher?.connection?.state === 'connected',
+        isConnected:    true,
 
         // Pagination
         nextCursor:     null,
@@ -1022,6 +1022,7 @@ function chatApp() {
         async flushQueue() {
             const queue = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
             if (!queue.length) return;
+            const failed = [];
             for (const item of queue) {
                 const body      = typeof item === 'string' ? item : item.body;
                 const tempId    = typeof item === 'string' ? null : item.tempId;
@@ -1032,10 +1033,21 @@ function chatApp() {
                         const idx = this.messages.findIndex(m => m._tempId === tempId);
                         if (idx !== -1) this.messages.splice(idx, 1, { ...res.data, sender_initial: CURRENT_INITIAL });
                     }
-                } catch(e) {}
+                } catch(e) {
+                    failed.push(item);
+                    // Mark the corresponding optimistic message as failed instead of dropping it
+                    if (tempId) {
+                        const idx = this.messages.findIndex(m => m._tempId === tempId);
+                        if (idx !== -1) { this.messages[idx].pending = false; this.messages[idx].failed = true; }
+                    }
+                }
             }
-            localStorage.removeItem(PENDING_KEY);
-            this.messages = this.messages.filter(m => !m.pending);
+            if (failed.length) {
+                localStorage.setItem(PENDING_KEY, JSON.stringify(failed));
+            } else {
+                localStorage.removeItem(PENDING_KEY);
+                this.messages = this.messages.filter(m => !m.pending);
+            }
         },
 
         // ─── Utilities ────────────────────────────────────────────────────────
@@ -1161,6 +1173,7 @@ function chatApp() {
 
         async sendFile() {
             if (!this.selectedFile || this.uploading) return;
+            if (!this.isOnline) { this.showError(__('chat.offline_no_file')); return; }
             this.uploading = true;
             const fd = new FormData();
             fd.append('file', this.selectedFile);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>500</title>
+    <title>{{ __('errors.500_title') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -63,7 +63,7 @@
     <div class="row">
         <span class="code">500</span>
         <div class="divider"></div>
-        <span class="message">Something went wrong on our end.</span>
+        <span class="message">{{ __('errors.500_message') }}</span>
     </div>
 
     <a href="javascript:history.back()" class="back">
@@ -71,7 +71,7 @@
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
-        Go back
+        {{ __('errors.go_back') }}
     </a>
 </body>
 </html>

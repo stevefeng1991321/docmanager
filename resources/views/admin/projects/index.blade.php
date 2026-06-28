@@ -8,19 +8,19 @@
 
     <button @click="showForm = !showForm"
             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-        + Add Project
+        + {{ __('admin.projects.new_project') }}
     </button>
 
     <div x-show="showForm" x-cloak class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <form method="POST" action="{{ route('admin.projects.store') }}" class="flex flex-wrap gap-3 items-end">
             @csrf
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
-                <input type="text" name="name" required placeholder="e.g. Checkout Redesign"
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.projects.name_label') }}</label>
+                <input type="text" name="name" required placeholder="{{ __('admin.projects.name_placeholder') }}"
                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-56">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Department (optional)</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('common.department') }} {{ __('common.optional') }}</label>
                 <select name="department_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48">
                     <option value="">— None —</option>
                     @foreach($departments as $dept)
@@ -29,18 +29,18 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.projects.status_label') }}</label>
                 <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <option value="active">Active</option>
-                    <option value="on_hold">On Hold</option>
-                    <option value="completed">Completed</option>
+                    <option value="active">{{ __('admin.projects.status_active') }}</option>
+                    <option value="on_hold">{{ __('admin.projects.status_paused') }}</option>
+                    <option value="completed">{{ __('admin.projects.status_completed') }}</option>
                 </select>
             </div>
             <div class="flex-1 min-w-[200px]">
-                <label class="block text-xs font-medium text-gray-600 mb-1">Description (optional)</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('common.description_optional') }}</label>
                 <input type="text" name="description" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             </div>
-            <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">Save</button>
+            <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">{{ __('common.save') }}</button>
         </form>
     </div>
 
@@ -48,10 +48,10 @@
         <table class="min-w-full divide-y divide-gray-100 text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Name</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Department</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Reports</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.projects.col_name') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.department') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.projects.col_status') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.work_reports.heading') }}</th>
                     <th class="px-4 py-3"></th>
                 </tr>
             </thead>
@@ -71,19 +71,19 @@
                         <div class="flex items-center justify-end gap-3">
                             <button type="button"
                                     @click="openEdit({{ $project->id }}, {{ \Illuminate\Support\Js::from($project->name) }}, {{ \Illuminate\Support\Js::from((string) $project->department_id) }}, {{ \Illuminate\Support\Js::from($project->status) }}, {{ \Illuminate\Support\Js::from($project->description) }})"
-                                    class="text-xs text-blue-600 hover:text-blue-800">Edit</button>
-                            <form method="POST" action="{{ route('admin.projects.destroy', $project) }}" onsubmit="return confirm('Delete this project?')">
+                                    class="text-xs text-blue-600 hover:text-blue-800">{{ __('admin.projects.edit_action') }}</button>
+                            <form method="POST" action="{{ route('admin.projects.destroy', $project) }}" onsubmit="return confirm('{{ __('admin.projects.confirm_delete', ['name' => '']) }}')">
                                 @csrf @method('DELETE')
                                 <button class="text-xs @if($project->work_reports_count > 0) text-gray-300 cursor-not-allowed @else text-red-500 hover:text-red-700 @endif"
                                         @if($project->work_reports_count > 0) disabled title="Project is in use" @endif>
-                                    Delete
+                                    {{ __('admin.projects.delete_action') }}
                                 </button>
                             </form>
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No projects yet.</td></tr>
+                <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">{{ __('admin.projects.no_projects') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -91,16 +91,16 @@
 
     <div x-show="editId !== null" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @keydown.escape.window="editId = null">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" @click.stop>
-            <h3 class="font-semibold text-gray-800">Edit Project</h3>
+            <h3 class="font-semibold text-gray-800">{{ __('admin.projects.edit') }}</h3>
             <form method="POST" x-bind:action="`{{ url('/admin/projects') }}/${editId}`" class="space-y-4">
                 @csrf
                 <input type="hidden" name="_method" value="PUT">
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.projects.name_label') }}</label>
                     <input type="text" name="name" x-model="editName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Department</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('common.department') }}</label>
                     <select name="department_id" x-model="editDepartmentId" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">— None —</option>
                         @foreach($departments as $dept)
@@ -109,20 +109,20 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.projects.status_label') }}</label>
                     <select name="status" x-model="editStatus" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="active">Active</option>
-                        <option value="on_hold">On Hold</option>
-                        <option value="completed">Completed</option>
+                        <option value="active">{{ __('admin.projects.status_active') }}</option>
+                        <option value="on_hold">{{ __('admin.projects.status_paused') }}</option>
+                        <option value="completed">{{ __('admin.projects.status_completed') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.projects.description_label') }}</label>
                     <textarea name="description" x-model="editDescription" rows="2" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y"></textarea>
                 </div>
                 <div class="flex gap-3 pt-1">
-                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">Save Changes</button>
-                    <button type="button" @click="editId = null" class="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">{{ __('common.save_changes') }}</button>
+                    <button type="button" @click="editId = null" class="px-4 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">{{ __('common.cancel') }}</button>
                 </div>
             </form>
         </div>

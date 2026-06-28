@@ -4,8 +4,8 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-800">New Employee</h1>
-        <a href="{{ route('admin.employees.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back to Employees</a>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('admin.employees.create') }}</h1>
+        <a href="{{ route('admin.employees.index') }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('common.back') }}</a>
     </div>
 
     <form method="POST" action="{{ route('admin.employees.store') }}" enctype="multipart/form-data" class="space-y-5">
@@ -15,10 +15,10 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-                Create Employee
+                {{ __('admin.employees.create') }}
             </button>
             <a href="{{ route('admin.employees.index') }}" class="px-5 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
-                Cancel
+                {{ __('common.cancel') }}
             </a>
         </div>
     </form>

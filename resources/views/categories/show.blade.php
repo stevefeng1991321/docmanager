@@ -34,7 +34,7 @@
             <span class="text-xs text-gray-400 uppercase font-mono flex-shrink-0">{{ $doc->file_type }}</span>
         </a>
         @empty
-        <p class="px-5 py-10 text-center text-gray-400 text-sm">No documents in this category.</p>
+        <p class="px-5 py-10 text-center text-gray-400 text-sm">{{ __('documents.no_documents') }}</p>
         @endforelse
     </div>
     <div>{{ $resources->links() }}</div>

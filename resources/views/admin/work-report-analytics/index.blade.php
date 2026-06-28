@@ -7,9 +7,9 @@
     @include('admin.work-reports._tabs', ['active' => 'analytics'])
 
     <div class="flex items-center justify-between">
-        <h1 class="text-lg font-bold text-gray-800">Analytics</h1>
+        <h1 class="text-lg font-bold text-gray-800">{{ __('admin.work_report_analytics.heading') }}</h1>
         <a href="{{ route('admin.work-report-analytics.export') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
-            ⬇ Export (CSV)
+            {{ __('admin.work_report_analytics.export') }}
         </a>
     </div>
 

@@ -32,7 +32,7 @@
         @csrf
 
         <div>
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.username_label') }}</label>
             <input id="username" type="text" name="username" value="{{ old('username') }}"
                    required autofocus autocomplete="username"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('username') border-red-400 @else border-gray-300 @enderror">
@@ -43,7 +43,7 @@
 
         <button type="submit"
                 class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            Submit Request
+            {{ __('auth.submit_request') }}
         </button>
     </form>
 
@@ -56,7 +56,7 @@
     @endif
 
     <p class="text-center text-sm text-gray-500 mt-6">
-        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-medium">Back to sign in</a>
+        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-medium">{{ __('auth.back_to_login') }}</a>
     </p>
 </div>
 

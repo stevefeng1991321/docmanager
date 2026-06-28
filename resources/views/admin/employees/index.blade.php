@@ -8,10 +8,10 @@
 
     <div class="flex items-center justify-between flex-wrap gap-3">
         <form method="GET" class="flex flex-wrap gap-2">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Name, code, or email…"
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('admin.employees.search_placeholder') }}"
                    class="w-56 border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <select name="department" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All Departments</option>
+                <option value="">{{ __('admin.employees.all_departments') }}</option>
                 @foreach($departments as $dept)
                     <option value="{{ $dept->id }}" @selected(request('department') == $dept->id)>{{ $dept->name }}</option>
                 @endforeach
@@ -23,7 +23,7 @@
                 @endforeach
             </select>
             <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All Status</option>
+                <option value="">{{ __('common.all_status') }}</option>
                 @foreach(['active','inactive','resigned','terminated'] as $s)
                     <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
                 @endforeach
@@ -35,13 +35,13 @@
                 <option value="name_desc" @selected($sort === 'name_desc')>Name Z–A</option>
                 <option value="code_asc"  @selected($sort === 'code_asc') >Employee Code</option>
             </select>
-            <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Filter</button>
+            <button class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">{{ __('common.filter') }}</button>
             @if(request()->hasAny(['search','department','position','status','sort']))
-                <a href="{{ route('admin.employees.index') }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
+                <a href="{{ route('admin.employees.index') }}" class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">{{ __('common.clear') }}</a>
             @endif
         </form>
         <a href="{{ route('admin.employees.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            + Add Employee
+            + {{ __('admin.employees.new_employee') }}
         </a>
     </div>
 
@@ -49,12 +49,12 @@
         <table class="min-w-full divide-y divide-gray-100 text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Employee</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Code</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Department</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Position</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Joined</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_name') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_id') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_department') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_position') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_status') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.employees.col_hire_date') }}</th>
                     <th class="px-4 py-3"></th>
                 </tr>
             </thead>
@@ -94,16 +94,16 @@
                     </td>
                     <td class="px-4 py-3 text-gray-500">{{ $employee->date_of_joining?->format('M j, Y') ?? '—' }}</td>
                     <td class="px-4 py-3 text-right">
-                        <a href="{{ route('admin.employees.edit', $employee) }}" class="text-xs text-gray-500 hover:text-blue-600 mr-3">Edit</a>
+                        <a href="{{ route('admin.employees.edit', $employee) }}" class="text-xs text-gray-500 hover:text-blue-600 mr-3">{{ __('admin.employees.edit_action') }}</a>
                         <form action="{{ route('admin.employees.destroy', $employee) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Delete &quot;{{ $employee->full_name }}&quot;?')">
+                              onsubmit="return confirm('{{ __('admin.employees.confirm_delete', ['name' => '']) }}' + '{{ addslashes($employee->full_name) }}' + '?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                            <button type="submit" class="text-xs text-red-500 hover:text-red-700">{{ __('admin.employees.delete_action') }}</button>
                         </form>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="px-4 py-12 text-center text-gray-400">No employees found.</td></tr>
+                <tr><td colspan="7" class="px-4 py-12 text-center text-gray-400">{{ __('admin.employees.no_employees') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -117,7 +117,7 @@
                     @foreach(request()->except(['per_page', 'page']) as $key => $val)
                         <input type="hidden" name="{{ $key }}" value="{{ $val }}">
                     @endforeach
-                    <label class="text-xs text-gray-500 whitespace-nowrap">Per page</label>
+                    <label class="text-xs text-gray-500 whitespace-nowrap">{{ __('common.per_page') }}</label>
                     <select name="per_page" onchange="this.form.submit()"
                             class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
                         @foreach(config('pagination.per_page_options') as $n)

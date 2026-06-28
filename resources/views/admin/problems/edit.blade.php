@@ -10,8 +10,8 @@
 @endphp
 <div class="max-w-2xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-800">Edit Problem</h1>
-        <a href="{{ route('admin.problems.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back to Problems</a>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('admin.problems.edit') }}</h1>
+        <a href="{{ route('admin.problems.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← {{ __('common.back') }}</a>
     </div>
 
     <form method="POST" action="{{ route('admin.problems.update', $problem) }}"
@@ -27,7 +27,7 @@
                 @error('order_index') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.problems.difficulty_label') }}</label>
                 <select name="difficulty"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('difficulty') border-red-400 @enderror">
                     @foreach(['easy', 'medium', 'hard'] as $d)
@@ -39,14 +39,14 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.title') }}</label>
             <input type="text" name="title" value="{{ old('title', $problem->title) }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('title') border-red-400 @enderror">
             @error('title') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.problems.category_label') }}</label>
             <input type="text" name="category" value="{{ old('category', $problem->category) }}" list="categories-list"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('category') border-red-400 @enderror">
             <datalist id="categories-list">
@@ -58,7 +58,7 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.description_optional') }}</label>
             <textarea name="description" rows="4"
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y @error('description') border-red-400 @enderror">{{ old('description', $problem->description) }}</textarea>
             @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -110,11 +110,11 @@
         <div class="flex gap-3 pt-2">
             <button type="submit"
                     class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-                Save Changes
+                {{ __('common.save_changes') }}
             </button>
             <a href="{{ route('admin.problems.index') }}"
                class="px-5 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
-                Cancel
+                {{ __('common.cancel') }}
             </a>
         </div>
     </form>

@@ -17,8 +17,8 @@
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
         </div>
-        <h1 class="text-2xl font-bold text-gray-900">Create an Account</h1>
-        <p class="text-sm text-gray-500 mt-1">Your account will be activated by an administrator before you can sign in.</p>
+        <h1 class="text-2xl font-bold text-gray-900">{{ __('auth.register_heading') }}</h1>
+        <p class="text-sm text-gray-500 mt-1">{{ __('auth.register_subheading') }}</p>
     </div>
 
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
@@ -26,7 +26,7 @@
 
         <div>
             <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                Username <span class="text-gray-400 font-normal">(3–50 chars, letters/numbers/_ /-)</span>
+                {{ __('auth.username_label') }} <span class="text-gray-400 font-normal">(3–50 chars, letters/numbers/_ /-)</span>
             </label>
             <input id="username" type="text" name="username" value="{{ old('username') }}"
                    required autofocus
@@ -37,7 +37,7 @@
         </div>
 
         <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.name_label') }}</label>
             <input id="name" type="text" name="name" value="{{ old('name') }}"
                    required
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-400 @else border-gray-300 @enderror">
@@ -47,7 +47,7 @@
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">{{ __('auth.password_label') }}</label>
             <input id="password" type="password" name="password"
                    required autocomplete="new-password"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-400 @else border-gray-300 @enderror">
@@ -58,7 +58,7 @@
         </div>
 
         <div>
-            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">{{ __('profile.confirm_password') }}</label>
             <input id="password_confirmation" type="password" name="password_confirmation"
                    required autocomplete="new-password"
                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
@@ -66,13 +66,13 @@
 
         <button type="submit"
                 class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            Create Account
+            {{ __('auth.submit_request') }}
         </button>
     </form>
 
     <p class="text-center text-sm text-gray-500 mt-6">
-        Already have an account?
-        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-medium">Sign in</a>
+        {{ __('auth.already_have_account') }}
+        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-medium">{{ __('auth.sign_in_button') }}</a>
     </p>
 </div>
 

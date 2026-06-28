@@ -40,13 +40,13 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Employee</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Period</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_employee') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('common.type') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.work_reports.col_period') }}</th>
                     <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Days</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_status') }}</th>
                     <th class="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Applied</th>
-                    <th class="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                    <th class="text-right px-4 py-3 font-medium text-gray-600">{{ __('common.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -73,15 +73,15 @@
                             @if($leave->isPending())
                             <form method="POST" action="{{ route('admin.attendance.leaves.approve', $leave) }}">
                                 @csrf
-                                <button class="text-xs font-semibold text-green-700 hover:text-green-900 transition">Approve</button>
+                                <button class="text-xs font-semibold text-green-700 hover:text-green-900 transition">{{ __('common.approve') }}</button>
                             </form>
                             <button @click="rejectLeaveId = {{ $leave->id }}; rejectReason = ''; showReject = true"
-                                    class="text-xs font-semibold text-red-600 hover:text-red-800 transition">Reject</button>
+                                    class="text-xs font-semibold text-red-600 hover:text-red-800 transition">{{ __('common.reject') }}</button>
                             @endif
                             <form method="POST" action="{{ route('admin.attendance.leaves.destroy', $leave) }}"
-                                  onsubmit="return confirm('Delete this leave record?')">
+                                  onsubmit="return confirm('{{ __('admin.attendance.confirm_delete') }}')">
                                 @csrf @method('DELETE')
-                                <button class="text-xs text-gray-400 hover:text-red-600 transition">Delete</button>
+                                <button class="text-xs text-gray-400 hover:text-red-600 transition">{{ __('common.delete') }}</button>
                             </form>
                         </div>
                         @if($leave->rejection_reason)
@@ -91,7 +91,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-4 py-10 text-center text-gray-400">No leave requests found.</td>
+                    <td colspan="7" class="px-4 py-10 text-center text-gray-400">{{ __('admin.attendance.no_records') }}</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -123,11 +123,11 @@
                 <div class="flex justify-end gap-2">
                     <button type="button" @click="showReject = false"
                             class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                        Cancel
+                        {{ __('common.cancel') }}
                     </button>
                     <button type="submit"
                             class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition">
-                        Reject
+                        {{ __('common.reject') }}
                     </button>
                 </div>
             </form>

@@ -12,8 +12,8 @@
 @if($state === 'unavailable')
     <div class="min-h-screen flex items-center justify-center p-6">
         <div class="max-w-md text-center bg-white rounded-2xl shadow-lg p-8">
-            <h1 class="text-xl font-bold text-gray-900 mb-2">Test Not Available</h1>
-            <p class="text-sm text-gray-500">This test link isn't active right now. Please check with whoever sent you this link.</p>
+            <h1 class="text-xl font-bold text-gray-900 mb-2">{{ __('tests.empty') }}</h1>
+            <p class="text-sm text-gray-500">{{ __('tests.empty_sub') }}</p>
         </div>
     </div>
 
@@ -35,7 +35,7 @@
                     <div class="font-semibold text-gray-800">{{ $invite->test->problems->count() }}</div>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-3">
-                    <div class="text-gray-400 text-xs">Time Limit</div>
+                    <div class="text-gray-400 text-xs">{{ __('tests.time_limit') }}</div>
                     <div class="font-semibold text-gray-800">{{ $invite->test->time_limit_minutes }} minutes</div>
                 </div>
             </div>
@@ -47,7 +47,7 @@
             <form method="POST" action="{{ route('test.start', $invite->token) }}">
                 @csrf
                 <button type="submit" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-                    Start Test
+                    {{ __('tests.start_test') }}
                 </button>
             </form>
         </div>
@@ -62,7 +62,7 @@
                 <p class="text-xs text-gray-400">{{ $invite->candidate_name }}</p>
             </div>
             <div class="text-right">
-                <div class="text-xs text-gray-400">Time Remaining</div>
+                <div class="text-xs text-gray-400">{{ __('tests.time_remaining') }}</div>
                 <div class="text-lg font-bold font-mono" :class="seconds <= 60 ? 'text-red-600' : 'text-gray-800'" x-text="formatted"></div>
             </div>
         </div>
@@ -83,7 +83,7 @@
                 <p class="px-5 py-3 text-sm text-gray-600 leading-relaxed border-b border-gray-50">{{ $problem->description }}</p>
                 <div class="p-4">
                     <textarea name="answers[{{ $problem->id }}]" rows="10" spellcheck="false"
-                              placeholder="Write your answer here…"
+                              placeholder="{{ __('tests.your_answer') }}"
                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-blue-500">{{ $existingAnswers[$problem->id] ?? '' }}</textarea>
                 </div>
             </div>
@@ -91,7 +91,7 @@
 
             <button type="button" @click="confirmSubmit()"
                     class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-                Submit Test
+                {{ __('tests.submit_test') }}
             </button>
         </form>
     </div>
@@ -124,7 +124,7 @@
             },
 
             confirmSubmit() {
-                if (confirm('Submit your answers now? You will not be able to make further changes.')) {
+                if (confirm('{{ __('tests.confirm_submit') }}')) {
                     clearInterval(this.interval);
                     document.getElementById('test-form').submit();
                 }
@@ -142,7 +142,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <h1 class="text-xl font-bold text-gray-900 mb-2">Test Submitted</h1>
+            <h1 class="text-xl font-bold text-gray-900 mb-2">{{ __('tests.completed') }}</h1>
             <p class="text-sm text-gray-500">Thanks, {{ $invite->candidate_name }} — your answers for "{{ $invite->test->title }}" have been recorded. The team will be in touch.</p>
         </div>
     </div>

@@ -1,8 +1,8 @@
 @php
     $tabs = [
-        'reports'   => ['label' => 'Reports',   'route' => 'admin.work-reports.index'],
-        'analytics' => ['label' => 'Analytics',  'route' => 'admin.work-report-analytics.index'],
-        'projects'  => ['label' => 'Projects',   'route' => 'admin.projects.index'],
+        'reports'   => ['label' => __('admin.work_reports.heading'),           'route' => 'admin.work-reports.index'],
+        'analytics' => ['label' => __('admin.work_report_analytics.heading'),  'route' => 'admin.work-report-analytics.index'],
+        'projects'  => ['label' => __('admin.projects.heading'),               'route' => 'admin.projects.index'],
     ];
 @endphp
 <div class="border-b border-gray-200 flex gap-1 -mt-1">

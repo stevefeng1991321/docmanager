@@ -46,6 +46,7 @@ return [
 
         // Banners
         'offline_banner'   => 'You are offline — messages will send when reconnected',
+        'offline_no_file'  => 'Files cannot be sent while offline.',
         'reconnecting'     => 'Reconnecting to real-time server…',
 
         // Reply / media

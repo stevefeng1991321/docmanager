@@ -8,7 +8,7 @@
         <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
                 <p class="font-semibold text-gray-800 text-sm truncate">{{ $doc->title }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ $doc->category?->name ?? 'Uncategorised' }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ $doc->category?->name ?? __('categories.all') }}</p>
             </div>
             <span class="flex-shrink-0 px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded font-mono uppercase">
                 {{ $doc->file_type }}
@@ -25,7 +25,7 @@
         </div>
     </a>
     @empty
-    <p class="col-span-full py-10 text-center text-gray-400 text-sm">No documents found.</p>
+    <p class="col-span-full py-10 text-center text-gray-400 text-sm">{{ __('documents.no_documents') }}</p>
     @endforelse
 </div>
 @else
@@ -36,7 +36,7 @@
         <div class="flex-1 min-w-0">
             <p class="font-medium text-gray-800 text-sm truncate">{{ $doc->title }}</p>
             <p class="text-xs text-gray-400 mt-0.5">
-                {{ $doc->category?->name ?? 'Uncategorised' }}
+                {{ $doc->category?->name ?? __('categories.all') }}
                 &middot; {{ $doc->created_at->diffForHumans() }}
                 @if($doc->ratings_avg_rating)
                 &middot; <span class="text-yellow-500">&#9733; {{ number_format($doc->ratings_avg_rating, 1) }}</span>
@@ -46,7 +46,7 @@
         <span class="flex-shrink-0 text-xs text-gray-400 uppercase font-mono">{{ $doc->file_type }}</span>
     </a>
     @empty
-    <p class="px-5 py-10 text-center text-gray-400 text-sm">No documents found.</p>
+    <p class="px-5 py-10 text-center text-gray-400 text-sm">{{ __('documents.no_documents') }}</p>
     @endforelse
 </div>
 @endif

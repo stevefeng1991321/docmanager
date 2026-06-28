@@ -1,9 +1,9 @@
 @php
     $tabs = [
-        'employees'   => ['label' => 'All Employees', 'route' => 'admin.employees.index'],
-        'departments' => ['label' => 'Departments',   'route' => 'admin.departments.index'],
-        'positions'   => ['label' => 'Positions',     'route' => 'admin.positions.index'],
-        'reports'     => ['label' => 'Reports',       'route' => 'admin.employee-reports.index'],
+        'employees'   => ['label' => __('admin.employees.heading'), 'route' => 'admin.employees.index'],
+        'departments' => ['label' => __('admin.departments.heading'),        'route' => 'admin.departments.index'],
+        'positions'   => ['label' => __('admin.positions.heading'),          'route' => 'admin.positions.index'],
+        'reports'     => ['label' => __('admin.employee_reports.heading'),   'route' => 'admin.employee-reports.index'],
     ];
 @endphp
 <div class="border-b border-gray-200 flex gap-1 -mt-1">

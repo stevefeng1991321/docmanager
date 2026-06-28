@@ -7,7 +7,7 @@
     {{-- Top bar: filters + new button --}}
     <div class="flex items-center justify-between flex-wrap gap-3">
         <form method="GET" action="{{ route('admin.science-tech.index') }}" class="flex flex-wrap gap-2">
-            <input type="text" name="q" value="{{ $q }}" placeholder="Search title…"
+            <input type="text" name="q" value="{{ $q }}" placeholder="{{ __('admin.science_tech.title_label') }}…"
                    class="w-52 border border-gray-300 rounded-lg px-3 py-2 text-sm">
 
             <select name="year" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -18,10 +18,10 @@
             </select>
 
             <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All Status</option>
-                <option value="published" {{ $status === 'published' ? 'selected' : '' }}>Published</option>
-                <option value="draft"     {{ $status === 'draft'     ? 'selected' : '' }}>Draft</option>
-                <option value="archived"  {{ $status === 'archived'  ? 'selected' : '' }}>Archived</option>
+                <option value="">{{ __('common.all_status') }}</option>
+                <option value="published" {{ $status === 'published' ? 'selected' : '' }}>{{ __('common.status_published') }}</option>
+                <option value="draft"     {{ $status === 'draft'     ? 'selected' : '' }}>{{ __('common.status_draft') }}</option>
+                <option value="archived"  {{ $status === 'archived'  ? 'selected' : '' }}>{{ __('common.status_archived') }}</option>
             </select>
 
             <select name="sort" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -34,18 +34,18 @@
 
             <button type="submit"
                     class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
-                Filter
+                {{ __('common.filter') }}
             </button>
 
             @if($q || $status || $year || $sort !== 'year_desc')
                 <a href="{{ route('admin.science-tech.index') }}"
-                   class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">Clear</a>
+                   class="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm">{{ __('common.clear') }}</a>
             @endif
         </form>
 
         <a href="{{ route('admin.science-tech.create') }}"
            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            + New Trend
+            + {{ __('admin.science_tech.new_article') }}
         </a>
     </div>
 
@@ -65,11 +65,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wide">
-                            <th class="px-5 py-3 text-left font-medium">Title</th>
-                            <th class="px-4 py-3 text-left font-medium w-20">Year</th>
-                            <th class="px-4 py-3 text-left font-medium w-28">Status</th>
-                            <th class="px-4 py-3 text-left font-medium w-28">Added</th>
-                            <th class="px-4 py-3 text-right font-medium w-36">Actions</th>
+                            <th class="px-5 py-3 text-left font-medium">{{ __('admin.science_tech.col_title') }}</th>
+                            <th class="px-4 py-3 text-left font-medium w-20">{{ __('common.year') }}</th>
+                            <th class="px-4 py-3 text-left font-medium w-28">{{ __('admin.science_tech.col_status') }}</th>
+                            <th class="px-4 py-3 text-left font-medium w-28">{{ __('common.added') }}</th>
+                            <th class="px-4 py-3 text-right font-medium w-36">{{ __('common.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -107,13 +107,13 @@
                             <td class="px-4 py-3 text-right text-xs">
                                 <div class="flex items-center justify-end gap-3">
                                     <a href="{{ route('admin.science-tech.show', $trend) }}"
-                                       class="text-blue-600 hover:underline">View</a>
+                                       class="text-blue-600 hover:underline">{{ __('admin.science_tech.view_action') }}</a>
                                     <a href="{{ route('admin.science-tech.edit', $trend) }}"
-                                       class="text-blue-600 hover:underline">Edit</a>
+                                       class="text-blue-600 hover:underline">{{ __('admin.science_tech.edit_action') }}</a>
                                     <form method="POST" action="{{ route('admin.science-tech.destroy', $trend) }}"
-                                          onsubmit="return confirm('Delete this trend?')">
+                                          onsubmit="return confirm('{{ __('admin.science_tech.confirm_delete') }}')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                                        <button type="submit" class="text-red-500 hover:underline">{{ __('admin.science_tech.delete_action') }}</button>
                                     </form>
                                 </div>
                             </td>
@@ -125,7 +125,7 @@
 
             {{-- Pagination --}}
             <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between gap-4 text-xs text-gray-400">
-                <span>Showing {{ $trends->firstItem() }}–{{ $trends->lastItem() }} of {{ $trends->total() }}</span>
+                <span>{{ __('common.showing') }} {{ $trends->firstItem() }}–{{ $trends->lastItem() }} {{ __('common.of') }} {{ $trends->total() }}</span>
                 @if($trends->hasPages())
                     {{ $trends->links() }}
                 @endif

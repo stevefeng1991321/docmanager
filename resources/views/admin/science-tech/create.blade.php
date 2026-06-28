@@ -4,8 +4,8 @@
 @section('content')
 <div class="max-w-2xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-800">New Science &amp; Technology Trend</h1>
-        <a href="{{ route('admin.science-tech.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back</a>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('admin.science_tech.create') }}</h1>
+        <a href="{{ route('admin.science-tech.index') }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('common.back') }}</a>
     </div>
 
     <form method="POST" action="{{ route('admin.science-tech.store') }}"
@@ -20,7 +20,7 @@
                 @error('year') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.science_tech.status_label') }}</label>
                 <select name="status"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('status') border-red-400 @enderror">
                     @foreach(['draft', 'published', 'archived'] as $s)
@@ -32,22 +32,22 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.science_tech.title_label') }}</label>
             <input type="text" name="title" value="{{ old('title') }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('title') border-red-400 @enderror">
             @error('title') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.science_tech.summary_label') }}</label>
             <textarea name="summary" rows="2"
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y @error('summary') border-red-400 @enderror"
-                      placeholder="Short description shown in listings…">{{ old('summary') }}</textarea>
+                      placeholder="{{ __('common.summary_placeholder') }}">{{ old('summary') }}</textarea>
             @error('summary') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.science_tech.content_label') }}</label>
             <textarea name="content" rows="14"
                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-y @error('content') border-red-400 @enderror">{{ old('content') }}</textarea>
             @error('content') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -56,11 +56,11 @@
         <div class="flex gap-3 pt-2">
             <button type="submit"
                     class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-                Create Trend
+                {{ __('admin.science_tech.create') }}
             </button>
             <a href="{{ route('admin.science-tech.index') }}"
                class="px-5 py-2 border border-gray-300 text-gray-600 text-sm rounded-lg hover:bg-gray-50 transition">
-                Cancel
+                {{ __('common.cancel') }}
             </a>
         </div>
     </form>

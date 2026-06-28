@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'welcome'               => 'Welcome back, :name',
+    'welcome_sub'           => 'Here\'s what\'s happening in your DocManager.',
+    'recent_documents'      => 'Recent Documents',
+    'recent_activity'       => 'Recent Activity',
+    'quick_access'          => 'Quick Access',
+    'statistics'            => 'Statistics',
+    'total_documents'       => 'Total Documents',
+    'my_uploads'            => 'My Uploads',
+    'my_favorites'          => 'My Favorites',
+    'storage_used'          => 'Storage Used',
+    'browse_all'            => 'Browse All Documents',
+    'no_recent'             => 'No recent documents.',
+    'no_activity'           => 'No recent activity.',
+    'view_all'              => 'View All',
+    'uploaded_by'           => 'Uploaded by :name',
+    'viewed'                => 'Viewed',
+    'downloaded'            => 'Downloaded',
+    'favorited'             => 'Favorited',
+    'new_announcement'      => 'New Announcement',
+    'announcements'         => 'Announcements',
+    'pinned'                => 'Pinned',
+    'see_all_announcements' => 'See all announcements',
+];

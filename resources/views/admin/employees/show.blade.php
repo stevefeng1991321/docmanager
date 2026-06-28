@@ -37,12 +37,12 @@
             @if($employee->isActive())
                 <form action="{{ route('admin.employees.deactivate', $employee) }}" method="POST">
                     @csrf @method('PATCH')
-                    <button class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">Deactivate</button>
+                    <button class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">{{ __('common.deactivate') }}</button>
                 </form>
             @else
                 <form action="{{ route('admin.employees.activate', $employee) }}" method="POST">
                     @csrf @method('PATCH')
-                    <button class="text-xs px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition">Activate</button>
+                    <button class="text-xs px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition">{{ __('common.activate') }}</button>
                 </form>
             @endif
             <a href="{{ route('admin.employees.edit', $employee) }}" class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">Edit</a>
@@ -53,7 +53,7 @@
     {{-- Info cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h2 class="text-sm font-semibold text-gray-700 mb-3">Personal Information</h2>
+            <h2 class="text-sm font-semibold text-gray-700 mb-3">{{ __('admin.employees.name_label') }}</h2>
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between"><dt class="text-gray-400">Email</dt><dd class="text-gray-700">{{ $employee->email ?? '—' }}</dd></div>
                 <div class="flex justify-between"><dt class="text-gray-400">Phone</dt><dd class="text-gray-700">{{ $employee->phone ?? '—' }}</dd></div>

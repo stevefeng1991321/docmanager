@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Tags')
+@section('title', __('admin.tags.heading'))
 
 @section('content')
 <div x-data="{ showForm: false, showMerge: false }" class="space-y-5">
@@ -7,11 +7,11 @@
     <div class="flex gap-2">
         <button @click="showForm = !showForm"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-            + Add Tag
+            + {{ __('admin.tags.new_tag') }}
         </button>
         <button @click="showMerge = !showMerge"
                 class="px-4 py-2 border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium rounded-lg transition">
-            Merge Tags
+            {{ __('common.merge') }}
         </button>
     </div>
 
@@ -19,7 +19,7 @@
         <form method="POST" action="{{ route('admin.tags.merge') }}" class="flex flex-wrap gap-3 items-end">
             @csrf
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Merge this tag…</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.tags.name_label') }}</label>
                 <select name="source_id" required class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-44">
                     <option value="">Select source</option>
                     @foreach($tags as $tag)
@@ -38,7 +38,7 @@
             </div>
             <button type="submit" onclick="return confirm('Merge tags? The source tag will be deleted.')"
                     class="px-5 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition">
-                Merge
+                {{ __('common.merge') }}
             </button>
         </form>
     </div>
@@ -47,12 +47,12 @@
         <form method="POST" action="{{ route('admin.tags.store') }}" class="flex gap-3 items-end">
             @csrf
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Tag Name</label>
-                <input type="text" name="name" required placeholder="e.g. networking"
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.tags.name_label') }}</label>
+                <input type="text" name="name" required placeholder="{{ __('admin.tags.name_placeholder') }}"
                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-52">
             </div>
             <button type="submit" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">
-                Save
+                {{ __('common.save') }}
             </button>
         </form>
     </div>
@@ -63,13 +63,13 @@
             <span class="text-gray-700">{{ $tag->name }}</span>
             <span class="text-xs text-gray-400">({{ $tag->resources_count }})</span>
             <form method="POST" action="{{ route('admin.tags.destroy', $tag) }}"
-                  onsubmit="return confirm('Delete tag?')" class="inline">
+                  onsubmit="return confirm('{{ __('admin.tags.confirm_delete', ['name' => '']) }}')" class="inline">
                 @csrf @method('DELETE')
                 <button class="ml-1 text-gray-300 hover:text-red-500 leading-none">&times;</button>
             </form>
         </div>
         @empty
-        <p class="text-gray-400 text-sm">No tags yet.</p>
+        <p class="text-gray-400 text-sm">{{ __('admin.tags.no_tags') }}</p>
         @endforelse
     </div>
 

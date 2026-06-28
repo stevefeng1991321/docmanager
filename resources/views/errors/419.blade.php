@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>419</title>
+    <title>{{ __('errors.419_title') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -68,17 +68,17 @@
     <div class="row">
         <span class="code">419</span>
         <div class="divider"></div>
-        <span class="message">Page expired.</span>
+        <span class="message">{{ __('errors.419_heading') }}</span>
     </div>
 
-    <p class="hint">Your session token expired. Please go back and try again.</p>
+    <p class="hint">{{ __('errors.419_message') }}</p>
 
     <a href="javascript:history.back()" class="back">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
-        Go back
+        {{ __('errors.go_back') }}
     </a>
 </body>
 </html>

@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Search Analytics')
+@section('title', __('admin.search.heading'))
 
 @section('content')
 <div class="space-y-5">
@@ -10,13 +10,13 @@
             @csrf
             <button class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition flex items-center gap-2">
                 <span>✦</span>
-                Build AI Index
+                {{ __('admin.search.rebuild_index') }}
             </button>
         </form>
         <form method="POST" action="{{ route('admin.search.reindex') }}">
             @csrf
             <button class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition">
-                Re-index All Documents
+                {{ __('admin.search.index_document') }}
             </button>
         </form>
     </div>
@@ -30,17 +30,17 @@
             <div class="flex items-center gap-2">
                 @if($tfidfReady && $tfidfIndexed > 0)
                     <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                    <span class="text-green-700 font-medium">Index ready</span>
+                    <span class="text-green-700 font-medium">{{ __('admin.search.index_status') }}</span>
                 @elseif($tfidfReady && $tfidfIndexed === 0)
                     <span class="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span>
-                    <span class="text-yellow-600 font-medium">Index empty</span>
+                    <span class="text-yellow-600 font-medium">{{ __('admin.search.index_status') }}</span>
                 @else
                     <span class="w-2 h-2 rounded-full bg-gray-300 inline-block"></span>
-                    <span class="text-gray-500">Not built yet</span>
+                    <span class="text-gray-500">{{ __('admin.search.index_status') }}</span>
                 @endif
             </div>
             <div class="text-gray-600">
-                <strong>{{ number_format($tfidfIndexed) }}</strong> document{{ $tfidfIndexed !== 1 ? 's' : '' }} indexed
+                <strong>{{ number_format($tfidfIndexed) }}</strong> {{ __('admin.search.total_indexed') }}
             </div>
         </div>
         @if(!$tfidfReady || $tfidfIndexed === 0)
@@ -62,16 +62,16 @@
         {{-- Top search queries --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100">
-                <h3 class="font-semibold text-gray-800">Top Search Queries</h3>
+                <h3 class="font-semibold text-gray-800">{{ __('admin.search.test_search') }}</h3>
                 <p class="text-xs text-gray-400 mt-0.5">Most frequent searches (all results)</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">#</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Query</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Count</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.number') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.search.test_search') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.count') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -82,7 +82,7 @@
                             <td class="px-4 py-3 text-gray-500">{{ $row->count }}</td>
                         </tr>
                         @empty
-                        <tr><td colspan="3" class="px-4 py-8 text-center text-gray-400">No searches recorded yet.</td></tr>
+                        <tr><td colspan="3" class="px-4 py-8 text-center text-gray-400">{{ __('admin.search.no_results') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -97,7 +97,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                     </svg>
-                    <h3 class="font-semibold text-gray-800">Zero-Result Queries</h3>
+                    <h3 class="font-semibold text-gray-800">{{ __('admin.search.test_results') }}</h3>
                 </div>
                 <p class="text-xs text-gray-500 mt-0.5 ml-6">Searches that returned no documents — content gaps to address</p>
             </div>
@@ -105,9 +105,9 @@
                 <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-amber-50/50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">#</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Query</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Times searched</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.number') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('admin.search.test_search') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.count') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">

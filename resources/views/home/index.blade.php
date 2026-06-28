@@ -7,15 +7,15 @@
 
     {{-- ── Sidebar: category tree (desktop lg+) ───────────────────────────── --}}
     <aside class="hidden lg:block w-56 flex-shrink-0">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Browse by Category</h2>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">{{ __('categories.all') }}</h2>
         <nav class="space-y-0.5">
 
             <button
-                @click="select(null, 'All Documents')"
+                @click="select(null, '{{ __('documents.heading') }}')"
                 :class="active === null ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-100'"
                 class="w-full flex items-center px-3 py-2 rounded-lg text-sm text-left transition-colors"
             >
-                All Documents
+                {{ __('documents.heading') }}
             </button>
 
             <template x-for="cat in cats" :key="cat.id">
@@ -80,7 +80,7 @@
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
                 </svg>
-                <span>Browse by Category</span>
+                <span>{{ __('categories.all') }}</span>
                 <span x-show="active !== null"
                       class="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex-shrink-0"
                       x-text="activeName"></span>
@@ -99,11 +99,11 @@
                     @change="load()"
                     class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 >
-                    <option value="date_desc">Newest first</option>
-                    <option value="date_asc">Oldest first</option>
-                    <option value="name_asc">A → Z</option>
-                    <option value="name_desc">Z → A</option>
-                    <option value="downloads">Most downloaded</option>
+                    <option value="date_desc">{{ __('documents.sort_newest') }}</option>
+                    <option value="date_asc">{{ __('documents.sort_oldest') }}</option>
+                    <option value="name_asc">{{ __('documents.sort_az') }}</option>
+                    <option value="name_desc">{{ __('documents.sort_za') }}</option>
+                    <option value="downloads">{{ __('documents.sort_popular') }}</option>
                     <option value="size_desc">Largest first</option>
                 </select>
 
@@ -171,7 +171,7 @@
      x-transition:leave-end="-translate-x-full">
 
     <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200 flex-shrink-0">
-        <h2 class="font-semibold text-gray-800 text-sm">Browse by Category</h2>
+        <h2 class="font-semibold text-gray-800 text-sm">{{ __('categories.all') }}</h2>
         <button @click="drawerOpen = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -180,10 +180,10 @@
     </div>
 
     <nav class="flex-1 overflow-y-auto p-3 space-y-0.5">
-        <button @click="select(null, 'All Documents'); drawerOpen = false"
+        <button @click="select(null, '{{ __('documents.heading') }}'); drawerOpen = false"
                 :class="active === null ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700 hover:bg-gray-100'"
                 class="w-full flex items-center px-3 py-2.5 rounded-lg text-sm text-left transition-colors">
-            All Documents
+            {{ __('documents.heading') }}
         </button>
 
         <template x-for="cat in cats" :key="'d-' + cat.id">
@@ -227,7 +227,7 @@ function catBrowser() {
         cats: @json($categories),
         open: {},
         active: null,
-        activeName: 'All Documents',
+        activeName: '{{ __('documents.heading') }}',
         loading: false,
         drawerOpen: false,
         sort: '{{ $sort }}',
@@ -246,7 +246,7 @@ function catBrowser() {
 
         select(slug, name) {
             this.active = slug;
-            this.activeName = name ?? 'All Documents';
+            this.activeName = name ?? '{{ __('documents.heading') }}';
             this.load();
         },
 

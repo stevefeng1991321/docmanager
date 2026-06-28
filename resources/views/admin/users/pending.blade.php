@@ -15,11 +15,11 @@
             <div class="flex gap-2">
                 <button type="submit" formaction="{{ route('admin.users.bulk-activate') }}"
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">
-                    Activate Selected
+                    {{ __('admin.users.activate') }}
                 </button>
                 <button type="button" onclick="showRejectModal()"
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition">
-                    Reject Selected
+                    {{ __('common.reject') }}
                 </button>
             </div>
         </div>
@@ -29,10 +29,10 @@
                 <thead class="bg-gray-50 text-xs font-medium text-gray-500 uppercase">
                     <tr>
                         <th class="px-4 py-3"><input type="checkbox" id="selectAll" class="rounded border-gray-300"></th>
-                        <th class="px-6 py-3 text-left">Username</th>
-                        <th class="px-6 py-3 text-left">Display Name</th>
-                        <th class="px-6 py-3 text-left">Registered</th>
-                        <th class="px-6 py-3 text-left">Actions</th>
+                        <th class="px-6 py-3 text-left">{{ __('admin.users.username_label') }}</th>
+                        <th class="px-6 py-3 text-left">{{ __('admin.users.name_label') }}</th>
+                        <th class="px-6 py-3 text-left">{{ __('admin.users.col_registered') }}</th>
+                        <th class="px-6 py-3 text-left">{{ __('admin.users.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -49,18 +49,18 @@
                                     <form action="{{ route('admin.users.activate', $user) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
                                         <button class="px-3 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-xs font-medium transition">
-                                            Activate
+                                            {{ __('admin.users.activate') }}
                                         </button>
                                     </form>
                                     <button type="button" onclick="rejectOne({{ $user->id }})"
                                             class="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-xs font-medium transition">
-                                        Reject
+                                        {{ __('common.reject') }}
                                     </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No pending accounts.</td></tr>
+                        <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">{{ __('admin.account_requests.no_requests') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -80,17 +80,17 @@
             @csrf
             <div id="rejectIdsContainer"></div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('common.reason_optional') }}</label>
                 <textarea name="reason" rows="3"
                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                           placeholder="Your registration request was not approved."></textarea>
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')"
-                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">{{ __('common.cancel') }}</button>
                 <button type="submit"
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition">
-                    Reject
+                    {{ __('common.reject') }}
                 </button>
             </div>
         </form>

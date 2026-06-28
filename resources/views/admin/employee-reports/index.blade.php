@@ -7,9 +7,9 @@
     @include('admin.employees._tabs', ['active' => 'reports'])
 
     <div class="flex items-center justify-between">
-        <h1 class="text-lg font-bold text-gray-800">Employee Reports</h1>
+        <h1 class="text-lg font-bold text-gray-800">{{ __('admin.employee_reports.heading') }}</h1>
         <a href="{{ route('admin.employee-reports.export') }}" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
-            ⬇ Export Directory (CSV)
+            {{ __('admin.employee_reports.export') }}
         </a>
     </div>
 

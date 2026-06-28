@@ -18,7 +18,7 @@
 
     {{-- Breadcrumb --}}
     <div class="flex items-center gap-2 text-sm text-gray-400">
-        <a href="{{ route('admin.work-reports.index') }}" class="hover:text-blue-600 transition-colors">Work Reports</a>
+        <a href="{{ route('admin.work-reports.index') }}" class="hover:text-blue-600 transition-colors">{{ __('admin.work_reports.heading') }}</a>
         <span>/</span>
         <span class="text-gray-700 truncate">{{ $workReport->title }}</span>
     </div>
@@ -121,11 +121,11 @@
                 @endif
                 <button type="submit" name="decision" value="approved"
                         class="text-xs px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium">
-                    Approve
+                    {{ __('admin.work_reports.approve_action') }}
                 </button>
                 <button type="submit" name="decision" value="rejected"
                         class="text-xs px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition font-medium">
-                    Reject
+                    {{ __('admin.work_reports.reject_action') }}
                 </button>
             </div>
         </form>
@@ -145,7 +145,7 @@
     @endphp
     @if($hasAnySummary)
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-800">Summary</h2>
+        <h2 class="text-sm font-semibold text-gray-800">{{ __('common.summary') }}</h2>
         @foreach($summaryFields as $field => $label)
             @if(!empty($workReport->$field))
             <div>

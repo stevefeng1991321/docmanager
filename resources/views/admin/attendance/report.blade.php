@@ -6,7 +6,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Attendance Report</h2>
+            <h2 class="text-lg font-semibold text-gray-900">{{ __('admin.attendance.summary_heading') }}</h2>
             <p class="text-sm text-gray-500 mt-0.5">{{ $start->format('F Y') }}</p>
         </div>
         <div class="flex gap-2">
@@ -15,7 +15,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Export CSV
+                {{ __('admin.attendance.export') }}
             </a>
             <a href="{{ route('admin.attendance.index') }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
@@ -44,18 +44,18 @@
             </select>
         </div>
         <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Department</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.attendance.filter_department') }}</label>
             <select name="department_id" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <option value="">All Departments</option>
+                <option value="">{{ __('admin.attendance.all_departments') }}</option>
                 @foreach($departments as $dept)
                 <option value="{{ $dept->id }}" @selected($dept->id == $deptId)>{{ $dept->name }}</option>
                 @endforeach
             </select>
         </div>
         <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">Employee</label>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.attendance.filter_employee') }}</label>
             <select name="employee_id" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <option value="">All Employees</option>
+                <option value="">{{ __('admin.attendance.all_employees') }}</option>
                 @foreach($employees as $emp)
                 <option value="{{ $emp->id }}" @selected($emp->id == $employeeId)>{{ $emp->full_name }}</option>
                 @endforeach
@@ -63,7 +63,7 @@
         </div>
         <button type="submit"
                 class="px-4 py-1.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-            Apply
+            {{ __('common.apply') }}
         </button>
     </form>
 
@@ -100,12 +100,12 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Employee</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Department</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Check In</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Check Out</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_date') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_employee') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">{{ __('common.department') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_status') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">{{ __('admin.attendance.col_check_in') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">{{ __('admin.attendance.col_check_out') }}</th>
                     <th class="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Duration</th>
                 </tr>
             </thead>
@@ -142,7 +142,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-4 py-10 text-center text-gray-400">No records found for this period.</td>
+                    <td colspan="7" class="px-4 py-10 text-center text-gray-400">{{ __('admin.attendance.no_records') }}</td>
                 </tr>
                 @endforelse
             </tbody>

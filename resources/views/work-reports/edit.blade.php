@@ -1,11 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Edit Work Report')
+@section('title', __('work_reports.edit_report'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-5">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-800">Edit Report</h1>
-        <a href="{{ route('work-reports.show', $workReport) }}" class="text-sm text-gray-500 hover:text-gray-700">← Back to Report</a>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('work_reports.edit_report') }}</h1>
+        <a href="{{ route('work-reports.show', $workReport) }}" class="text-sm text-gray-500 hover:text-gray-700">{{ __('common.go_back') }}</a>
     </div>
 
     @if($workReport->isRejected())

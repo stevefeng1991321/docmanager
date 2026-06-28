@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'My Attendance')
+@section('title', __('attendance.my_attendance'))
 
 @section('content')
 
@@ -13,7 +13,7 @@
     {{-- Page header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-xl font-semibold text-gray-900">My Attendance</h1>
+            <h1 class="text-xl font-semibold text-gray-900">{{ __('attendance.my_attendance') }}</h1>
             <p class="text-sm text-gray-500 mt-0.5">{{ $start->format('F Y') }}</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -68,14 +68,14 @@
             <form method="POST" action="{{ route('attendance.check-in') }}">
                 @csrf
                 <button class="px-4 py-2 text-sm font-semibold bg-green-600 hover:bg-green-700 text-white rounded-lg transition">
-                    Check In
+                    {{ __('attendance.check_in') }}
                 </button>
             </form>
             @elseif(!$today->check_out_time)
             <form method="POST" action="{{ route('attendance.check-out') }}">
                 @csrf
                 <button class="px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
-                    Check Out
+                    {{ __('attendance.check_out') }}
                 </button>
             </form>
             @else
@@ -89,10 +89,10 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         @php
             $statCards = [
-                ['label' => 'Present',  'value' => $stats['present'],  'color' => 'green'],
-                ['label' => 'Absent',   'value' => $stats['absent'],   'color' => 'red'],
-                ['label' => 'Late',     'value' => $stats['late'],     'color' => 'yellow'],
-                ['label' => 'On Leave', 'value' => $stats['on_leave'], 'color' => 'blue'],
+                ['label' => __('attendance.status_present'),  'value' => $stats['present'],  'color' => 'green'],
+                ['label' => __('attendance.status_absent'),   'value' => $stats['absent'],   'color' => 'red'],
+                ['label' => __('attendance.status_late'),     'value' => $stats['late'],     'color' => 'yellow'],
+                ['label' => __('attendance.status_leave'),    'value' => $stats['on_leave'], 'color' => 'blue'],
             ];
             $colorMap = [
                 'green'  => 'bg-green-50 border-green-200 text-green-700',
@@ -112,7 +112,7 @@
     {{-- Calendar --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-800">Attendance Records — {{ $start->format('F Y') }}</h3>
+            <h3 class="text-sm font-semibold text-gray-800">{{ __('attendance.history') }} — {{ $start->format('F Y') }}</h3>
         </div>
 
         {{-- Day headers --}}
@@ -183,7 +183,7 @@
 
         {{-- Legend --}}
         <div class="px-4 py-3 border-t border-gray-100 flex flex-wrap gap-3">
-            @foreach(['present' => 'Present', 'absent' => 'Absent', 'late' => 'Late', 'on_leave' => 'On Leave', 'holiday' => 'Holiday', 'half_day' => 'Half Day'] as $key => $label)
+            @foreach(['present' => __('attendance.status_present'), 'absent' => __('attendance.status_absent'), 'late' => __('attendance.status_late'), 'on_leave' => __('attendance.status_leave'), 'holiday' => 'Holiday', 'half_day' => __('attendance.status_half_day')] as $key => $label)
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-sm {{ $colors[$key]['bg'] }}"></span>
                 <span class="text-xs text-gray-500">{{ $label }}</span>

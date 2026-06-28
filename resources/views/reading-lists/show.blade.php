@@ -5,7 +5,7 @@
 <div class="space-y-4">
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-bold text-gray-800">{{ $readingList->name }}</h1>
-        <a href="{{ route('reading-lists.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; All Lists</a>
+        <a href="{{ route('reading-lists.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; {{ __('reading_lists.heading') }}</a>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
@@ -19,11 +19,11 @@
             </a>
             <form method="POST" action="{{ route('reading-lists.items.remove', [$readingList, $doc]) }}">
                 @csrf @method('DELETE')
-                <button class="text-xs text-red-400 hover:text-red-600">Remove</button>
+                <button class="text-xs text-red-400 hover:text-red-600">{{ __('reading_lists.remove_from_list') }}</button>
             </form>
         </div>
         @empty
-        <p class="px-5 py-10 text-center text-gray-400 text-sm">This list is empty. Add documents from their detail page.</p>
+        <p class="px-5 py-10 text-center text-gray-400 text-sm">{{ __('reading_lists.list_empty') }}</p>
         @endforelse
     </div>
 </div>

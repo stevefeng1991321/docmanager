@@ -1,10 +1,10 @@
 @extends('layouts.app')
-@section('title', 'My Profile')
+@section('title', __('profile.heading'))
 
 @section('content')
 <div class="max-w-lg space-y-5">
 
-    <h1 class="text-xl font-bold text-gray-800">My Profile</h1>
+    <h1 class="text-xl font-bold text-gray-800">{{ __('profile.heading') }}</h1>
 
     {{-- Avatar + main details --}}
     <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data"
@@ -47,14 +47,14 @@
         </script>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('profile.username') }}</label>
             <input type="text" value="{{ $user->username }}" disabled
                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
             <p class="mt-1 text-xs text-gray-400">Username cannot be changed directly — use the request form below.</p>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('profile.display_name') }}</label>
             <input type="text" name="name" value="{{ old('name', $user->name) }}" required
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('name') border-red-400 @enderror">
             @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -62,7 +62,7 @@
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-                New Password <span class="text-gray-400 text-xs">(leave blank to keep current)</span>
+                {{ __('profile.new_password') }} <span class="text-gray-400 text-xs">(leave blank to keep current)</span>
             </label>
             <input type="password" name="password"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('password') border-red-400 @enderror">
@@ -71,19 +71,19 @@
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('profile.confirm_password') }}</label>
             <input type="password" name="password_confirmation"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
         </div>
 
         <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
-            Save Changes
+            {{ __('common.save_changes') }}
         </button>
     </form>
 
     {{-- Notification preferences --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h3 class="font-semibold text-gray-800">Notification Preferences</h3>
+        <h3 class="font-semibold text-gray-800">{{ __('profile.notifications_pref') }}</h3>
         @php
             $notifFields = [
                 'notify_file_uploaded'     => 'New document uploaded',
@@ -106,7 +106,7 @@
             </label>
             @endforeach
             <button type="submit" class="mt-3 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-                Save Preferences
+                {{ __('profile.save_preferences') }}
             </button>
         </form>
     </div>
@@ -121,7 +121,7 @@
         $barColor   = $pct >= 90 ? 'bg-red-500' : ($pct >= 70 ? 'bg-yellow-400' : 'bg-blue-500');
     @endphp
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
-        <h3 class="font-semibold text-gray-800">Storage Usage</h3>
+        <h3 class="font-semibold text-gray-800">{{ __('profile.storage_usage') }}</h3>
         @if($quotaBytes)
             <div class="flex justify-between text-xs text-gray-500">
                 <span>{{ $usedMb }} MB used</span>
@@ -146,7 +146,7 @@
                    pattern="[a-zA-Z0-9_\-]{3,50}" title="3–50 characters: letters, numbers, underscores, hyphens"
                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm @error('new_username') border-red-400 @enderror">
             <button type="submit" class="px-5 py-2 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition">
-                Submit Request
+                {{ __('auth.submit_request') }}
             </button>
         </form>
         @error('new_username') <p class="text-xs text-red-600">{{ $message }}</p> @enderror

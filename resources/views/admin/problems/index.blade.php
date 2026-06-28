@@ -9,9 +9,9 @@
 
         {{-- Panel header --}}
         <div class="px-3 py-2.5 border-b border-gray-100 flex items-center justify-between">
-            <span class="text-sm font-semibold text-gray-700">Problems</span>
+            <span class="text-sm font-semibold text-gray-700">{{ __('admin.problems.heading') }}</span>
             <a href="{{ route('admin.problems.create') }}"
-               class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition">+ New</a>
+               class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg transition">+ {{ __('admin.problems.new_problem') }}</a>
         </div>
 
         {{-- Search + Filter --}}
@@ -80,7 +80,7 @@
 
             {{-- Empty state --}}
             <div x-show="filteredProblems.length === 0" class="px-4 py-10 text-center text-gray-400 text-sm">
-                No problems match your search.
+                {{ __('admin.problems.no_problems') }}
             </div>
         </div>
     </div>
@@ -147,11 +147,11 @@
                         <div class="flex gap-2 flex-shrink-0">
                             <a :href="`{{ url('admin/problems') }}/${detail.id}/edit`"
                                class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                Edit
+                                {{ __('admin.problems.edit_action') }}
                             </a>
                             <button @click="confirmDelete()"
                                     class="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">
-                                Delete
+                                {{ __('admin.problems.delete_action') }}
                             </button>
                         </div>
                     </div>

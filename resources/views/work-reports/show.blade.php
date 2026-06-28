@@ -35,25 +35,25 @@
             </div>
             <div class="flex gap-2 flex-shrink-0">
                 @if($canEdit)
-                    <a href="{{ route('work-reports.edit', $workReport) }}" class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">Edit</a>
+                    <a href="{{ route('work-reports.edit', $workReport) }}" class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">{{ __('work_reports.edit_action') }}</a>
                     @if($workReport->isDraft() || $workReport->isRejected())
                         <form action="{{ route('work-reports.submit', $workReport) }}" method="POST">
                             @csrf
-                            <button class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">Submit</button>
+                            <button class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">{{ __('work_reports.submit_button') }}</button>
                         </form>
                     @endif
-                    <form action="{{ route('work-reports.destroy', $workReport) }}" method="POST" onsubmit="return confirm('Delete this report?')">
+                    <form action="{{ route('work-reports.destroy', $workReport) }}" method="POST" onsubmit="return confirm('{{ __('work_reports.confirm_delete') }}')">
                         @csrf @method('DELETE')
-                        <button class="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">Delete</button>
+                        <button class="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">{{ __('work_reports.delete_action') }}</button>
                     </form>
                 @endif
                 @if($workReport->isOwnedBy($me))
                     <form action="{{ route('work-reports.duplicate', $workReport) }}" method="POST">
                         @csrf
-                        <button class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">Duplicate</button>
+                        <button class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">{{ __('common.duplicate') }}</button>
                     </form>
                 @endif
-                <a href="{{ route('work-reports.index') }}" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">← Reports</a>
+                <a href="{{ route('work-reports.index') }}" class="text-xs px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">← {{ __('work_reports.heading') }}</a>
             </div>
         </div>
 
@@ -67,7 +67,7 @@
 
     {{-- Summary --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-        <h2 class="text-sm font-semibold text-gray-700">Summary</h2>
+        <h2 class="text-sm font-semibold text-gray-700">{{ __('common.summary') }}</h2>
         @foreach(['tasks_completed' => 'Tasks Completed', 'task_descriptions' => 'Task Descriptions', 'challenges' => 'Challenges / Issues', 'solutions' => 'Solutions Implemented', 'notes' => 'Additional Notes'] as $field => $label)
             @if($workReport->$field)
             <div>
@@ -85,11 +85,11 @@
         <table class="min-w-full divide-y divide-gray-100 text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Task</th>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.name') }}</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('common.status') }}</th>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Priority</th>
                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">% Complete</th>
-                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Hours</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">{{ __('work_reports.hours_worked') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -119,21 +119,21 @@
 
     {{-- Attachments --}}
     <div x-data="{ previewSrc: null, previewTitle: '' }" class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <h2 class="text-sm font-semibold text-gray-700 mb-3">Attachments</h2>
+        <h2 class="text-sm font-semibold text-gray-700 mb-3">{{ __('common.files') }}</h2>
 
         <form action="{{ route('work-reports.attachments.store', $workReport) }}" method="POST" enctype="multipart/form-data"
               class="flex flex-wrap items-end gap-3 mb-4 pb-4 border-b border-gray-100">
             @csrf
             <div class="flex-1 min-w-[180px]">
-                <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('common.title') }}</label>
                 <input type="text" name="title" required placeholder="e.g. Screenshot of dashboard"
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">File</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('common.file') }}</label>
                 <input type="file" name="file" required class="text-sm">
             </div>
-            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">Upload</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">{{ __('common.upload') }}</button>
         </form>
         @error('file') <p class="text-red-500 text-xs mb-3">{{ $message }}</p> @enderror
 
@@ -160,15 +160,15 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3 flex-shrink-0">
-                    <a href="{{ route('work-reports.attachments.download', [$workReport, $doc]) }}" class="text-xs text-blue-600 hover:text-blue-800">Download</a>
-                    <form action="{{ route('work-reports.attachments.destroy', [$workReport, $doc]) }}" method="POST" onsubmit="return confirm('Delete this attachment?')">
+                    <a href="{{ route('work-reports.attachments.download', [$workReport, $doc]) }}" class="text-xs text-blue-600 hover:text-blue-800">{{ __('common.download') }}</a>
+                    <form action="{{ route('work-reports.attachments.destroy', [$workReport, $doc]) }}" method="POST" onsubmit="return confirm('{{ __('work_reports.confirm_delete') }}')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">Delete</button>
+                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">{{ __('common.delete') }}</button>
                     </form>
                 </div>
             </div>
             @empty
-            <p class="text-center text-xs text-gray-400 py-4">No attachments yet.</p>
+            <p class="text-center text-xs text-gray-400 py-4">{{ __('work_reports.empty') }}</p>
             @endforelse
         </div>
 
@@ -179,7 +179,7 @@
             <div class="max-w-3xl max-h-[85vh]" @click.stop>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm text-white" x-text="previewTitle"></span>
-                    <button type="button" @click="previewSrc = null" class="text-white/80 hover:text-white text-sm">✕ Close</button>
+                    <button type="button" @click="previewSrc = null" class="text-white/80 hover:text-white text-sm">✕ {{ __('common.close') }}</button>
                 </div>
                 <img :src="previewSrc" :alt="previewTitle" class="max-w-full max-h-[75vh] rounded-lg shadow-xl">
             </div>
@@ -198,8 +198,8 @@
                 @if($workReport->isSubmitted())
                 <button type="submit" name="decision" value="under_review" class="text-xs px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg transition">Mark Under Review</button>
                 @endif
-                <button type="submit" name="decision" value="approved" class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">Approve</button>
-                <button type="submit" name="decision" value="rejected" class="text-xs px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">Reject</button>
+                <button type="submit" name="decision" value="approved" class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition">{{ __('common.approve') }}</button>
+                <button type="submit" name="decision" value="rejected" class="text-xs px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition">{{ __('common.reject') }}</button>
             </div>
         </form>
     </div>
@@ -227,7 +227,7 @@
                 </div>
             </div>
             @empty
-            <p class="text-xs text-gray-400">No comments yet.</p>
+            <p class="text-xs text-gray-400">{{ __('work_reports.empty') }}</p>
             @endforelse
         </div>
 
@@ -243,7 +243,7 @@
                     <option value="revision_request">Revision Request</option>
                 </select>
                 @endif
-                <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Post</button>
+                <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">{{ __('common.post') }}</button>
             </div>
         </form>
     </div>

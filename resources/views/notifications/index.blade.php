@@ -1,14 +1,14 @@
 @extends('layouts.app')
-@section('title', 'Notifications')
+@section('title', __('notifications.heading'))
 
 @section('content')
 <div class="space-y-4">
     <div class="flex items-center justify-between gap-4">
-        <h1 class="text-xl font-bold text-gray-800">Notifications</h1>
+        <h1 class="text-xl font-bold text-gray-800">{{ __('notifications.heading') }}</h1>
         @if($notifications->contains('is_read', false))
         <form method="POST" action="{{ route('notifications.read-all') }}">
             @csrf @method('PATCH')
-            <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">Mark all as read</button>
+            <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">{{ __('notifications.mark_all_read') }}</button>
         </form>
         @endif
     </div>
@@ -24,17 +24,17 @@
                 @if(!$notif->is_read)
                 <form method="POST" action="{{ route('notifications.read', $notif) }}">
                     @csrf @method('PATCH')
-                    <button class="text-blue-500 hover:text-blue-700">Mark read</button>
+                    <button class="text-blue-500 hover:text-blue-700">{{ __('notifications.mark_read') }}</button>
                 </form>
                 @endif
                 <form method="POST" action="{{ route('notifications.destroy', $notif) }}">
                     @csrf @method('DELETE')
-                    <button class="text-gray-400 hover:text-red-500">Delete</button>
+                    <button class="text-gray-400 hover:text-red-500">{{ __('notifications.delete') }}</button>
                 </form>
             </div>
         </div>
         @empty
-        <p class="px-5 py-10 text-center text-gray-400 text-sm">No notifications.</p>
+        <p class="px-5 py-10 text-center text-gray-400 text-sm">{{ __('notifications.empty') }}</p>
         @endforelse
     </div>
     <div>{{ $notifications->links() }}</div>

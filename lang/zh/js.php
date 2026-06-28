@@ -45,6 +45,7 @@ return [
 
         // Banners
         'offline_banner'   => '您已离线 — 重新连接后将发送消息',
+        'offline_no_file'  => '离线时无法发送文件。',
         'reconnecting'     => '正在重新连接…',
 
         // Reply / media

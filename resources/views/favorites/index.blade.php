@@ -1,9 +1,9 @@
 @extends('layouts.app')
-@section('title', 'My Favorites')
+@section('title', __('favorites.heading'))
 
 @section('content')
 <div class="space-y-4">
-    <h1 class="text-xl font-bold text-gray-800">My Favorites</h1>
+    <h1 class="text-xl font-bold text-gray-800">{{ __('favorites.heading') }}</h1>
 
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm divide-y divide-gray-50">
         @forelse ($favorites as $fav)
@@ -15,11 +15,11 @@
             </a>
             <form method="POST" action="{{ route('favorites.destroy', $doc) }}">
                 @csrf @method('DELETE')
-                <button class="text-xs text-red-400 hover:text-red-600 transition">Remove</button>
+                <button class="text-xs text-red-400 hover:text-red-600 transition">{{ __('favorites.remove') }}</button>
             </form>
         </div>
         @empty
-        <p class="px-5 py-10 text-center text-gray-400 text-sm">No favorites yet. Browse documents and save ones you like.</p>
+        <p class="px-5 py-10 text-center text-gray-400 text-sm">{{ __('favorites.empty') }} {{ __('favorites.empty_sub') }}</p>
         @endforelse
     </div>
     <div>{{ $favorites->links() }}</div>

@@ -1,15 +1,15 @@
 @extends('layouts.admin')
-@section('title', 'Roles & Permissions')
+@section('title', __('admin.roles.heading'))
 
 @section('content')
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
     <table class="min-w-full text-sm">
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-64">Permission</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Admin</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Editor</th>
-                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Viewer</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase w-64">{{ __('admin.roles.permission_list') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.roles.role_admin') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.roles.role_editor') }}</th>
+                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase">{{ __('admin.roles.role_viewer') }}</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
@@ -47,5 +47,5 @@
         </tbody>
     </table>
 </div>
-<p class="mt-3 text-xs text-gray-400">Role assignments are managed per user via <a href="{{ route('admin.users.index') }}" class="text-blue-500 hover:underline">Users</a>.</p>
+<p class="mt-3 text-xs text-gray-400">{{ __('admin.roles.no_custom_roles') }}</p>
 @endsection

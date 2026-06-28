@@ -44,19 +44,19 @@
 
     <div class="grid grid-cols-2 gap-5">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.name_label') }}</label>
             <input type="text" name="full_name" value="{{ $val('full_name') }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('full_name') border-red-400 @enderror">
             @error('full_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.email_label') }}</label>
             <input type="email" name="email" value="{{ $val('email') }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm @error('email') border-red-400 @enderror">
             @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.phone_label') }}</label>
             <input type="text" name="phone" value="{{ $val('phone') }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
         </div>
@@ -110,7 +110,7 @@
 
     <div class="grid grid-cols-2 gap-5">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.department_label') }}</label>
             <select name="department_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">— None —</option>
                 @foreach($departments as $dept)
@@ -119,7 +119,7 @@
             </select>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.position_label') }}</label>
             <select name="position_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 <option value="">— None —</option>
                 @foreach($positions as $pos)
@@ -137,7 +137,7 @@
             </select>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.status_label') }}</label>
             <select name="employment_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 @foreach(['active','inactive','resigned','terminated'] as $s)
                     <option value="{{ $s }}" @selected($val('employment_status', 'active') === $s)>{{ ucfirst($s) }}</option>
@@ -145,7 +145,7 @@
             </select>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Joining</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.hire_date_label') }}</label>
             <input type="date" name="date_of_joining" value="{{ $val('date_of_joining') ? \Illuminate\Support\Carbon::parse($val('date_of_joining'))->format('Y-m-d') : '' }}"
                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
         </div>
@@ -181,7 +181,7 @@
 <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
     <h2 class="text-sm font-semibold text-gray-700">System Account <span class="text-gray-400 font-normal">(optional)</span></h2>
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Linked User Account</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.employees.linked_user') }}</label>
         <select name="user_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">— No login access —</option>
             @foreach($users as $user)

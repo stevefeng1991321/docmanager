@@ -19,15 +19,15 @@
         </div>
         <div class="flex gap-2 flex-shrink-0">
             <a href="{{ route('admin.tests.edit', $test) }}"
-               class="text-sm px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">Edit</a>
+               class="text-sm px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">{{ __('admin.tests.edit_action') }}</a>
             <a href="{{ route('admin.tests.index') }}"
-               class="text-sm px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">← Tests</a>
+               class="text-sm px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition">← {{ __('common.back') }}</a>
         </div>
     </div>
 
     {{-- Problems --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100 text-sm font-semibold text-gray-700">Problems</div>
+        <div class="px-5 py-3 border-b border-gray-100 text-sm font-semibold text-gray-700">{{ __('admin.problems.heading') }}</div>
         <ol class="divide-y divide-gray-50">
             @foreach($test->problems as $problem)
             <li class="px-5 py-2.5 flex items-center gap-3 text-sm">
@@ -78,9 +78,9 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                 <tr>
-                    <th class="px-4 py-2 text-left">Candidate</th>
-                    <th class="px-4 py-2 text-left">Status</th>
-                    <th class="px-4 py-2 text-left">Score</th>
+                    <th class="px-4 py-2 text-left">{{ __('admin.tests.col_user') }}</th>
+                    <th class="px-4 py-2 text-left">{{ __('admin.tests.col_status') }}</th>
+                    <th class="px-4 py-2 text-left">{{ __('admin.tests.col_score') }}</th>
                     <th class="px-4 py-2 text-left">Link</th>
                     <th class="px-4 py-2"></th>
                 </tr>

@@ -7,8 +7,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h2 class="text-lg font-semibold text-gray-900">Daily Attendance</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Mark and track employee attendance by date</p>
+            <h2 class="text-lg font-semibold text-gray-900">{{ __('admin.attendance.heading') }}</h2>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex items-center gap-2">
@@ -21,18 +20,18 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                 </svg>
-                Bulk Mark
+                {{ __('admin.attendance.add_record') }}
             </button>
             <a href="{{ route('admin.attendance.export', ['date' => $date]) }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Export
+                {{ __('admin.attendance.export') }}
             </a>
             <a href="{{ route('admin.attendance.report') }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                Reports
+                {{ __('admin.attendance.summary_heading') }}
             </a>
             <a href="{{ route('admin.attendance.leaves.index') }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
@@ -74,12 +73,12 @@
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Employee</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Department</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Check In</th>
-                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Check Out</th>
-                    <th class="text-right px-4 py-3 font-medium text-gray-600">Action</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_employee') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">{{ __('common.department') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">{{ __('admin.attendance.col_status') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">{{ __('admin.attendance.col_check_in') }}</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">{{ __('admin.attendance.col_check_out') }}</th>
+                    <th class="text-right px-4 py-3 font-medium text-gray-600">{{ __('common.action') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -140,7 +139,7 @@
         <div @click.outside="showBulk = false"
              class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-800 text-sm">Bulk Mark Attendance</h3>
+                <h3 class="font-semibold text-gray-800 text-sm">{{ __('admin.attendance.manual_entry') }}</h3>
                 <button @click="showBulk = false" class="text-gray-400 hover:text-gray-600 transition text-lg leading-none">&times;</button>
             </div>
             <form method="POST" action="{{ route('admin.attendance.bulk-mark') }}" class="p-5 space-y-4">
@@ -152,7 +151,7 @@
                 </p>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-2">Mark all as <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">{{ __('admin.attendance.status_label') }} <span class="text-red-500">*</span></label>
                     <div class="space-y-1.5">
                         @foreach(['present' => 'Present', 'absent' => 'Absent', 'late' => 'Late', 'on_leave' => 'On Leave', 'holiday' => 'Holiday'] as $val => $label)
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -171,11 +170,11 @@
                 <div class="flex justify-end gap-2 pt-1">
                     <button type="button" @click="showBulk = false"
                             class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                        Cancel
+                        {{ __('common.cancel') }}
                     </button>
                     <button type="submit"
                             class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                        Apply
+                        {{ __('common.apply') }}
                     </button>
                 </div>
             </form>
@@ -189,7 +188,7 @@
         <div @click.outside="showModal = false"
              class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-800 text-sm">Mark Attendance — <span x-text="modalEmployee"></span></h3>
+                <h3 class="font-semibold text-gray-800 text-sm">{{ __('admin.attendance.manual_entry') }} — <span x-text="modalEmployee"></span></h3>
                 <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition text-lg leading-none">&times;</button>
             </div>
             <form method="POST" action="{{ route('admin.attendance.mark') }}" class="p-5 space-y-4">
@@ -198,7 +197,7 @@
                 <input type="hidden" name="date" value="{{ $date }}">
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-medium text-gray-700 mb-2">{{ __('admin.attendance.status_label') }} <span class="text-red-500">*</span></label>
                     <div class="space-y-1.5">
                         @foreach(['present' => 'Present', 'absent' => 'Absent', 'late' => 'Late', 'on_leave' => 'On Leave', 'holiday' => 'Holiday', 'half_day' => 'Half Day'] as $val => $label)
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -212,25 +211,25 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Check In</label>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('admin.attendance.col_check_in') }}</label>
                         <input type="time" name="check_in_time" x-model="modalCheckIn"
                                class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Check Out</label>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('admin.attendance.col_check_out') }}</label>
                         <input type="time" name="check_out_time" x-model="modalCheckOut"
                                class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                     </div>
                 </div>
 
                 <div x-show="modalStatus === 'late'" x-cloak>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Late (minutes)</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('admin.attendance.col_hours') }}</label>
                     <input type="number" name="late_minutes" x-model="modalLateMinutes" min="0" max="480"
                            class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('admin.attendance.note_label') }}</label>
                     <textarea name="notes" x-model="modalNotes" rows="2"
                               class="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
                               placeholder="Optional notes…"></textarea>
@@ -239,11 +238,11 @@
                 <div class="flex justify-end gap-2 pt-1">
                     <button type="button" @click="showModal = false"
                             class="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                        Cancel
+                        {{ __('common.cancel') }}
                     </button>
                     <button type="submit"
                             class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                        Save
+                        {{ __('common.save') }}
                     </button>
                 </div>
             </form>
