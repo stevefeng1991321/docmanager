@@ -42,26 +42,26 @@ class DatabaseSeeder extends Seeder
         }
 
         Problem::query()->delete();
-        $this->call(JavaScriptSeeder::class);
-        $this->call(MathSeeder::class);
-        $this->call(AlgorithmsSeeder::class);
-        $this->call(AISeeder::class);
-
-        $this->call(VanadiumKnowledgeSeeder::class);
-        $this->call(RefractoryGoldKnowledgeSeeder::class);
-        $this->call(VanadiumVsLithiumSeeder::class);
-        $this->call(VanadiumVsOtherBatteriesSeeder::class);
-        $this->call(VRFBInnovativeTechnologySeeder::class);
-        $this->call(VRFBBuildPreparationSeeder::class);
-        $this->call(PlanWorkReportKnowledgeSeeder::class);
-        $this->call(HeatResistantPaintKnowledgeSeeder::class);
-        $this->call(MoisturizingAgentsKnowledgeSeeder::class);
-        $this->call(InorganicSpecialPaintsKnowledgeSeeder::class);
-        $this->call(HairDyeTypesKnowledgeSeeder::class);
-        $this->call(FoundationMilkKnowledgeSeeder::class);
-        $this->call(CosmeticsKnowledgeSeeder::class);
-        $this->call(IndustrialChemistrySeeder::class);
-        $this->call(EnergyStorageSeeder::class);
+        // $this->call(JavaScriptSeeder::class);
+        // $this->call(MathSeeder::class);
+        // $this->call(AlgorithmsSeeder::class);
+        // $this->call(AISeeder::class);
+        // $this->call(VanadiumKnowledgeSeeder::class);
+        // $this->call(RefractoryGoldKnowledgeSeeder::class);
+        // $this->call(VanadiumVsLithiumSeeder::class);
+        // $this->call(VanadiumVsOtherBatteriesSeeder::class);
+        // $this->call(VRFBInnovativeTechnologySeeder::class);
+        // $this->call(VRFBBuildPreparationSeeder::class);
+        // $this->call(PlanWorkReportKnowledgeSeeder::class);
+        // $this->call(HeatResistantPaintKnowledgeSeeder::class);
+        // $this->call(MoisturizingAgentsKnowledgeSeeder::class);
+        // $this->call(InorganicSpecialPaintsKnowledgeSeeder::class);
+        // $this->call(HairDyeTypesKnowledgeSeeder::class);
+        // $this->call(FoundationMilkKnowledgeSeeder::class);
+        // $this->call(CosmeticsKnowledgeSeeder::class);
+        // $this->call(IndustrialChemistrySeeder::class);
+        // $this->call(EnergyStorageSeeder::class);
+        // $this->call(BusinessStrategyKnowledgeSeeder::class);
 
         $this->command->info('Admin account: username=admin  password=Admin@1234');
         $this->command->warn('Change the admin password after first login!');
