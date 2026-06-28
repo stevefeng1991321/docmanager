@@ -61,10 +61,10 @@ class ScienceTechTrendController extends Controller
             'year'    => ['required', 'integer', 'min:2000', 'max:2100'],
         ]);
 
-        ScienceTechTrend::create($validated);
+        $trend = ScienceTechTrend::create($validated);
 
-        return redirect()->route('admin.science-tech.index')
-            ->with('message', 'Trend created.');
+        return redirect()->route('admin.science-tech.edit', $trend)
+            ->with('message', 'Trend created. You can now add media below.');
     }
 
     public function show(ScienceTechTrend $trend)

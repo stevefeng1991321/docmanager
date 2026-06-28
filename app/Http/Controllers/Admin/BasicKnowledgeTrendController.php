@@ -67,10 +67,10 @@ class BasicKnowledgeTrendController extends Controller
 
         $validated['tags'] = $this->parseTags($request->input('tags'));
 
-        BasicKnowledgeTrend::create($validated);
+        $trend = BasicKnowledgeTrend::create($validated);
 
-        return redirect()->route('admin.basic-knowledge.index')
-            ->with('message', 'Entry created successfully.');
+        return redirect()->route('admin.basic-knowledge.edit', $trend)
+            ->with('message', 'Entry created. You can now add media below.');
     }
 
     public function show(BasicKnowledgeTrend $trend)

@@ -53,10 +53,20 @@
       "Bash(grep -rn \"fonts\\\\.googleapis\\\\|fonts\\\\.gstatic\\\\|cdnjs\\\\|jsdelivr\\\\|unpkg\\\\.com\\\\|stackpath\\\\|bootstrapcdn\" resources/ --include=\"*.blade.php\" -l)",
       "Bash(curl -s -X POST -H 'Authorization: Bearer 2|hvmhZbx7FcIi7cyNm5tJaSt8kGGHNQSR1anunVwt0a46cbf6' -H 'Accept: application/json' http://127.0.0.1:8001/api/conversations/1/read)",
       "Bash(curl -s -H 'Authorization: Bearer 1|IgSlRQ72VP3VsOUSkphQ3IqGs9vCCaFfJqROgD769ed22f60' -H 'Accept: application/json' http://127.0.0.1:8001/api/conversations)",
-      "Bash(xargs grep -l \"MessageRead\")"
+      "Bash(xargs grep -l \"MessageRead\")",
+      "PowerShell(& \"C:\\\\xampp\\\\mysql\\\\bin\\\\mysqladmin.exe\" -u root status 2>&1)",
+      "Read(//c/xampp/**)",
+      "PowerShell(Start-Process -FilePath \"C:\\\\xampp\\\\mysql_start.bat\" -WindowStyle Normal)",
+      "Read(//c/xampp/mysql/data/**)",
+      "PowerShell(Start-Process -FilePath \"C:\\\\xampp\\\\mysql\\\\bin\\\\mysqld.exe\" -ArgumentList \"--defaults-file=C:\\\\xampp\\\\mysql\\\\bin\\\\my.ini\", \"--standalone\" -WindowStyle Normal)",
+      "Bash(xargs basename -a)",
+      "Bash(php artisan *)",
+      "PowerShell(head)",
+      "PowerShell(Test-Path \"D:\\\\Github\\\\docmanager\\\\public\\\\storage\" ; \\(Get-Item \"D:\\\\Github\\\\docmanager\\\\public\\\\storage\" -ErrorAction SilentlyContinue\\).LinkType)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64"
+      "C:\\Users\\FFF\\AppData\\Roaming\\Local\\lightning-services\\php-8.5.1+1\\bin\\win64",
+      "C:\\xampp\\mysql\\data"
     ]
   }
 }

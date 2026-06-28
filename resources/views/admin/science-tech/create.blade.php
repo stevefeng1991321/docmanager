@@ -53,6 +53,8 @@
             @error('content') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
+        <p class="text-xs text-gray-400 pt-1">Media (images &amp; videos) can be added after saving.</p>
+
         <div class="flex gap-3 pt-2">
             <button type="submit"
                     class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition">
