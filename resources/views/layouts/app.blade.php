@@ -7,6 +7,23 @@
     <title>{{ config('app.name') }} — @yield('title', 'Document Library')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>[x-cloak]{display:none!important}</style>
+    {{-- i18n: translations baked into HTML so they work fully offline --}}
+    <script>
+    window.LANG = @json(trans('js'));
+    window.__ = function(key, replace) {
+        var parts = key.split('.');
+        var v = window.LANG || {};
+        for (var i = 0; i < parts.length; i++) {
+            if (v === undefined || v === null || typeof v !== 'object') return key;
+            v = v[parts[i]];
+        }
+        if (typeof v !== 'string') return key;
+        if (replace) {
+            Object.keys(replace).forEach(function(k) { v = v.replace(':' + k, replace[k]); });
+        }
+        return v;
+    };
+    </script>
 </head>
 <body class="h-full flex flex-col">
 
@@ -38,7 +55,7 @@
                 <form action="{{ route('search') }}" method="GET" class="hidden md:flex flex-1 max-w-xl mx-6">
                     <div class="relative w-full">
                         <input type="text" name="q" value="{{ request('q') }}"
-                               placeholder="Search documents…"
+                               placeholder="{{ __('ui.nav_search_placeholder') }}"
                                class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
                         <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,6 +124,34 @@
                         </div>
                     </div>
 
+                    {{-- Language switcher --}}
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open"
+                                class="p-1.5 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-gray-100 transition"
+                                :title="__('ui.language') || '{{ __('ui.language') }}'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.outside="open = false" x-cloak
+                             class="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                            <p class="px-3 py-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">{{ __('ui.language') }}</p>
+                            @foreach(\App\Http\Middleware\SetLocale::SUPPORTED as $loc)
+                                <form action="{{ route('locale.switch') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="locale" value="{{ $loc }}">
+                                    <button type="submit"
+                                            class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition flex items-center gap-2
+                                                   {{ app()->getLocale() === $loc ? 'font-semibold text-blue-600' : 'text-gray-700' }}">
+                                        @if($loc === 'en') 🇬🇧 @else 🇨🇳 @endif
+                                        {{ __('ui.locale_' . $loc) }}
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                    </div>
+
                     {{-- User dropdown (desktop md+) --}}
                     <div x-data="{ open: false }" class="relative hidden md:block">
                         <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 font-medium">
@@ -122,30 +167,30 @@
                         </button>
                         <div x-show="open" @click.outside="open = false" x-cloak
                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                            <a href="{{ route('home') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Browse Documents</a>
-                            <a href="{{ route('science-tech.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Science &amp; Technology</a>
-                            <a href="{{ route('basic-knowledge.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Basic Knowledge</a>
-                            <a href="{{ route('favorites.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Favorites</a>
-                            <a href="{{ route('work-reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Work Reports</a>
-                            <a href="{{ route('attendance.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Attendance</a>
-                            <a href="{{ route('plans.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Plans</a>
+                            <a href="{{ route('home') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_browse') }}</a>
+                            <a href="{{ route('science-tech.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_science_tech') }}</a>
+                            <a href="{{ route('basic-knowledge.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_basic_knowledge') }}</a>
+                            <a href="{{ route('favorites.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_favorites') }}</a>
+                            <a href="{{ route('work-reports.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_work_reports') }}</a>
+                            <a href="{{ route('attendance.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_attendance') }}</a>
+                            <a href="{{ route('plans.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_my_plans') }}</a>
                             <a href="{{ route('chat.index') }}" class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Messages
+                                {{ __('ui.nav_messages') }}
                                 @if($navChatUnread > 0)
                                     <span class="min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center px-1">{{ $navChatUnread }}</span>
                                 @endif
                             </a>
-                            <a href="{{ route('reading-lists.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Reading Lists</a>
-                            <a href="{{ route('history.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Recently Viewed</a>
+                            <a href="{{ route('reading-lists.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_reading_lists') }}</a>
+                            <a href="{{ route('history.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_recently_viewed') }}</a>
                             <hr class="my-1 border-gray-100">
-                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Profile</a>
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ __('ui.nav_profile') }}</a>
                             @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
-                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-indigo-600 font-medium hover:bg-gray-50">Admin Panel</a>
+                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-indigo-600 font-medium hover:bg-gray-50">{{ __('ui.nav_admin_panel') }}</a>
                             @endif
                             <hr class="my-1 border-gray-100">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Sign Out</button>
+                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50">{{ __('ui.nav_sign_out') }}</button>
                             </form>
                         </div>
                     </div>
@@ -180,7 +225,7 @@
                 <form action="{{ route('search') }}" method="GET">
                     <div class="relative">
                         <input type="text" name="q" value="{{ request('q') }}"
-                               placeholder="Search documents…"
+                               placeholder="{{ __('ui.nav_search_placeholder') }}"
                                class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
                         <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,31 +253,31 @@
 
                 {{-- Nav links --}}
                 <nav class="space-y-0.5">
-                    <a href="{{ route('home') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Browse Documents</a>
-                    <a href="{{ route('science-tech.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Science &amp; Technology</a>
-                    <a href="{{ route('basic-knowledge.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Basic Knowledge</a>
-                    <a href="{{ route('favorites.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Favorites</a>
-                    <a href="{{ route('work-reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Work Reports</a>
-                    <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Attendance</a>
-                    <a href="{{ route('plans.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">My Plans</a>
+                    <a href="{{ route('home') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_browse') }}</a>
+                    <a href="{{ route('science-tech.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_science_tech') }}</a>
+                    <a href="{{ route('basic-knowledge.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_basic_knowledge') }}</a>
+                    <a href="{{ route('favorites.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_favorites') }}</a>
+                    <a href="{{ route('work-reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_work_reports') }}</a>
+                    <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_attendance') }}</a>
+                    <a href="{{ route('plans.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_my_plans') }}</a>
                     <a href="{{ route('chat.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        Messages
+                        {{ __('ui.nav_messages') }}
                         @if($navChatUnread > 0)
                             <span class="ml-auto min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center px-1">{{ $navChatUnread }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('reading-lists.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Reading Lists</a>
-                    <a href="{{ route('history.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Recently Viewed</a>
-                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">Profile</a>
+                    <a href="{{ route('reading-lists.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_reading_lists') }}</a>
+                    <a href="{{ route('history.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_recently_viewed') }}</a>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">{{ __('ui.nav_profile') }}</a>
                     @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
-                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-indigo-600 font-medium hover:bg-indigo-50 transition-colors">Admin Panel</a>
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-indigo-600 font-medium hover:bg-indigo-50 transition-colors">{{ __('ui.nav_admin_panel') }}</a>
                     @endif
                 </nav>
 
                 <div class="border-t border-gray-100 pt-2">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors">Sign Out</button>
+                        <button type="submit" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors">{{ __('ui.nav_sign_out') }}</button>
                     </form>
                 </div>
             </div>

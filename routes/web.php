@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Client;
+use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
+
+// Language switcher — available to authenticated users only
+Route::post('/locale', [LocaleController::class, 'switch'])->name('locale.switch')->middleware(['auth']);
 
 // ─── Client Web App ──────────────────────────────────────────────────────────
 

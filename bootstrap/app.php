@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
         $middleware->alias([
             'active'    => \App\Http\Middleware\RequireActiveAccount::class,
             'role'      => \App\Http\Middleware\RequireRole::class,

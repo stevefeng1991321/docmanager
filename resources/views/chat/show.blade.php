@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Chat')
+@section('title', __('ui.chat_title'))
 
 @section('content')
 @php
@@ -31,7 +31,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 Messages
             </a>
-            <button @click="openNewChat()" class="p-1 rounded-lg hover:bg-gray-100 text-gray-500" title="New chat">
+            <button @click="openNewChat()" class="p-1 rounded-lg hover:bg-gray-100 text-gray-500" :title="__('chat.new_chat')">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             </button>
         </div>
@@ -51,7 +51,7 @@
                             <span class="text-sm font-medium text-gray-800 truncate" x-text="conv.name"></span>
                             <span class="text-xs text-gray-400 flex-shrink-0" x-text="formatTime(conv.last_message_at)"></span>
                         </div>
-                        <p class="text-xs text-gray-500 truncate" x-text="conv.last_message || 'No messages yet'"></p>
+                        <p class="text-xs text-gray-500 truncate" x-text="conv.last_message || __('chat.no_messages_yet')"></p>
                     </div>
                     <template x-if="conv.unread_count > 0">
                         <span class="min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center px-1 flex-shrink-0"
@@ -79,7 +79,7 @@
                     <span class="font-semibold text-sm text-gray-800" x-text="groupName || @js($chatName)"></span>
                     @if($conversation->type === 'private' && $others->isNotEmpty())
                         <span x-show="onlineUsers.includes({{ $others->first()->user_id }})"
-                              class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Online"></span>
+                              class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" :title="__('chat.online_title')"></span>
                     @endif
                 </div>
                 @if($conversation->type === 'group')
@@ -89,7 +89,7 @@
                     </p>
                 @else
                     <p class="text-xs text-gray-400"
-                       x-text="onlineUsers.includes({{ $others->first()?->user_id ?? 0 }}) ? 'Online' : 'Offline'"></p>
+                       x-text="onlineUsers.includes({{ $others->first()?->user_id ?? 0 }}) ? __('chat.online') : __('chat.offline_status')"></p>
                 @endif
             </div>
 
@@ -97,11 +97,11 @@
             <div class="flex items-center gap-1 flex-shrink-0">
                 {{-- Search --}}
                 <button @click="toggleSearch()" :class="showSearch ? 'bg-gray-100 text-blue-600' : 'text-gray-500'"
-                        class="p-1.5 rounded-lg hover:bg-gray-100 transition" title="Search messages">
+                        class="p-1.5 rounded-lg hover:bg-gray-100 transition" :title="__('chat.search_messages')">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </button>
                 {{-- Mute toggle --}}
-                <button @click="toggleMute()" :title="isMuted ? 'Unmute notifications' : 'Mute notifications'"
+                <button @click="toggleMute()" :title="isMuted ? __('chat.unmute') : __('chat.mute')"
                         class="p-1.5 rounded-lg hover:bg-gray-100 transition"
                         :class="isMuted ? 'text-gray-400' : 'text-gray-500'">
                     <template x-if="isMuted">
@@ -114,12 +114,12 @@
 
                 @if($conversation->type === 'group')
                     {{-- Group management --}}
-                    <button @click="openGroupPanel()" title="Group settings"
+                    <button @click="openGroupPanel()" :title="__('chat.group_settings')"
                             class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </button>
                     {{-- Leave group --}}
-                    <button @click="leaveGroup()" title="Leave group"
+                    <button @click="leaveGroup()" :title="__('chat.leave_group_tip')"
                             class="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-500 transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </button>
@@ -130,11 +130,11 @@
         {{-- Status banners --}}
         <div x-show="!isOnline" x-cloak class="px-4 py-2 bg-red-50 border-b border-red-200 text-xs text-red-700 font-medium flex items-center gap-2 flex-shrink-0">
             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-            You are offline — messages will send when reconnected
+            <span x-text="__('chat.offline_banner')"></span>
         </div>
         <div x-show="isOnline && !isConnected" x-cloak class="px-4 py-2 bg-yellow-50 border-b border-yellow-200 text-xs text-yellow-700 font-medium flex items-center gap-2 flex-shrink-0">
             <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-            Reconnecting to real-time server…
+            <span x-text="__('chat.reconnecting')"></span>
         </div>
 
         {{-- Search panel --}}
@@ -143,7 +143,7 @@
                 <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input x-ref="searchInput" type="text" x-model="searchQuery"
                        @input="runSearch()" @keydown.escape="closeSearch()"
-                       placeholder="Search in this conversation…"
+                       :placeholder="__('chat.search_placeholder')"
                        class="flex-1 text-sm bg-transparent focus:outline-none text-gray-700 placeholder-gray-400">
                 <button @click="closeSearch()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -154,10 +154,10 @@
                     <div class="flex justify-center py-8"><div class="w-5 h-5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div></div>
                 </template>
                 <template x-if="!searching && searchQuery.length < 2">
-                    <p class="text-xs text-gray-400 text-center py-8">Type at least 2 characters to search</p>
+                    <p class="text-xs text-gray-400 text-center py-8" x-text="__('chat.search_placeholder')"></p>
                 </template>
                 <template x-if="!searching && searchQuery.length >= 2 && searchResults.length === 0">
-                    <p class="text-xs text-gray-400 text-center py-8">No messages found for "<span x-text="searchQuery"></span>"</p>
+                    <p class="text-xs text-gray-400 text-center py-8" x-text="__('chat.no_results')"></p>
                 </template>
                 <template x-for="result in searchResults" :key="result.id">
                     <button @click="goToMessage(result.id)"
@@ -183,7 +183,7 @@
                         <template x-if="loadingMore">
                             <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                         </template>
-                        <span x-text="loadingMore ? 'Loading…' : 'Load earlier messages'"></span>
+                        <span x-text="loadingMore ? __('chat.loading') : __('chat.load_earlier')"></span>
                     </button>
                 </template>
             </div>
@@ -213,20 +213,20 @@
                                         md:opacity-0 md:pointer-events-none
                                         group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto">
                                 {{-- Reply --}}
-                                <button @click="setReply(msg)" title="Reply"
+                                <button @click="setReply(msg)" :title="__('chat.reply')"
                                         class="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 shadow-sm">
                                     <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
                                 </button>
                                 {{-- Edit (own messages only) --}}
                                 <template x-if="msg.sender_id == currentUserId">
-                                    <button @click="startEdit(msg)" title="Edit"
+                                    <button @click="startEdit(msg)" :title="__('chat.edit')"
                                             class="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 shadow-sm">
                                         <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
                                 </template>
                                 {{-- Delete (own messages only) --}}
                                 <template x-if="msg.sender_id == currentUserId">
-                                    <button @click="deleteMessage(msg)" title="Delete"
+                                    <button @click="deleteMessage(msg)" :title="__('chat.delete')"
                                             class="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-red-50 shadow-sm">
                                         <svg class="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
@@ -236,7 +236,7 @@
 
                         {{-- Retry button for failed messages --}}
                         <template x-if="msg.failed">
-                            <button @click="retryMessage(msg)" title="Retry"
+                            <button @click="retryMessage(msg)" :title="__('chat.retry')"
                                     class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center hover:bg-red-200 mb-1">
                                 <svg class="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             </button>
@@ -289,13 +289,13 @@
                                             <template x-if="!msg.reply_to.deleted && msg.reply_to.type === 'image'">
                                                 <div class="flex items-center gap-1.5 mt-0.5">
                                                     <img :src="msg.reply_to.metadata?.url" class="w-10 h-10 rounded object-cover flex-shrink-0">
-                                                    <span class="text-xs opacity-70">Photo</span>
+                                                    <span class="text-xs opacity-70" x-text="__('chat.photo')"></span>
                                                 </div>
                                             </template>
                                             <template x-if="!msg.reply_to.deleted && msg.reply_to.type === 'file'">
                                                 <div class="flex items-center gap-1.5 mt-0.5">
                                                     <svg class="w-4 h-4 opacity-70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                    <span class="text-xs opacity-70 truncate" x-text="msg.reply_to.metadata?.filename || 'File'"></span>
+                                                    <span class="text-xs opacity-70 truncate" x-text="msg.reply_to.metadata?.filename || __('chat.file')"></span>
                                                 </div>
                                             </template>
                                             <template x-if="!msg.reply_to.deleted && msg.reply_to.type !== 'image' && msg.reply_to.type !== 'file'">
@@ -305,7 +305,7 @@
                                     </template>
 
                                     <template x-if="msg.deleted">
-                                        <span class="italic">This message was deleted</span>
+                                        <span class="italic" x-text="__('chat.deleted_message')"></span>
                                     </template>
                                     <template x-if="!msg.deleted && msg.type === 'image'">
                                         <img :src="msg.metadata?.url" class="max-w-full rounded-lg max-h-56 object-cover cursor-pointer block" @click="window.open(msg.metadata.url, '_blank')">
@@ -335,12 +335,12 @@
                                      :class="msg.sender_id == currentUserId ? 'flex-row-reverse' : ''">
                                     <span class="text-[10px] text-gray-400" x-text="formatMsgTime(msg.created_at)"></span>
                                     <template x-if="msg.edited_at">
-                                        <span class="text-[10px] text-gray-400 italic">edited</span>
+                                        <span class="text-[10px] text-gray-400 italic" x-text="__('chat.edited')"></span>
                                     </template>
                                     <template x-if="msg.sender_id == currentUserId && !msg.pending && !msg.deleted">
                                         <span class="text-[10px]"
                                               :class="isRead(msg) ? 'text-blue-500' : 'text-gray-400'"
-                                              :title="isRead(msg) ? 'Read' : 'Delivered'">
+                                              :title="isRead(msg) ? __('chat.read') : __('chat.delivered')">
                                             <template x-if="isRead(msg)"><span>✓✓</span></template>
                                             <template x-if="!isRead(msg)"><span>✓</span></template>
                                         </span>
@@ -382,21 +382,21 @@
         <template x-if="replyTo">
             <div class="px-4 py-2 border-t border-gray-100 bg-blue-50 flex items-center gap-2 flex-shrink-0">
                 <div class="flex-1 min-w-0">
-                    <p class="text-[11px] font-semibold text-blue-700" x-text="'Replying to ' + replyTo.sender_name"></p>
+                    <p class="text-[11px] font-semibold text-blue-700" x-text="__('chat.replying_to', {name: replyTo.sender_name})"></p>
                     <template x-if="!replyTo.deleted && replyTo.type === 'image'">
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <img :src="replyTo.metadata?.url" class="w-8 h-8 rounded object-cover flex-shrink-0">
-                            <span class="text-xs text-gray-500">Photo</span>
+                            <span class="text-xs text-gray-500" x-text="__('chat.photo')"></span>
                         </div>
                     </template>
                     <template x-if="!replyTo.deleted && replyTo.type === 'file'">
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span class="text-xs text-gray-500 truncate" x-text="replyTo.metadata?.filename || 'File'"></span>
+                            <span class="text-xs text-gray-500 truncate" x-text="replyTo.metadata?.filename || __('chat.file')"></span>
                         </div>
                     </template>
                     <template x-if="replyTo.deleted || (replyTo.type !== 'image' && replyTo.type !== 'file')">
-                        <p class="text-xs text-gray-500 truncate" x-text="replyTo.deleted ? 'Deleted message' : replyTo.body"></p>
+                        <p class="text-xs text-gray-500 truncate" x-text="replyTo.deleted ? __('chat.deleted_msg') : replyTo.body"></p>
                     </template>
                 </div>
                 <button @click="cancelReply()" class="text-gray-400 hover:text-gray-600 flex-shrink-0">
@@ -425,7 +425,7 @@
                     <template x-if="uploading">
                         <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     </template>
-                    <span x-text="uploading ? 'Uploading…' : 'Send'"></span>
+                    <span x-text="uploading ? __('chat.uploading') : __('chat.send')"></span>
                 </button>
                 <button @click="clearFile()" :disabled="uploading" class="text-gray-400 hover:text-gray-600 disabled:opacity-40">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -437,7 +437,7 @@
         <div class="px-3 md:px-4 py-3 border-t border-gray-100 flex-shrink-0">
             <div class="flex items-end gap-1.5 md:gap-2">
                 {{-- File attachment --}}
-                <button @click="pickFile()" title="Attach file"
+                <button @click="pickFile()" :title="__('chat.attach_file')"
                         class="w-9 h-9 md:w-9 md:h-9 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center flex-shrink-0 transition touch-manipulation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                 </button>
@@ -448,7 +448,7 @@
                     x-model="newMessage"
                     @keydown.enter.prevent="if(!$event.shiftKey) sendMessage()"
                     @input="onTyping(); $el.style.height = 'auto'; $el.style.height = Math.min($el.scrollHeight, 128) + 'px'"
-                    placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+                    :placeholder="__('chat.type_message')"
                     rows="1"
                     class="flex-1 border border-gray-300 rounded-2xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none leading-5 max-h-32 overflow-y-auto"
                     style="min-height: 42px;"
@@ -481,7 +481,7 @@
                             class="flex-1 py-2 text-sm font-medium rounded-lg transition">Group</button>
                 </div>
                 <div x-show="newChatType === 'group'">
-                    <input type="text" x-model="newChatGroupName" placeholder="Group name"
+                    <input type="text" x-model="newChatGroupName" :placeholder="__('chat.group_name')"
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div>
@@ -531,7 +531,7 @@
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Rename Group</p>
                     <div class="flex gap-2">
-                        <input type="text" x-model="groupNewName" placeholder="Group name"
+                        <input type="text" x-model="groupNewName" :placeholder="__('chat.group_name')"
                                @keydown.enter="renameGroup()"
                                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         <button @click="renameGroup()" class="px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">Save</button>
@@ -789,7 +789,7 @@ function chatApp() {
                 const idx = this.messages.findIndex(m => m._tempId === tempId);
                 if (idx !== -1) this.messages[idx].failed = true;
                 this.newMessage = body;
-                this.showError('Message failed to send. Click the retry button to try again.');
+                this.showError(__('chat.send_failed'));
             }
         },
 
@@ -810,12 +810,12 @@ function chatApp() {
         },
 
         async deleteMessage(msg) {
-            if (!confirm('Delete this message?')) return;
+            if (!confirm(__('chat.confirm_delete'))) return;
             try {
                 await axios.delete('/chat/' + CONV_ID + '/messages/' + msg.id);
                 const idx = this.messages.findIndex(m => m.id === msg.id);
                 if (idx !== -1) { this.messages[idx].deleted = true; this.messages[idx].body = null; }
-            } catch(e) { this.showError('Failed to delete message.'); }
+            } catch(e) { this.showError(__('chat.delete_failed')); }
         },
 
         startEdit(msg) {
@@ -836,7 +836,7 @@ function chatApp() {
                     this.messages[idx].edited_at = res.data.edited_at;
                 }
                 this.cancelEdit();
-            } catch(e) { this.showError('Failed to save edit.'); }
+            } catch(e) { this.showError(__('chat.edit_failed')); }
         },
 
         // ─── Reply ───────────────────────────────────────────────────────────
@@ -871,9 +871,9 @@ function chatApp() {
         },
 
         typingLabel() {
-            if (this.typingUsers.length === 1) return this.typingUsers[0] + ' is typing…';
-            if (this.typingUsers.length === 2) return this.typingUsers.join(' and ') + ' are typing…';
-            return 'Several people are typing…';
+            if (this.typingUsers.length === 1) return __('chat.typing_one', {name: this.typingUsers[0]});
+            if (this.typingUsers.length === 2) return __('chat.typing_one', {name: this.typingUsers[0]}) + ', ' + this.typingUsers[1];
+            return __('chat.typing_many');
         },
 
         // ─── Conversation management ─────────────────────────────────────────
@@ -886,7 +886,7 @@ function chatApp() {
         },
 
         async leaveGroup() {
-            if (!confirm('Leave this group?')) return;
+            if (!confirm(__('chat.confirm_leave'))) return;
             try {
                 await axios.post('/chat/' + CONV_ID + '/leave');
                 window.location.href = '/chat';
@@ -924,7 +924,7 @@ function chatApp() {
         },
 
         async removeMember(userId) {
-            if (!confirm('Remove this member?')) return;
+            if (!confirm(__('chat.confirm_remove'))) return;
             try {
                 await axios.delete('/chat/' + CONV_ID + '/members/' + userId);
                 this.groupMembers = this.groupMembers.filter(m => m.user_id !== userId);
@@ -1070,7 +1070,7 @@ function chatApp() {
             const d = new Date(iso), now = new Date();
             const diffDays = Math.floor((now - d) / 86400000);
             if (diffDays === 0) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            if (diffDays === 1) return 'Yesterday';
+            if (diffDays === 1) return __('chat.yesterday');
             if (diffDays < 7)  return d.toLocaleDateString([], { weekday: 'short' });
             return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
         },
@@ -1178,7 +1178,7 @@ function chatApp() {
                     conv.last_message_at = res.data.created_at;
                 }
             } catch(e) {
-                const msg = e.response?.data?.message || 'Failed to upload. Max 10 MB; allowed: images, PDF, Office, txt, zip.';
+                const msg = e.response?.data?.message || __('chat.upload_failed');
                 this.showError(msg);
             }
             this.uploading = false;
