@@ -54,7 +54,7 @@
                     @php
                         $sc = ['present'=>'text-green-600','absent'=>'text-red-600','late'=>'text-yellow-600','on_leave'=>'text-blue-600','holiday'=>'text-purple-600','half_day'=>'text-orange-600'];
                     @endphp
-                    <span class="font-medium {{ $sc[$today->status->value] ?? 'text-gray-600' }}">{{ $today->status_label }}</span>
+                    <span class="font-medium {{ $sc[$today->status] ?? 'text-gray-600' }}">{{ $today->status_label }}</span>
                     @if($today->check_in_time)  · In: {{ $today->check_in_time }} @endif
                     @if($today->check_out_time) · Out: {{ $today->check_out_time }} @endif
                     @if($today->work_duration)  · {{ $today->work_duration }} @endif
@@ -165,7 +165,7 @@
                 {{-- Status badge --}}
                 @if($inMonth && !$isFuture)
                     @if($rec)
-                    <div class="rounded-md border px-1.5 py-0.5 text-center {{ $colors[$rec->status->value]['light'] ?? 'bg-gray-50 text-gray-500 border-gray-200' }}">
+                    <div class="rounded-md border px-1.5 py-0.5 text-center {{ $colors[$rec->status]['light'] ?? 'bg-gray-50 text-gray-500 border-gray-200' }}">
                         <div class="text-[10px] font-semibold leading-tight">{{ $rec->status_label }}</div>
                         @if($rec->check_in_time)
                         <div class="text-[9px] opacity-70 leading-tight">{{ $rec->check_in_time }}{{ $rec->check_out_time ? ' – '.$rec->check_out_time : '' }}</div>

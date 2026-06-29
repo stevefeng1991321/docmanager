@@ -117,8 +117,9 @@
                     </td>
                     <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">{{ $leave->days_count }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $leave->status->badge() }}">
-                            {{ $leave->status->label() }}
+                        @include('partials.leave-colors')
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$leave->status] }}">
+                            {{ ucfirst($leave->status) }}
                         </span>
                         @if($leave->rejection_reason)
                         <p class="text-xs text-red-500 mt-1">{{ $leave->rejection_reason }}</p>

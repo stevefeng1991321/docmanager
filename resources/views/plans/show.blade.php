@@ -3,13 +3,15 @@
 
 @section('content')
 
+    @include('partials.plan-colors')
+
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div class="min-w-0">
             <div class="flex items-center gap-2 flex-wrap mb-1">
                 <span class="text-xs text-gray-400 font-mono">{{ $plan->plan_number }}</span>
-                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->status->badge() }}">{{ $plan->status->label() }}</span>
-                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->priority->badge() }}">{{ $plan->priority->label() }}</span>
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$plan->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $plan->status_label }}</span>
+                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $pc[$plan->priority] ?? 'bg-gray-100 text-gray-600' }}">{{ ucfirst($plan->priority) }}</span>
                 @if($plan->is_overdue)
                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">Overdue</span>
                 @endif
@@ -45,7 +47,7 @@
                          style="width:{{ $plan->progress }}%"></div>
                 </div>
                 <div class="mt-2 text-xs text-gray-400">
-                    {{ $plan->tasks->where('status', \App\Enums\PlanTaskStatus::Completed)->count() }} / {{ $plan->tasks->count() }} tasks completed
+                    {{ $plan->tasks->where('status','completed')->count() }} / {{ $plan->tasks->count() }} tasks completed
                 </div>
             </div>
 
@@ -58,8 +60,8 @@
                     @forelse($plan->tasks->sortBy('sort_order') as $task)
                     <div class="px-4 py-3 flex items-start gap-3">
                         <div class="mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
-                                    {{ $task->status === \App\Enums\PlanTaskStatus::Completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300' }}">
-                            @if($task->status === \App\Enums\PlanTaskStatus::Completed)
+                                    {{ $task->status === 'completed' ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300' }}">
+                            @if($task->status === 'completed')
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                             </svg>
@@ -67,11 +69,11 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-sm text-gray-800 {{ $task->status === \App\Enums\PlanTaskStatus::Completed ? 'line-through text-gray-400' : '' }}">
+                                <span class="text-sm text-gray-800 {{ $task->status==='completed' ? 'line-through text-gray-400' : '' }}">
                                     {{ $task->title }}
                                 </span>
-                                <span class="inline-flex px-1.5 py-0.5 rounded text-xs {{ $task->priority->badge() }}">
-                                    {{ $task->priority->label() }}
+                                <span class="inline-flex px-1.5 py-0.5 rounded text-xs {{ $pc[$task->priority] ?? 'bg-gray-100 text-gray-500' }}">
+                                    {{ ucfirst($task->priority) }}
                                 </span>
                                 @if($task->is_overdue)
                                 <span class="text-xs text-red-500 font-medium">Overdue</span>

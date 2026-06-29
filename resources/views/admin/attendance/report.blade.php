@@ -111,18 +111,28 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse($records as $rec)
+                @php
+                    $colors = [
+                        'present'  => 'bg-green-100 text-green-700',
+                        'absent'   => 'bg-red-100 text-red-700',
+                        'late'     => 'bg-yellow-100 text-yellow-700',
+                        'on_leave' => 'bg-blue-100 text-blue-700',
+                        'holiday'  => 'bg-purple-100 text-purple-700',
+                        'half_day' => 'bg-orange-100 text-orange-700',
+                    ];
+                @endphp
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3 text-gray-700">{{ $rec->date->format('M d, Y') }}</td>
                     <td class="px-4 py-3">
-                        <div class="font-medium text-gray-800">{{ $rec->employee?->full_name ?? '—' }}</div>
-                        <div class="text-xs text-gray-400">{{ $rec->employee?->employee_code ?? '' }}</div>
+                        <div class="font-medium text-gray-800">{{ $rec->employee->full_name }}</div>
+                        <div class="text-xs text-gray-400">{{ $rec->employee->employee_code }}</div>
                     </td>
-                    <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">{{ $rec->employee?->department?->name ?? '—' }}</td>
+                    <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">{{ $rec->employee->department?->name ?? '—' }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $rec->status->badge() }}">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $colors[$rec->status] ?? 'bg-gray-100 text-gray-600' }}">
                             {{ $rec->status_label }}
                         </span>
-                        @if($rec->status === \App\Enums\AttendanceStatus::Late && $rec->late_minutes)
+                        @if($rec->status === 'late' && $rec->late_minutes)
                             <span class="text-xs text-gray-400 ml-1">+{{ $rec->late_minutes }}m</span>
                         @endif
                     </td>
