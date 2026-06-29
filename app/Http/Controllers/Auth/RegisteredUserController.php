@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
@@ -33,7 +32,7 @@ class RegisteredUserController extends Controller
             'name'     => $request->name,
             'password' => $request->password,   // cast to hashed automatically
             'role'     => 'viewer',
-            'status'   => UserStatus::Pending,
+            'status'   => 'pending',
         ]);
 
         AuditLog::create([

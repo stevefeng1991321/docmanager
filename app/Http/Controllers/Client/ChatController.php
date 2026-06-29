@@ -9,7 +9,6 @@ use App\Events\MessageRead;
 use App\Events\MessageSent;
 use App\Events\NewMessageNotification;
 use App\Events\UserTyping;
-use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -348,7 +347,7 @@ class ChatController extends Controller
     public function users(): JsonResponse
     {
         $users = User::where('id', '!=', auth()->id())
-            ->where('status', UserStatus::Active)
+            ->where('status', 'active')
             ->orderBy('name')
             ->get(['id', 'name']);
 

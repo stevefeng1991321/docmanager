@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\BasicKnowledgeTrend;
 use App\Models\Department;
@@ -28,8 +27,8 @@ class DashboardController extends Controller
                                             ->count(),
                 'published'          => Resource::where('status', 'published')->count(),
                 'pending_review'     => Resource::where('status', 'pending_review')->count(),
-                'total_users'        => User::where('status', UserStatus::Active)->count(),
-                'pending_users'      => User::where('status', UserStatus::Pending)->count(),
+                'total_users'        => User::where('status', 'active')->count(),
+                'pending_users'      => User::where('status', 'pending')->count(),
                 'storage_bytes'      => Resource::sum('file_size'),
                 'downloads_today'    => DB::table('download_logs')
                                             ->whereDate('created_at', today())

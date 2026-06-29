@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\User;
@@ -22,7 +21,7 @@ class NotificationController extends Controller
             'message' => ['required', 'string'],
         ]);
 
-        $users = User::where('status', UserStatus::Active)->pluck('id');
+        $users = User::where('status', 'active')->pluck('id');
         foreach ($users as $userId) {
             Notification::send($userId, 'system_broadcast', $request->title, $request->message);
         }

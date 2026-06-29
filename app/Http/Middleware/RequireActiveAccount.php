@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +21,7 @@ class RequireActiveAccount
                 : redirect()->route('login');
         }
 
-        if ($user->status === UserStatus::Pending) {
+        if ($user->status === 'pending') {
             Auth::logout();
             if (!$isApi) {
                 $request->session()->invalidate();
@@ -35,7 +34,7 @@ class RequireActiveAccount
                     ->with('message', 'Your account is awaiting activation by an administrator.');
         }
 
-        if ($user->status === UserStatus::Inactive) {
+        if ($user->status === 'inactive') {
             Auth::logout();
             if (!$isApi) {
                 $request->session()->invalidate();
