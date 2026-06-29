@@ -3,8 +3,6 @@
 
 @section('content')
 
-    @include('partials.plan-colors')
-
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-lg font-semibold text-gray-900">Plans Dashboard</h2>
@@ -137,8 +135,8 @@
                         <div class="text-sm font-medium text-gray-800 truncate">{{ $plan->title }}</div>
                         <div class="text-xs text-gray-400">{{ $plan->plan_number }} · {{ $plan->owner->name }}</div>
                     </div>
-                    <span class="ml-3 flex-shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$plan->status] ?? 'bg-gray-100 text-gray-500' }}">
-                        {{ $plan->status_label }}
+                    <span class="ml-3 flex-shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->status->badge() }}">
+                        {{ $plan->status->label() }}
                     </span>
                 </a>
                 @empty

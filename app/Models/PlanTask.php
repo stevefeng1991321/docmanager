@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PlanPriority;
+use App\Enums\PlanTaskStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,6 +20,8 @@ class PlanTask extends Model
         'start_date'   => 'date',
         'due_date'     => 'date',
         'completed_at' => 'datetime',
+        'status'       => PlanTaskStatus::class,
+        'priority'     => PlanPriority::class,
     ];
 
     public function plan(): BelongsTo         { return $this->belongsTo(Plan::class); }
@@ -27,17 +31,11 @@ class PlanTask extends Model
     {
         return $this->due_date
             && $this->due_date->isPast()
-            && $this->status !== 'completed';
+            && $this->status !== PlanTaskStatus::Completed;
     }
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
-            'pending'     => 'gray',
-            'in_progress' => 'blue',
-            'completed'   => 'green',
-            'cancelled'   => 'red',
-            default       => 'gray',
-        };
+        return $this->status?->color() ?? 'gray';
     }
 }

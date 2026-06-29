@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PlanPriority;
+use App\Enums\PlanStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -28,6 +30,8 @@ class Plan extends Model
         'tags'            => 'array',
         'estimated_hours' => 'float',
         'actual_hours'    => 'float',
+        'status'          => PlanStatus::class,
+        'priority'        => PlanPriority::class,
     ];
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -54,46 +58,22 @@ class Plan extends Model
     {
         return $this->due_date
             && $this->due_date->isPast()
-            && !in_array($this->status, ['completed', 'cancelled', 'archived']);
+            && !$this->status?->isTerminal();
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
-            'draft'       => 'Draft',
-            'pending'     => 'Pending',
-            'in_progress' => 'In Progress',
-            'on_hold'     => 'On Hold',
-            'completed'   => 'Completed',
-            'cancelled'   => 'Cancelled',
-            'archived'    => 'Archived',
-            default       => ucfirst($this->status),
-        };
+        return $this->status?->label() ?? '';
     }
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
-            'draft'       => 'gray',
-            'pending'     => 'yellow',
-            'in_progress' => 'blue',
-            'on_hold'     => 'orange',
-            'completed'   => 'green',
-            'cancelled'   => 'red',
-            'archived'    => 'purple',
-            default       => 'gray',
-        };
+        return $this->status?->color() ?? 'gray';
     }
 
     public function getPriorityColorAttribute(): string
     {
-        return match($this->priority) {
-            'low'      => 'green',
-            'medium'   => 'blue',
-            'high'     => 'orange',
-            'critical' => 'red',
-            default    => 'gray',
-        };
+        return $this->priority?->color() ?? 'gray';
     }
 
     // ── Relationships ─────────────────────────────────────────────────────────

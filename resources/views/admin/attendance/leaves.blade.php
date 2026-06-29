@@ -62,9 +62,8 @@
                     </td>
                     <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">{{ $leave->days_count }}</td>
                     <td class="px-4 py-3">
-                        @include('partials.leave-colors')
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$leave->status] }}">
-                            {{ ucfirst($leave->status) }}
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $leave->status->badge() }}">
+                            {{ $leave->status->label() }}
                         </span>
                     </td>
                     <td class="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell">{{ $leave->created_at->format('M d, Y') }}</td>

@@ -85,7 +85,7 @@
                 @forelse($employees as $emp)
                 @php
                     $att    = $emp->today_attendance;
-                    $status = $att?->status ?? 'not_marked';
+                    $status = $att?->status?->value ?? 'not_marked';
                     $colors = [
                         'present'    => 'bg-green-100 text-green-700',
                         'absent'     => 'bg-red-100 text-red-700',
@@ -117,7 +117,7 @@
                     <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ $att?->check_in_time ?? '—' }}</td>
                     <td class="px-4 py-3 text-gray-500 hidden md:table-cell">{{ $att?->check_out_time ?? '—' }}</td>
                     <td class="px-4 py-3 text-right">
-                        <button @click="openMark({{ $emp->id }}, '{{ addslashes($emp->full_name) }}', '{{ $att?->status ?? '' }}', '{{ $att?->check_in_time ?? '' }}', '{{ $att?->check_out_time ?? '' }}', {{ $att?->late_minutes ?? 0 }}, '{{ addslashes($att?->notes ?? '') }}')"
+                        <button @click="openMark({{ $emp->id }}, '{{ addslashes($emp->full_name) }}', '{{ $att?->status?->value ?? '' }}', '{{ $att?->check_in_time ?? '' }}', '{{ $att?->check_out_time ?? '' }}', {{ $att?->late_minutes ?? 0 }}, '{{ addslashes($att?->notes ?? '') }}')"
                                 class="text-xs text-blue-600 hover:text-blue-800 font-medium transition">
                             {{ $att ? 'Edit' : 'Mark' }}
                         </button>

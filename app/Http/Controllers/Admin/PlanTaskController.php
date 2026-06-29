@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PlanTaskStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Plan;
@@ -49,7 +50,7 @@ class PlanTaskController extends Controller
             'notes'       => 'nullable|string',
         ]);
 
-        if ($validated['status'] === 'completed' && $task->status !== 'completed') {
+        if ($validated['status'] === 'completed' && $task->status !== PlanTaskStatus::Completed) {
             $validated['completed_at'] = now();
         } elseif ($validated['status'] !== 'completed') {
             $validated['completed_at'] = null;
@@ -63,7 +64,7 @@ class PlanTaskController extends Controller
 
     public function toggle(Plan $plan, PlanTask $task)
     {
-        $newStatus = $task->status === 'completed' ? 'pending' : 'completed';
+        $newStatus = $task->status === PlanTaskStatus::Completed ? 'pending' : 'completed';
 
         $task->update([
             'status'       => $newStatus,

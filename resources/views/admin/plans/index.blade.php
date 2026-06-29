@@ -3,8 +3,6 @@
 
 @section('content')
 
-    @include('partials.plan-colors')
-
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
             <h2 class="text-lg font-semibold text-gray-900">Plan Management</h2>
@@ -115,13 +113,13 @@
                     </td>
                     <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">{{ ucfirst($plan->category) }}</td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $pc[$plan->priority] ?? 'bg-gray-100 text-gray-600' }}">
-                            {{ ucfirst($plan->priority) }}
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->priority->badge() }}">
+                            {{ $plan->priority->label() }}
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$plan->status] ?? 'bg-gray-100 text-gray-600' }}">
-                            {{ $plan->status_label }}
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->status->badge() }}">
+                            {{ $plan->status->label() }}
                         </span>
                         @if($plan->is_overdue)
                         <span class="ml-1 text-xs text-red-500 font-medium">Overdue</span>

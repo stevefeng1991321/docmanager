@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AttendanceStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -14,7 +15,8 @@ class Attendance extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date'   => 'date',
+        'status' => AttendanceStatus::class,
     ];
 
     public function employee(): BelongsTo
@@ -29,28 +31,12 @@ class Attendance extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
-            'present'  => 'Present',
-            'absent'   => 'Absent',
-            'late'     => 'Late',
-            'on_leave' => 'On Leave',
-            'holiday'  => 'Holiday',
-            'half_day' => 'Half Day',
-            default    => ucfirst($this->status),
-        };
+        return $this->status?->label() ?? '';
     }
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
-            'present'  => 'green',
-            'absent'   => 'red',
-            'late'     => 'yellow',
-            'on_leave' => 'blue',
-            'holiday'  => 'purple',
-            'half_day' => 'orange',
-            default    => 'gray',
-        };
+        return $this->status?->color() ?? 'gray';
     }
 
     public function getWorkDurationAttribute(): ?string

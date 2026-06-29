@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\LeaveRequestStatus;
+use App\Enums\LeaveType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,6 +20,8 @@ class AttendanceLeave extends Model
         'end_date'    => 'date',
         'approved_at' => 'datetime',
         'days_count'  => 'float',
+        'leave_type'  => LeaveType::class,
+        'status'      => LeaveRequestStatus::class,
     ];
 
     public function employee(): BelongsTo
@@ -32,30 +36,16 @@ class AttendanceLeave extends Model
 
     public function getLeaveTypeLabelAttribute(): string
     {
-        return match($this->leave_type) {
-            'annual'    => 'Annual Leave',
-            'sick'      => 'Sick Leave',
-            'personal'  => 'Personal Leave',
-            'unpaid'    => 'Unpaid Leave',
-            'maternity' => 'Maternity Leave',
-            'paternity' => 'Paternity Leave',
-            default     => ucfirst($this->leave_type),
-        };
+        return $this->leave_type?->label() ?? '';
     }
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
-            'pending'   => 'yellow',
-            'approved'  => 'green',
-            'rejected'  => 'red',
-            'cancelled' => 'gray',
-            default     => 'gray',
-        };
+        return $this->status?->color() ?? 'gray';
     }
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === LeaveRequestStatus::Pending;
     }
 }

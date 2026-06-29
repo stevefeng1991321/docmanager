@@ -55,8 +55,6 @@
         @endif
     </form>
 
-    @include('partials.plan-colors')
-
     @if($plans->isEmpty())
     <div class="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
         <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,11 +71,11 @@
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span class="text-xs text-gray-400 font-mono">{{ $plan->plan_number }}</span>
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $sc[$plan->status] ?? 'bg-gray-100 text-gray-600' }}">
-                            {{ $plan->status_label }}
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->status->badge() }}">
+                            {{ $plan->status->label() }}
                         </span>
-                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $pc[$plan->priority] ?? 'bg-gray-100 text-gray-600' }}">
-                            {{ ucfirst($plan->priority) }}
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium {{ $plan->priority->badge() }}">
+                            {{ $plan->priority->label() }}
                         </span>
                         @if($plan->is_overdue)
                         <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">Overdue</span>

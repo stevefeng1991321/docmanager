@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AttendanceStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Attendance;
@@ -31,10 +32,10 @@ class AttendanceController extends Controller
 
         $summary = [
             'total'      => $employees->count(),
-            'present'    => $employees->filter(fn($e) => $e->today_attendance?->status === 'present')->count(),
-            'absent'     => $employees->filter(fn($e) => $e->today_attendance?->status === 'absent')->count(),
-            'late'       => $employees->filter(fn($e) => $e->today_attendance?->status === 'late')->count(),
-            'on_leave'   => $employees->filter(fn($e) => $e->today_attendance?->status === 'on_leave')->count(),
+            'present'    => $employees->filter(fn($e) => $e->today_attendance?->status === AttendanceStatus::Present)->count(),
+            'absent'     => $employees->filter(fn($e) => $e->today_attendance?->status === AttendanceStatus::Absent)->count(),
+            'late'       => $employees->filter(fn($e) => $e->today_attendance?->status === AttendanceStatus::Late)->count(),
+            'on_leave'   => $employees->filter(fn($e) => $e->today_attendance?->status === AttendanceStatus::OnLeave)->count(),
             'not_marked' => $employees->filter(fn($e) => !$e->today_attendance)->count(),
         ];
 
