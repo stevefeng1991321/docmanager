@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -32,6 +33,7 @@ class User extends Authenticatable
             'last_login_at'             => 'datetime',
             'last_seen_at'              => 'datetime',
             'two_factor_recovery_codes' => 'array',
+            'status'                    => UserStatus::class,
         ];
     }
 
@@ -40,8 +42,8 @@ class User extends Authenticatable
     public function isAdmin(): bool    { return $this->role === 'admin'; }
     public function isEditor(): bool   { return $this->role === 'editor'; }
     public function isViewer(): bool   { return $this->role === 'viewer'; }
-    public function isActive(): bool   { return $this->status === 'active'; }
-    public function isPending(): bool  { return $this->status === 'pending'; }
+    public function isActive(): bool   { return $this->status === UserStatus::Active; }
+    public function isPending(): bool  { return $this->status === UserStatus::Pending; }
     public function isLocked(): bool   { return $this->locked_until && $this->locked_until->isFuture(); }
 
     // ---------- storage quota ----------

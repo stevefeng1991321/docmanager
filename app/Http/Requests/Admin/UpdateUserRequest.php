@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\UserStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -19,7 +21,7 @@ class UpdateUserRequest extends FormRequest
             'username'         => ['required', 'string', 'min:3', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:users,username,' . $userId],
             'name'             => ['required', 'string', 'max:255'],
             'role'             => ['required', 'in:admin,editor,viewer'],
-            'status'           => ['required', 'in:active,inactive'],
+            'status'           => ['required', Rule::enum(UserStatus::class)->except([UserStatus::Pending])],
             'storage_quota_mb' => ['nullable', 'integer', 'min:0', 'max:102400'],
         ];
     }

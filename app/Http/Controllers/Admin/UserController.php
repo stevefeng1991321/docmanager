@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
@@ -32,7 +33,7 @@ class UserController extends Controller
 
     public function pending()
     {
-        $users = User::where('status', 'pending')->orderBy('created_at')->paginate(20);
+        $users = User::where('status', UserStatus::Pending)->orderBy('created_at')->paginate(20);
         return view('admin.users.pending', compact('users'));
     }
 
@@ -49,7 +50,7 @@ class UserController extends Controller
             'name'     => $request->name,
             'password' => $request->password,
             'role'     => $request->role,
-            'status'   => 'active',
+            'status'   => UserStatus::Active,
         ]);
 
         AuditLog::record('user.created', null, ['username' => $user->username, 'role' => $user->role]);
@@ -73,7 +74,7 @@ class UserController extends Controller
 
     public function activate(User $user)
     {
-        $user->update(['status' => 'active']);
+        $user->update(['status' => UserStatus::Active]);
         Notification::send($user->id, 'account_activated', 'Account Activated', 'Your account has been activated. You can now sign in.');
         AuditLog::record('user.activated', null, ['user_id' => $user->id, 'username' => $user->username]);
 
@@ -86,7 +87,7 @@ class UserController extends Controller
 
     public function deactivate(User $user)
     {
-        $user->update(['status' => 'inactive']);
+        $user->update(['status' => UserStatus::Inactive]);
         AuditLog::record('user.deactivated', null, ['user_id' => $user->id]);
 
         return back()->with('message', "Account '{$user->username}' deactivated.");
@@ -108,10 +109,10 @@ class UserController extends Controller
     public function bulkActivate(Request $request)
     {
         $request->validate(['ids' => ['required', 'array']]);
-        $users = User::whereIn('id', $request->ids)->where('status', 'pending')->get();
+        $users = User::whereIn('id', $request->ids)->where('status', UserStatus::Pending)->get();
 
         foreach ($users as $user) {
-            $user->update(['status' => 'active']);
+            $user->update(['status' => UserStatus::Active]);
             Notification::send($user->id, 'account_activated', 'Account Activated', 'Your account has been activated. You can now sign in.');
             if ($user->email) {
                 Mail::to($user->email)->queue(new AccountActivated($user));
@@ -130,7 +131,7 @@ class UserController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $users = User::whereIn('id', $request->ids)->where('status', 'pending')->get();
+        $users = User::whereIn('id', $request->ids)->where('status', UserStatus::Pending)->get();
         $reason = $request->reason ?? 'Your registration request was not approved.';
 
         foreach ($users as $user) {

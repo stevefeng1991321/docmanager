@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AccountRequest;
 use App\Models\User;
@@ -21,7 +22,7 @@ class ForgotPasswordController extends Controller
         ]);
 
         $user = User::where('username', $request->username)
-            ->whereIn('status', ['active'])
+            ->where('status', UserStatus::Active)
             ->first();
 
         // Always show success to prevent username enumeration

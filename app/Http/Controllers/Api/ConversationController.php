@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\UserStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\User;
@@ -103,7 +104,7 @@ class ConversationController extends Controller
     public function users(): JsonResponse
     {
         $users = User::where('id', '!=', auth()->id())
-            ->where('status', 'active')
+            ->where('status', UserStatus::Active)
             ->orderBy('name')
             ->get(['id', 'name']);
 
