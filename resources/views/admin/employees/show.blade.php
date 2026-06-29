@@ -99,8 +99,8 @@
                     <span class="text-gray-700 font-medium">{{ $employee->user->name }}</span>
                     <span class="text-gray-400">({{ '@' . $employee->user->username }})</span>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium capitalize ml-2
-                        {{ $employee->user->isActive() ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $employee->user->isActive() ? 'Login enabled' : 'Login disabled' }}
+                        {{ $employee->user->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                        {{ $employee->user->status === 'active' ? 'Login enabled' : 'Login disabled' }}
                     </span>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium capitalize bg-indigo-100 text-indigo-700 ml-1">
                         {{ $employee->user->role }}
@@ -116,7 +116,7 @@
                     @csrf @method('PUT')
                     <input type="hidden" name="username" value="{{ $employee->user->username }}">
                     <input type="hidden" name="name" value="{{ $employee->user->name }}">
-                    <input type="hidden" name="status" value="{{ $employee->user->status->value }}">
+                    <input type="hidden" name="status" value="{{ $employee->user->status }}">
                     <label class="block text-xs font-medium text-gray-600">Role</label>
                     <select name="role" class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm">
                         @foreach(['admin','editor','viewer'] as $r)
@@ -129,7 +129,7 @@
                 {{-- Login access --}}
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-600">Login Access</label>
-                    @if($employee->user->isActive())
+                    @if($employee->user->status === 'active')
                         <form action="{{ route('admin.users.deactivate', $employee->user) }}" method="POST">
                             @csrf @method('PATCH')
                             <button type="submit" class="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">Disable Login</button>

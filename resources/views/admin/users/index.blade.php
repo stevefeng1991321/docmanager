@@ -49,18 +49,19 @@
                             <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $roleColors[$user->role] }}">{{ ucfirst($user->role) }}</span>
                         </td>
                         <td class="px-6 py-3">
-                            <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $user->status->badge() }}">{{ $user->status->label() }}</span>
+                            @php $statusColors = ['active' => 'bg-green-100 text-green-700', 'pending' => 'bg-yellow-100 text-yellow-700', 'inactive' => 'bg-red-100 text-red-600']; @endphp
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$user->status] }}">{{ ucfirst($user->status) }}</span>
                         </td>
                         <td class="px-6 py-3 text-gray-400">{{ $user->last_login_at?->diffForHumans() ?? 'Never' }}</td>
                         <td class="px-6 py-3">
                             <div class="flex gap-2">
                                 <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:underline text-xs">{{ __('admin.users.edit_action') }}</a>
-                                @if($user->isActive())
+                                @if($user->status === 'active')
                                     <form action="{{ route('admin.users.deactivate', $user) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
                                         <button class="text-red-600 hover:underline text-xs">{{ __('admin.users.deactivate') }}</button>
                                     </form>
-                                @elseif($user->status === \App\Enums\UserStatus::Inactive)
+                                @elseif($user->status === 'inactive')
                                     <form action="{{ route('admin.users.activate', $user) }}" method="POST" class="inline">
                                         @csrf @method('PATCH')
                                         <button class="text-green-600 hover:underline text-xs">{{ __('admin.users.activate') }}</button>
